@@ -1,0 +1,256 @@
+package cn.ppps.forwarder.utils
+
+import android.annotation.SuppressLint
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
+import cn.ppps.forwarder.R
+import cn.ppps.forwarder.core.Core
+import cn.ppps.forwarder.database.entity.MsgAndLogs
+import cn.ppps.forwarder.database.entity.Rule
+import cn.ppps.forwarder.entity.MsgInfo
+import cn.ppps.forwarder.entity.result.SendResponse
+import cn.ppps.forwarder.entity.setting.BarkSetting
+import cn.ppps.forwarder.entity.setting.DingtalkGroupRobotSetting
+import cn.ppps.forwarder.entity.setting.DingtalkInnerRobotSetting
+import cn.ppps.forwarder.entity.setting.EmailSetting
+import cn.ppps.forwarder.entity.setting.FeishuAppSetting
+import cn.ppps.forwarder.entity.setting.FeishuSetting
+import cn.ppps.forwarder.entity.setting.GotifySetting
+import cn.ppps.forwarder.entity.setting.PushplusSetting
+import cn.ppps.forwarder.entity.setting.ServerchanSetting
+import cn.ppps.forwarder.entity.setting.SmsSetting
+import cn.ppps.forwarder.entity.setting.SocketSetting
+import cn.ppps.forwarder.entity.setting.TelegramSetting
+import cn.ppps.forwarder.entity.setting.UrlSchemeSetting
+import cn.ppps.forwarder.entity.setting.WebhookSetting
+import cn.ppps.forwarder.entity.setting.WeworkAgentSetting
+import cn.ppps.forwarder.entity.setting.WeworkRobotSetting
+import cn.ppps.forwarder.utils.sender.BarkUtils
+import cn.ppps.forwarder.utils.sender.DingtalkGroupRobotUtils
+import cn.ppps.forwarder.utils.sender.DingtalkInnerRobotUtils
+import cn.ppps.forwarder.utils.sender.EmailUtils
+import cn.ppps.forwarder.utils.sender.FeishuAppUtils
+import cn.ppps.forwarder.utils.sender.FeishuUtils
+import cn.ppps.forwarder.utils.sender.GotifyUtils
+import cn.ppps.forwarder.utils.sender.PushplusUtils
+import cn.ppps.forwarder.utils.sender.ServerchanUtils
+import cn.ppps.forwarder.utils.sender.SmsUtils
+import cn.ppps.forwarder.utils.sender.SocketUtils
+import cn.ppps.forwarder.utils.sender.TelegramUtils
+import cn.ppps.forwarder.utils.sender.UrlSchemeUtils
+import cn.ppps.forwarder.utils.sender.WebhookUtils
+import cn.ppps.forwarder.utils.sender.WeworkAgentUtils
+import cn.ppps.forwarder.utils.sender.WeworkRobotUtils
+import cn.ppps.forwarder.workers.SendLogicWorker
+import cn.ppps.forwarder.workers.SendWorker
+import cn.ppps.forwarder.workers.UpdateLogsWorker
+import com.google.gson.Gson
+import com.jeremyliao.liveeventbus.LiveEventBus
+import com.xuexiang.xutil.XUtil
+import com.xuexiang.xutil.resource.ResUtils.getString
+import java.util.Calendar
+
+object SendUtils {
+    private const val TAG = "SendUtils"
+
+    //Rematch rules and send messages
+    fun rematchSendMsg(item: MsgAndLogs) {
+        val msgInfo = MsgInfo(item.msg.type, item.msg.from, item.msg.content, item.msg.time, item.msg.simInfo, item.msg.simSlot, item.msg.subId)
+        Log.d(TAG, "msgInfo = $msgInfo")
+
+        val request = OneTimeWorkRequestBuilder<SendWorker>().setInputData(
+            workDataOf(
+                Worker.SEND_MSG_INFO to Gson().toJson(msgInfo)
+            )
+        ).build()
+        WorkManager.getInstance(XUtil.getContext()).enqueue(request)
+    }
+
+    //Retry sending the message
+    fun retrySendMsg(logId: Long) {
+        val item = Core.logs.getOne(logId)
+        val msgInfo = MsgInfo(item.msg.type, item.msg.from, item.msg.content, item.msg.time, item.msg.simInfo, item.msg.simSlot, item.msg.subId)
+        Log.d(TAG, "msgInfo = $msgInfo")
+
+        var senderIndex = 0
+        for (sender in item.rule.senderList) {
+            if (item.logs.senderId == sender.id) {
+                Log.d(TAG, "sender = $sender")
+                senderIndex = item.rule.senderList.indexOf(sender)
+                break
+            }
+        }
+
+        val rule = item.rule
+        rule.senderLogic = SENDER_LOGIC_RETRY
+        sendMsgSender(msgInfo, rule, senderIndex, logId, item.msg.id)
+    }
+
+    //Match Sender Channel Sending Messages
+    @SuppressLint("SimpleDateFormat")
+    fun sendMsgSender(msgInfo: MsgInfo, rule: Rule, senderIndex: Int = 0, logId: Long = 0L, msgId: Long = 0L) {
+        try {
+            val sender = rule.senderList[senderIndex]
+            if (sender.status != 1) {
+                Log.d(TAG, "sender = $sender is disabled")
+                updateLogs(logId, 0, getString(R.string.sender_disabled))
+                senderLogic(0, msgInfo, rule, senderIndex, msgId)
+                return
+            }
+
+            //Do not disturb(Disable forwarding)：Weekday and time restrictions use AND; at least one restriction must be configured
+            //An unset weekday or time filter is unrestricted; block only when both match
+            Log.d(TAG, "silentDayOfWeek = ${rule.silentDayOfWeek}, silentPeriodStart = ${rule.silentPeriodStart}, silentPeriodEnd = ${rule.silentPeriodEnd}")
+            val silentDayOfWeek = rule.silentDayOfWeek.split(",").mapNotNull { it.trim().toIntOrNull() }
+            val dayConfigured = silentDayOfWeek.isNotEmpty()
+            val periodConfigured = rule.silentPeriodStart != rule.silentPeriodEnd
+            if (dayConfigured || periodConfigured) {
+                val dayMatched = !dayConfigured || silentDayOfWeek.contains(Calendar.getInstance().get(Calendar.DAY_OF_WEEK))
+                val periodMatched = !periodConfigured || DataProvider.isCurrentTimeInPeriod(rule.silentPeriodStart, rule.silentPeriodEnd)
+                if (dayMatched && periodMatched) {
+                    Log.d(TAG, "Do not disturb(Disable forwarding)Period")
+                    updateLogs(logId, 0, getString(R.string.silent_time_period))
+                    senderLogic(0, msgInfo, rule, senderIndex, msgId)
+                    return
+                }
+            }
+
+            when (sender.type) {
+                TYPE_DINGTALK_GROUP_ROBOT -> {
+                    val settingVo = Gson().fromJson(sender.jsonSetting, DingtalkGroupRobotSetting::class.java)
+                    DingtalkGroupRobotUtils.sendMsg(settingVo, msgInfo, rule, senderIndex, logId, msgId)
+                }
+
+                TYPE_EMAIL -> {
+                    val settingVo = Gson().fromJson(sender.jsonSetting, EmailSetting::class.java)
+                    EmailUtils.sendMsg(settingVo, msgInfo, rule, senderIndex, logId, msgId)
+                }
+
+                TYPE_BARK -> {
+                    val settingVo = Gson().fromJson(sender.jsonSetting, BarkSetting::class.java)
+                    BarkUtils.sendMsg(settingVo, msgInfo, rule, senderIndex, logId, msgId)
+                }
+
+                TYPE_WEBHOOK -> {
+                    val settingVo = Gson().fromJson(sender.jsonSetting, WebhookSetting::class.java)
+                    WebhookUtils.sendMsg(settingVo, msgInfo, rule, senderIndex, logId, msgId)
+                }
+
+                TYPE_WEWORK_ROBOT -> {
+                    val settingVo = Gson().fromJson(sender.jsonSetting, WeworkRobotSetting::class.java)
+                    WeworkRobotUtils.sendMsg(settingVo, msgInfo, rule, senderIndex, logId, msgId)
+                }
+
+                TYPE_WEWORK_AGENT -> {
+                    val settingVo = Gson().fromJson(sender.jsonSetting, WeworkAgentSetting::class.java)
+                    WeworkAgentUtils.sendMsg(settingVo, msgInfo, rule, senderIndex, logId, msgId)
+                }
+
+                TYPE_SERVERCHAN -> {
+                    val settingVo = Gson().fromJson(sender.jsonSetting, ServerchanSetting::class.java)
+                    ServerchanUtils.sendMsg(settingVo, msgInfo, rule, senderIndex, logId, msgId)
+                }
+
+                TYPE_TELEGRAM -> {
+                    val settingVo = Gson().fromJson(sender.jsonSetting, TelegramSetting::class.java)
+                    TelegramUtils.sendMsg(settingVo, msgInfo, rule, senderIndex, logId, msgId)
+                }
+
+                TYPE_SMS -> {
+                    val settingVo = Gson().fromJson(sender.jsonSetting, SmsSetting::class.java)
+                    SmsUtils.sendMsg(settingVo, msgInfo, rule, senderIndex, logId, msgId)
+                }
+
+                TYPE_FEISHU -> {
+                    val settingVo = Gson().fromJson(sender.jsonSetting, FeishuSetting::class.java)
+                    FeishuUtils.sendMsg(settingVo, msgInfo, rule, senderIndex, logId, msgId)
+                }
+
+                TYPE_PUSHPLUS -> {
+                    val settingVo = Gson().fromJson(sender.jsonSetting, PushplusSetting::class.java)
+                    PushplusUtils.sendMsg(settingVo, msgInfo, rule, senderIndex, logId, msgId)
+                }
+
+                TYPE_GOTIFY -> {
+                    val settingVo = Gson().fromJson(sender.jsonSetting, GotifySetting::class.java)
+                    GotifyUtils.sendMsg(settingVo, msgInfo, rule, senderIndex, logId, msgId)
+                }
+
+                TYPE_DINGTALK_INNER_ROBOT -> {
+                    val settingVo = Gson().fromJson(sender.jsonSetting, DingtalkInnerRobotSetting::class.java)
+                    DingtalkInnerRobotUtils.sendMsg(settingVo, msgInfo, rule, senderIndex, logId, msgId)
+                }
+
+                TYPE_FEISHU_APP -> {
+                    val settingVo = Gson().fromJson(sender.jsonSetting, FeishuAppSetting::class.java)
+                    FeishuAppUtils.sendMsg(settingVo, msgInfo, rule, senderIndex, logId, msgId)
+                }
+
+                TYPE_URL_SCHEME -> {
+                    val settingVo = Gson().fromJson(sender.jsonSetting, UrlSchemeSetting::class.java)
+                    UrlSchemeUtils.sendMsg(settingVo, msgInfo, rule, senderIndex, logId, msgId)
+                }
+
+                TYPE_SOCKET -> {
+                    val settingVo = Gson().fromJson(sender.jsonSetting, SocketSetting::class.java)
+                    SocketUtils.sendMsg(settingVo, msgInfo, rule, senderIndex, logId, msgId)
+                }
+
+                else -> {
+                    updateLogs(logId, 0, getString(R.string.unknown_sender))
+                    senderLogic(0, msgInfo, rule, senderIndex, msgId)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.e(TAG, "sendMsgSender: ${e.message}")
+            updateLogs(logId, 0, e.message.toString())
+            senderLogic(0, msgInfo, rule, senderIndex, msgId)
+        }
+    }
+
+    //Sending channel execution logic：ALL=Execute All, UntilFail=Stop on failure, UntilSuccess=Stop on success, Retry=Retry Send
+    fun senderLogic(status: Int, msgInfo: MsgInfo, rule: Rule?, senderIndex: Int = 0, msgId: Long = 0L) {
+        if (rule == null || rule.senderLogic == SENDER_LOGIC_RETRY) return
+
+        if (senderIndex < rule.senderList.count() - 1 && (rule.senderLogic == SENDER_LOGIC_ALL || (status == 2 && rule.senderLogic == SENDER_LOGIC_UNTIL_FAIL) || (status == 0 && rule.senderLogic == SENDER_LOGIC_UNTIL_SUCCESS))) {
+            val request = OneTimeWorkRequestBuilder<SendLogicWorker>().setInputData(
+                workDataOf(
+                    Worker.SEND_MSG_INFO to Gson().toJson(msgInfo),
+                    //Worker.ruleId to rule.id,
+                    Worker.RULE to Gson().toJson(rule),
+                    Worker.SENDER_INDEX to senderIndex + 1,
+                    Worker.MSG_ID to msgId,
+                )
+            ).build()
+            WorkManager.getInstance(XUtil.getContext()).enqueue(request)
+        }
+    }
+
+    //Update forward log status
+    fun updateLogs(logId: Long?, status: Int, response: String) {
+
+        //Auto tasks do not require toast or update logs
+        if (logId == -1L) return
+
+        //No record of the tests.ID，This relies on the current ordering
+        if (logId == null || logId == 0L) {
+            if (status == 2) {
+                LiveEventBus.get(EVENT_TOAST_SUCCESS, String::class.java).post(getString(R.string.request_succeeded))
+            } else if (status == 0) {
+                LiveEventBus.get(EVENT_TOAST_ERROR, String::class.java).post(getString(R.string.request_failed) + response)
+            }
+            return
+        }
+
+        val sendResponse = SendResponse(logId, status, response)
+        val request = OneTimeWorkRequestBuilder<UpdateLogsWorker>().setInputData(
+            workDataOf(
+                Worker.UPDATE_LOGS to Gson().toJson(sendResponse)
+            )
+        ).build()
+        WorkManager.getInstance(XUtil.getContext()).enqueue(request)
+    }
+
+}

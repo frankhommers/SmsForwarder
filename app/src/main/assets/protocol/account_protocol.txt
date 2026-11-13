@@ -1,0 +1,86 @@
+Software License and Service Agreement
+
+English translation of the upstream agreement, retained for legal provenance. The original is preserved in Git history. This agreement contains restrictions that conflict with the repository's BSD LICENSE; translating it does not resolve that conflict or replace the LICENSE. References to upstream services and update behavior describe the upstream agreement, not the privacy fork's implementation.
+
+IMPORTANT NOTICE
+
+The SmsForwarder developers (the "SmsF Developers") ask users to read and fully understand this Software License and Service Agreement (the "Agreement"), especially provisions excluding or limiting the SmsF Developers' liability, dispute resolution and applicable law. Liability exclusions or limitations are to be marked in bold and deserve particular attention. Read carefully and choose whether to accept; minors should read with their legal guardian. Downloading, installing or using the software, obtaining an account or logging in constitutes acceptance of this Agreement and its terms.
+
+The SmsF Developers may amend this Agreement. Updated terms will be published on the official website or in the software and take effect upon publication. Users may download and install the software again or visit the website to read the latest terms. If you do not accept amended terms, stop using the software and services immediately. Continued use constitutes acceptance.
+
+1. General provisions
+
+1.1. This Agreement is between you (the "User"), the SmsF Developers and their operating partners (the "Partners") concerning downloading, installing and using the SmsF Developers' software (the "Software") and related services.
+1.2. The Software and services are supplied by the SmsF Developers for installation on devices including, but not limited to, mobile smart terminals, providing services such as connecting and operating smart products.
+1.3. Ownership and operating rights in the Software and services belong to the SmsF Developers.
+
+2. Scope of license
+
+2.1. The SmsF Developers grant the User a personal, non-transferable, non-sublicensable, non-exclusive license.
+2.2. The User may install, use, display and run the Software on one mobile terminal for noncommercial purposes. The User must not install, use or run it for commercial operations, or copy, change, modify, hook into or create derivative works from the Software, data released into device memory during its operation, or data exchanged between client and server. This includes, without limitation, connecting unauthorized plugins, add-ons or third-party tools/services to the Software and related systems. Commercial sale, copying or distribution, including preinstallation and bundling, requires the SmsF Developers' written authorization and permission.
+2.3. Without permission, the User must not install the Software on other terminal devices not expressly authorized by the SmsF Developers, including set-top boxes, game consoles, televisions and DVD players.
+2.4. The User may make one backup copy solely for using the Software and services. It must retain all original copyright information.
+2.5. Rights not expressly granted are reserved. Exercising other rights requires separate written consent from the SmsF Developers.
+
+3. Acquisition, installation and upgrades
+
+3.1. Download and install the Software from the designated website or by the designated method. Avoid unauthorized download sites, which may distribute malware that damages user data or obtains private information. The SmsF Developers cannot guarantee operation of software or identically named installers obtained from unauthorized third parties and accept no responsibility for resulting losses.
+3.2. Select a version compatible with the device. The User bears responsibility for software problems, device problems or damage caused by a version/device mismatch.
+3.3. To improve experience and services, the SmsF Developers may provide replacement, modified or upgraded versions and may charge for them with prior consent. The upstream Software enables upgrade notifications by default; depending on the version, users may choose whether to enable them. Continued availability of older versions is not guaranteed after a new release.
+
+4. Rules of use
+
+4.1. Subject to law and this Agreement, the User may use the Software and services, but must not:
+4.1.1. Remove copyright information from the Software or copies, or modify, remove or circumvent intellectual-property protection measures.
+4.1.2. Reverse-engineer, disassemble, decompile or otherwise attempt to obtain source code.
+4.1.3. Modify or falsify runtime instructions or data to add, remove or change functionality or behavior, or operate or publicly distribute software or methods for those purposes, commercially or otherwise.
+4.1.4. Endanger network security, including unauthorized data use or server/account access; unauthorized access to public networks or others' operating systems to remove, modify or add stored information; unauthorized probing, scanning or testing of system/network weaknesses or other harmful acts; interference with normal system or website operation; deliberate distribution of malware or viruses; disruption of normal network information services; or falsification of TCP/IP packet names or portions thereof.
+4.1.5. Log in to or use the Software/services through third-party compatible software or systems not developed, authorized or approved by the SmsF Developers, or create, publish or distribute such tools.
+4.1.6. Without written consent, use, rent, lend, copy, modify, link, reproduce, compile, publish or distribute the Software or its information, establish mirror sites, or develop related derivative products, works, services, plugins, add-ons, compatibility or interconnection products.
+4.1.7. Publish, transmit, distribute or store content contrary to local laws or regulations.
+4.1.8. Publish, transmit, distribute or store content infringing others' intellectual property, trade secrets or other lawful rights.
+4.1.9. Use the Software to publish, transmit or distribute advertising or spam in bulk.
+4.1.10. Otherwise use the Software or other SmsF Developers' services unlawfully, for unlawful purposes, or inconsistently with this license.
+
+4.2. Publishing rules
+4.2.1. You may publish original or authorized opinions, data, text, information, usernames, images, photographs, personal information, audio, video and links. You must own the intellectual property or have lawful authorization, and your use of the Software/services must not infringe third-party rights.
+4.2.2. Comply with local laws and regulations.
+4.2.3. You must not use the Software for acts including:
+4.2.3.1. Producing, copying, publishing, distributing or storing unlawful content.
+4.2.3.2. Publishing, transmitting, distributing or storing content infringing reputation, portrait rights, intellectual property, trade secrets or other lawful rights.
+4.2.3.3. Fabricating facts or concealing the truth to mislead or deceive others.
+4.2.3.4. Publishing, transmitting or distributing advertising or spam.
+4.2.3.5. Other violations of local laws or regulations.
+4.2.4. Without permission, do not conduct commercial activities in the Software, such as advertising or selling goods.
+
+4.3. You understand and agree:
+4.3.1. The SmsF Developers may determine whether a User is suspected of violating these rules and suspend or terminate the license or impose other restrictions permitted by this Agreement.
+4.3.2. They may directly delete information suspected of being unlawful, infringing others' rights or violating this Agreement.
+4.3.3. You independently bear legal responsibility for harm to third parties caused by violating these rules and must protect the SmsF Developers from resulting losses or additional costs.
+4.3.4. If your violation of law or this Agreement causes losses, third-party claims or administrative penalties for the SmsF Developers, you must compensate their losses and/or expenses, including reasonable legal, investigation and evidence-gathering costs.
+
+5. Service risks and disclaimers
+
+5.1. You must provide the equipment needed for mobile Internet access and telecommunications value-added services and pay the associated communication, information and other charges, including those charged by telecommunications/mobile providers. Confirm relevant charges with your provider.
+5.2. The SmsF Developers and Partners are not responsible for losses caused by third-party communication failures, technical problems, networks, mobile-device failures, system instability or other force majeure.
+5.3. Like most Internet software, the Software may be affected by user behavior, network quality and social conditions and face security threats. Others may misuse your information for harassment; other installed software or visited sites may contain Trojans or viruses that threaten device information/data and interfere with operation. Strengthen information-security awareness, protect personal information and passwords, and guard against losses and harassment.
+5.4. The Software may invoke third-party systems/software when you use it or request particular services. Third parties provide those results. The SmsF Developers do not guarantee their security, accuracy or effectiveness, or against other uncertain risks, and accept no liability for resulting disputes or damage.
+5.5. To retain discretion over business development and adjustment, the SmsF Developers may modify or interrupt services at any time without notice and without liability to users or third parties.
+5.6. Except where law expressly requires otherwise, they will use best efforts to ensure the Software, technology and information are secure, effective, accurate and reliable, but existing technical limitations prevent a guarantee.
+5.7. The User bears responsibility for personal injury and incidental or indirect economic damages, including lost profits, lost data, business interruption and other commercial damage or losses arising from or related to:
+5.7.1. Use or inability to use the licensed Software.
+5.7.2. Unauthorized third-party use of the Software or alteration of user data.
+5.7.3. Costs and losses resulting from the User's actions using the Software.
+5.7.4. Misunderstanding the Software.
+5.7.5. Other software-related losses not caused by the SmsF Developers.
+5.8. In interactions with other users through the Software, any actual or potential personal or economic harm caused by misleading or deceptive conduct is the legal responsibility of the party at fault.
+
+6. Intellectual property
+
+6.1. The SmsF Developers hold the Software's intellectual-property rights. Copyright, trademarks, patents, trade secrets and other rights, and related content including text, images, audio, video, diagrams, interface design, layouts, data and electronic documents, are protected by local law and applicable international treaties. The SmsF Developers hold those rights.
+6.2. Without their written consent, the User must not exercise, exploit or transfer those rights, or authorize third parties to do so, for commercial or noncommercial purposes. The SmsF Developers reserve the right to pursue legal responsibility.
+
+7. Changes to the Agreement
+
+7.1. The SmsF Developers may amend terms as needed and publish them on the relevant page. If you disagree, cancel the service. Continued use constitutes acceptance.
+7.2. The SmsF Developers and Partners may change paid services, rates, charging methods, fees and service terms as needed. Some services may become chargeable now or later; users who refuse payment cannot continue using them once charges begin. The SmsF Developers and Partners will use best efforts to notify users by email or other means.

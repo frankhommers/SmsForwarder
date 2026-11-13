@@ -1,0 +1,67 @@
+package cn.ppps.forwarder.server.controller
+
+import android.content.ContentUris
+import android.content.ContentValues
+import android.provider.ContactsContract
+import cn.ppps.forwarder.utils.Log
+import cn.ppps.forwarder.entity.ContactInfo
+import cn.ppps.forwarder.server.model.BaseRequest
+import cn.ppps.forwarder.server.model.ContactQueryData
+import cn.ppps.forwarder.utils.PhoneUtils
+import com.xuexiang.xutil.XUtil.getContentResolver
+import com.yanzhenjie.andserver.annotation.*
+
+
+@Suppress("PrivatePropertyName", "SameReturnValue")
+@RestController
+@RequestMapping(path = ["/contact"])
+class ContactController {
+
+    private val TAG: String = ContactController::class.java.simpleName
+
+    //Query contacts remotely
+    @CrossOrigin(methods = [RequestMethod.POST])
+    @PostMapping("/query")
+    fun query(@RequestBody bean: BaseRequest<ContactQueryData>): MutableList<ContactInfo> {
+        val contactQueryData = bean.data
+        Log.d(TAG, contactQueryData.toString())
+
+        val limit = contactQueryData.pageSize
+        val offset = (contactQueryData.pageNum - 1) * limit
+        return PhoneUtils.getContactInfoList(limit, offset, contactQueryData.phoneNumber, contactQueryData.name)
+    }
+
+    //Add contact remotely
+    @CrossOrigin(methods = [RequestMethod.POST])
+    @PostMapping("/add")
+    fun add(@RequestBody bean: BaseRequest<ContactInfo>): String {
+        val contactData = bean.data
+        Log.d(TAG, contactData.toString())
+
+        //Create an empty oneContentValues
+        val values = ContentValues()
+        //FirstRawContacts.CONTENT_URIExecute an empty insertion for the purpose of obtaining system returnsrawContactId
+        val rawcontacturi = getContentResolver().insert(ContactsContract.RawContacts.CONTENT_URI, values)
+        val rawcontactid = ContentUris.parseId(rawcontacturi!!)
+
+        //Insert Name Data
+        values.clear()
+        values.put(ContactsContract.Data.RAW_CONTACT_ID, rawcontactid)
+        values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+        values.put(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME, contactData.name)
+        getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values)
+
+        //Insert Phone Data
+        for (phoneNumber in contactData.phoneNumber.split(";")) {
+            values.clear()
+            values.put(ContactsContract.Data.RAW_CONTACT_ID, rawcontactid)
+            values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+            values.put(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber)
+            values.put(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
+            getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values)
+        }
+
+        return "success"
+    }
+
+}

@@ -1,0 +1,13 @@
+{
+  "Code": 0,
+  "Data": [
+    {
+      "title": "SmsForwarder Private",
+      "content": "Configure a forwarding destination, then a rule. Only enable permissions and automation you need. Never share authentication codes with untrusted recipients."
+    },
+    {
+      "title": "Privacy",
+      "content": "Analytics, upstream updates and executable downloads are removed. Public IP discovery uses the owner-approved ip.hommers.it service. Read the bundled privacy notice in About."
+    }
+  ]
+}

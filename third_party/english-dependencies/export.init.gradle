@@ -1,0 +1,18 @@
+// Export the original pinned dependencies for the source rebuild bootstrap.
+// Invoked by scripts/rebuild_english_dependencies.py, never by normal packaging.
+allprojects { p ->
+    afterEvaluate {
+        if (p.path == ':app') {
+            tasks.register('exportEnglishDependencyInputs') {
+                doLast {
+                    def cp = configurations.debugRuntimeClasspath
+                    def jars = cp.incoming.artifactView { attributes { attribute(Attribute.of('artifactType', String), 'android-classes-jar') } }.files.files
+                    def artifacts = cp.resolvedConfiguration.resolvedArtifacts.collect { a -> [coordinate: a.moduleVersion.id.toString(), file: a.file.absolutePath] }
+                    def out = rootProject.file('.gradle/english-dependencies/inputs.json')
+                    out.parentFile.mkdirs()
+                    out.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson([jars:jars.collect {it.absolutePath}, artifacts:artifacts, boot:android.bootClasspath.collect {it.absolutePath}]))
+                }
+            }
+        }
+    }
+}

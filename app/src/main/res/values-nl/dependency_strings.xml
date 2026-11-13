@@ -1,0 +1,38 @@
+<resources>
+    <!-- Override upstream default-language UI resources without modifying library binaries. -->
+    <string name="description_picture">Afbeelding</string>
+    <string name="stfLocationOffMessage">Schakel locatie in</string>
+    <string name="stf_retry">Tik om opnieuw te proberen</string>
+    <string name="xui_count_down_finish">Opnieuw proberen</string>
+    <string name="xui_jump">Overslaan</string>
+    <string name="xui_lab_button_cancel">Annuleren</string>
+    <string name="xui_lab_button_reset">Herstellen</string>
+    <string name="xui_lab_button_submit">OK</string>
+    <string name="xui_met_input_error">Ongeldige invoer</string>
+    <string name="xui_met_not_allow_empty">Dit veld is verplicht</string>
+    <string name="xui_picker_view_cancel">Annuleren</string>
+    <string name="xui_picker_view_day">Dag</string>
+    <string name="xui_picker_view_hours">Uur</string>
+    <string name="xui_picker_view_minutes">Minuut</string>
+    <string name="xui_picker_view_month">Maand</string>
+    <string name="xui_picker_view_seconds">Seconde</string>
+    <string name="xui_picker_view_submit">OK</string>
+    <string name="xui_picker_view_year">Jaar</string>
+    <string name="xui_preview_play_failed">Afspelen mislukt</string>
+    <string name="xui_preview_video_path_error">Media laden mislukt</string>
+    <string name="xui_rmtv_show_less">Minder tonen</string>
+    <string name="xui_rmtv_show_more">Meer tonen</string>
+    <string name="xui_tip_empty_message">Geen gegevens</string>
+    <string name="xui_tip_error_message">Er is een fout opgetreden. Probeer het opnieuw.</string>
+    <string name="xui_tip_expand">Uitklappen</string>
+    <string name="xui_tip_loading_message">Laden…</string>
+    <string name="xui_tip_no_network">Controleer uw netwerkverbinding</string>
+    <string name="xui_tip_no_recognize_speech">Spraakinvoer wordt niet ondersteund op dit apparaat</string>
+    <string name="xui_tip_retry">Opnieuw proberen</string>
+    <string name="xui_tip_shrink">Inklappen</string>
+    <string name="xui_try_immediately">Nu proberen</string>
+    <string name="xutil_tip_close_wifi_success">Wifi uitgeschakeld</string>
+    <string name="xutil_tip_close_wifiap_success">Wifi-hotspot uitgeschakeld</string>
+    <string name="xutil_tip_open_wifiap_failed">Hotspot inschakelen mislukt. Controleer de systeeminstellingen.</string>
+    <string name="xutil_tip_open_wifiap_success">Wifi-hotspot ingeschakeld</string>
+</resources>

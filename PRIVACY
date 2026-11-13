@@ -1,0 +1,7 @@
+SmsForwarder privacy fork
+
+This fork removes upstream analytics, automatic update checks, remote tips and remote privacy-page loading. It does not collect analytics on behalf of the upstream developers.
+
+Forwarding sends the content you configure to your chosen providers. Optional public-IP lookup uses https://ip.hommers.it/ and necessarily exposes the request's source IP to that service. Remote-control functions require explicit configuration. See README_PRIVACY.md for implementation details and verification limits.
+
+Historical upstream notice, translated for provenance: "SmsForwarder does not collect your private data. At startup it sends version information to Umeng statistics; manual update checks send the version number to check for a new version. No other data is sent." This historical claim is not a description of this fork's behavior and does not override the qualifications above.

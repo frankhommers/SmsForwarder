@@ -1,0 +1,199 @@
+{
+  "d77931847daaba9848ae4e5c23f722ed1bda6a498b40d1e7e25758b5f8e47ab7": {
+    "references": [
+      "Landroidx/core/text/util/FindAddress;->SP"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "a79b2621139904d8bdf494b386737dda15d8f3f349744a5f6d3655583b853240": {
+    "references": [
+      "Landroidx/core/text/util/FindAddress;->WS"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "c461f542bb6ceb23bdb207c3dc35bebe77eb0f5024f0a01cb7697cbbc0a65334": {
+    "references": [
+      "Landroidx/core/util/PatternsCompat;-><clinit>"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "9d3b1b48e17d0db5c3926dad4c47abe76d35a91f9d05599af4da1c79da42b2f0": {
+    "references": [
+      "Landroidx/core/util/PatternsCompat;-><clinit>"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "23ca9a84a7861f3bad7fb11ed67276b200d377f9c4c7b0d2972652cca13eb560": {
+    "references": [
+      "Landroidx/core/util/PatternsCompat;-><clinit>"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "f4ca1263cf91c026be96c8b80e2cc94efc27f90bb87911ce87844e5adf3a833a": {
+    "references": [
+      "Landroidx/core/util/PatternsCompat;->STRICT_TLD"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "0014861461e29d28846672063d1d883bcca32e21be3c5edcc6b026e920ca09d4": {
+    "references": [
+      "Landroidx/core/util/PatternsCompat;-><clinit>"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "09c6be658aa49bf8a0baaf146fbc766e0b10ee3dee8ef01ac852efb119fe6420": {
+    "references": [
+      "Landroidx/core/util/PatternsCompat;->STRICT_HOST_NAME"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "b751750cd192695b54335785598087c9b693507e92099a88f8bea918abb88b6e": {
+    "references": [
+      "Landroidx/core/util/PatternsCompat;->IANA_TOP_LEVEL_DOMAINS"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "74715ea3524114d1525aa204171d20a8c73250432162830441bd2b380453c5fa": {
+    "references": [
+      "Landroidx/core/text/util/FindAddress;-><clinit>"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "0358ccc8ea5855a745a8cd0ae6b2cc97fcc84c4e1d2a603dd174ea3c2c6b34d1": {
+    "references": [
+      "Landroidx/core/text/util/FindAddress;-><clinit>"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "f2c1fd48723d685ac4fd9380842ed8c20f261d33b389197cd2a61f3b02a83476": {
+    "references": [
+      "Landroidx/core/text/util/FindAddress;-><clinit>"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "83ab6cdee59287b0ed0957129f138f9fc817066d4253f6fd0a92b8d74afc72dc": {
+    "references": [
+      "Landroidx/core/text/util/FindAddress;-><clinit>"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "b18a148baeff7934bba0d545302274ca1259ce01760cf1504cc0bb568fecbc77": {
+    "references": [
+      "Landroidx/core/util/PatternsCompat;->EMAIL_ADDRESS_DOMAIN"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "8e679efe83abf98d073cddc978de2bd28a49d857f0435c64d823169d606e3f9e": {
+    "references": [
+      "Landroidx/core/text/util/FindAddress;->HOUSE_END"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "647f5d0d790ac4a3782b05708dd4be268d400b744dfa18db74657e6999fd0b8c": {
+    "references": [
+      "Landroidx/core/text/util/FindAddress;->WORD_END"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "aaa5be6ad3561fdc71d9a1712fc65d88d39815ce80facaef5c6395e624815d18": {
+    "references": [
+      "Landroidx/core/util/PatternsCompat;->HOST_NAME"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "d43fa8d8b02bfca6abd49e3c400627f367ac0ab5664c9aabcb12608a3568e682": {
+    "references": [
+      "Landroidx/core/util/PatternsCompat;->TLD"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "20410c3d98ca6479f81198ff7280efc6c3607d05d25bb08a53bf04ca08c8a28a": {
+    "references": [
+      "Landroidx/core/text/util/FindAddress;->HOUSE_POST_DELIM"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "05bc2d638bfec047640b4286fa6979ecbb192c8eb8dacb95102c3172a4c23ac6": {
+    "references": [
+      "Landroidx/core/text/util/FindAddress;->WORD_DELIM",
+      "Landroidx/core/text/util/FindAddress;->matchState"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "9f6e24561980a122ec344a7b0905d0c04f085959b3cae5ae2b616d3ede8f29b6": {
+    "references": [
+      "Landroidx/core/text/util/FindAddress;->HOUSE_PRE_DELIM",
+      "Landroidx/core/text/util/FindAddress;->matchHouseNumber"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "abeaf485b5e98bcf7350fb20a6744bc93463fb9a339dcbbcc42fbdf67fb9518d": {
+    "references": [
+      "Landroidx/core/util/PatternsCompat;-><clinit>",
+      "Landroidx/core/util/PatternsCompat;->PATH_AND_QUERY"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "fab18f9b944a59a79f93d646ebbe963fc60bbf49d3648fb98f880d5132e41243": {
+    "references": [
+      "Landroidx/core/text/util/FindAddress;-><clinit>"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "3c57799b7d4b02604223ddccec2d34eb441aa5358605dcaa41b0a7d26e2392c3": {
+    "references": [
+      "Landroidx/core/util/PatternsCompat;->EMAIL_ADDRESS_LOCAL_PART"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "301ff783e6c8cafffed4776d758ba50733e0a0884dd2bb999401236080f45190": {
+    "references": [
+      "Landroidx/core/util/PatternsCompat;->IRI_LABEL"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "a858165f51715649779f2c7082f5ec78f935bef5498c8a93559c713ef3204fb0": {
+    "references": [
+      "Landroidx/core/util/PatternsCompat;->UCS_CHAR"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "612f59e8508f429b4833c4ea29016b8c1f54ac04671014d3d1b53d2626b2f9bf": {
+    "references": [
+      "Landroidx/core/util/PatternsCompat;->LABEL_CHAR"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "7fd968ebe43b536ca6ca33a72f80d9a457fce6f8ff1dbe39e609fe13cb82a314": {
+    "references": [
+      "Landroidx/core/util/PatternsCompat;->EMAIL_CHAR"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "b206b656b58413742ee657f98765498e0e649135d88c03967e44f93915e15bf9": {
+    "references": [
+      "Landroidx/core/util/PatternsCompat;->TLD_CHAR"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "0c8cca48335647a4c061626aa3f48a6ea1f2f7e674bda3744135aa548ec302c5": {
+    "references": [
+      "Lcom/xuexiang/xutil/common/StringUtils;->replaceSpecialCharacter"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "b65bdd1c1eb0c06e4ba570e8c725d168ace9de6b877afe311b4b702365f1e440": {
+    "references": [
+      "Lcom/xuexiang/constant/RegexConstants;->REGEX_ZH",
+      "Lcom/xuexiang/xutil/common/RegexUtils;->isZh"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  },
+  "b66fd4f153e0ac35a172b2e094c60d2c883d92c4b88d1daea57f3a56e0de9f5a": {
+    "references": [
+      "Lcom/xuexiang/constant/RegexConstants;->REGEX_USERNAME",
+      "Lcom/xuexiang/xutil/common/RegexUtils;->isUsername"
+    ],
+    "reason": "Existing Unicode URL/address/validation character class; exact byte hash and owners, not natural-language prose."
+  }
+}

@@ -1,0 +1,142 @@
+{
+  "com.gyf.cactus:cactus:1.1.3-beta13": {
+    "aar_sha256": "df4c1bca2c3d6db65125555e277a712280c489816a25505bee6b480cc6b7537a",
+    "pom_sha256": "9b5144a6d64152be699562b7a3756ddb8f0860a8ac0748b2d11b62364ff70726",
+    "classes": [
+      "com/gyf/cactus/ext/NotificationExtKt"
+    ],
+    "upstream_pom_sha256": "9b5144a6d64152be699562b7a3756ddb8f0860a8ac0748b2d11b62364ff70726"
+  },
+  "com.github.pppscn:XUI:dev~1.2.2-SNAPSHOT": {
+    "aar_sha256": "5a933eaf881d674730fa585e20c785da6a5747bfc76cabe1a3f0e24cf75e1f1c",
+    "pom_sha256": "6cca4d89e473683a517a4ad5ec20514cd1d0d4ac71c95905ab8711efff7cc904",
+    "classes": [
+      "com/xuexiang/xui/XUI",
+      "com/xuexiang/xui/adapter/recyclerview/DividerItemDecoration",
+      "com/xuexiang/xui/utils/SnackbarUtils",
+      "com/xuexiang/xui/widget/imageview/RadiusImageView",
+      "com/xuexiang/xui/widget/imageview/preview/view/BezierBannerView",
+      "com/xuexiang/xui/widget/picker/wheelview/WheelView",
+      "com/xuexiang/xui/widget/picker/widget/builder/TimePickerBuilder",
+      "com/xuexiang/xui/widget/picker/widget/utils/ChinaDateUtils",
+      "com/xuexiang/xui/widget/slideback/SlideBackManager",
+      "com/xuexiang/xui/widget/tabbar/XUIItemViewsAdapter",
+      "com/xuexiang/xui/widget/textview/marqueen/ComplexItemEntity",
+      "com/xuexiang/xui/widget/textview/span/AlignMiddleImageSpan"
+    ],
+    "upstream_pom_sha256": "6cca4d89e473683a517a4ad5ec20514cd1d0d4ac71c95905ab8711efff7cc904"
+  },
+  "com.github.pppscn.XPage:xpage-lib:3.3.0": {
+    "aar_sha256": "a6b2df6fd00d4ec1963ed000cb74e0dab1a54c386be0874fc6fb197cac8963cd",
+    "pom_sha256": "567a47d34c92142a3095343db13e6eb3f7489ebd37773135864981e45246adfa",
+    "classes": [
+      "com/xuexiang/xpage/PageConfig",
+      "com/xuexiang/xpage/core/CoreConfig"
+    ],
+    "upstream_pom_sha256": "4a5bbd748f594cd767432909f469fbff3984dea0fd751f0d147dd92f3e96e8ff"
+  },
+  "com.zzhoujay.richtext:richtext:3.0.8": {
+    "aar_sha256": "f079fd0624fc1bb770558842e9f2ed84fafaec9b85522dd93d67c95878e7e2bb",
+    "pom_sha256": "352d187c8cc7e3bb9a0cb3fb8840d2795fde67514ff328759206f40ba1fcd91b",
+    "classes": [
+      "com/zzhoujay/richtext/exceptions/BitmapCacheException",
+      "com/zzhoujay/richtext/exceptions/BitmapCacheLoadFailureException",
+      "com/zzhoujay/richtext/exceptions/BitmapCacheNotFoundException",
+      "com/zzhoujay/richtext/exceptions/ImageDownloaderNonExistenceException",
+      "com/zzhoujay/richtext/exceptions/ImageWrapperMultiSourceException",
+      "com/zzhoujay/richtext/exceptions/ResetImageSourceException"
+    ],
+    "upstream_pom_sha256": "352d187c8cc7e3bb9a0cb3fb8840d2795fde67514ff328759206f40ba1fcd91b"
+  },
+  "com.github.xuexiangjys.SmartRefreshLayout:refresh-layout:1.1.6": {
+    "aar_sha256": "b8f41e60604f76682f635f9e13c32513549c304b21b9f37ba9a6b8a27ac71f81",
+    "pom_sha256": "1ed36ab83c4840bae988376a2223b8c02764131ca9acc47d6f194952ab62b9a7",
+    "classes": [
+      "com/scwang/smartrefresh/layout/SmartRefreshLayout"
+    ],
+    "upstream_pom_sha256": "90d40464f8fc11a07926de6f40074dbfe0dcc9d2ab0273de7ea4bd942cd04b17"
+  },
+  "com.github.xuexiangjys.AgentWeb:agentweb-download:1.0.1": {
+    "aar_sha256": "8d92722e05cc2eb3cabcd9c0a3b40282b6c25304d7f440aecc5973001addb7e7",
+    "pom_sha256": "623d8717ce33e45ca1761ce9f17b0de4ec902b50ef8122983d5e7c4f08e8cad4",
+    "classes": [
+      "com/just/agentweb/download/DefaultDownloadImpl",
+      "com/just/agentweb/download/Downloader"
+    ],
+    "upstream_pom_sha256": "0239584cd9a52d79e5c0be44bd330b4efeae51c2baac153b4034f0cd6d874ed2"
+  },
+  "com.github.xuexiangjys.AgentWeb:agentweb-core:1.0.1": {
+    "aar_sha256": "8fe25346c3fe226812b949ca31435d3ec60e64cf2cbff5024c3c02ce17e3eb98",
+    "pom_sha256": "5f0b53fe0e007d46d3aab5256795ec03c8a409fc35e7313ad4cd4c3feb7df2c9",
+    "classes": [
+      "com/just/agentweb/action/ActionActivity",
+      "com/just/agentweb/widget/AgentWebView"
+    ],
+    "upstream_pom_sha256": "e7e0a3bdfa49e21423e2f9b7d7205a43ddc6b55ea7f99774af5dacc50d89f60f"
+  },
+  "com.github.pppscn:XHttp2:2.0.10": {
+    "aar_sha256": "b6d3ba257e668b7304633b862e04652e0f8f583ed8e97e64ef4eabd6944e4a46",
+    "pom_sha256": "e1bf1c187a2985641b16e286a8f64eb852eb0e089d8f959191f479bb66a7bf7f",
+    "classes": [
+      "com/xuexiang/xhttp2/XHttp",
+      "com/xuexiang/xhttp2/XHttpProxy",
+      "com/xuexiang/xhttp2/exception/ApiException",
+      "com/xuexiang/xhttp2/subsciber/ProgressDialogLoader",
+      "com/xuexiang/xhttp2/transform/func/RetryExceptionFunc",
+      "com/xuexiang/xhttp2/utils/TypeUtils"
+    ],
+    "upstream_pom_sha256": "8ab4ba3dd1051e896a1bf0d32549fbe476a57791608762347a3abe8c532f349a"
+  },
+  "com.github.pppscn.XAOP:xaop-runtime:1.1.0": {
+    "aar_sha256": "5cd72bbea7bb8625b73c29fc1d8062055e7006776b1d3082f27e564706a7095a",
+    "pom_sha256": "ff6a2afa5a6afa40543fbf675424ea98dac492f9c7854c69b56a9e7aab637177",
+    "classes": [
+      "com/xuexiang/xaop/XAOP",
+      "com/xuexiang/xaop/aspectj/IOThreadAspectJ",
+      "com/xuexiang/xaop/aspectj/InterceptAspectJ",
+      "com/xuexiang/xaop/aspectj/MainThreadAspectJ",
+      "com/xuexiang/xaop/aspectj/PermissionAspectJ",
+      "com/xuexiang/xaop/aspectj/SingleClickAspectJ"
+    ],
+    "upstream_pom_sha256": "c6ba3b25e85f8765a56117577700d68eb836a8765b26fef19d1cb318657014db"
+  },
+  "com.github.pppscn.XUtil:xutil-core:2.0.0": {
+    "aar_sha256": "16fffe0047a78962854f046c1d0b5b14a4b5393d99d48c834cf53c52cf02fb55",
+    "pom_sha256": "a3d337a3e2d2795d226157f8d1ec3589a8fa041db62a67357930075d73eda7d8",
+    "classes": [
+      "com/xuexiang/xutil/XUtil",
+      "com/xuexiang/xutil/app/ProcessUtils",
+      "com/xuexiang/xutil/common/ClickUtils",
+      "com/xuexiang/xutil/data/ConvertTools",
+      "com/xuexiang/xutil/data/DateUtils",
+      "com/xuexiang/xutil/display/ScreenUtils",
+      "com/xuexiang/xutil/net/NetworkUtils"
+    ],
+    "upstream_pom_sha256": "52fb411f0465c70b97d952f96dc2ec213a69a10f288f619ee3fa871a14d20d0c"
+  },
+  "com.github.pppscn.XUtil:xutil-sub:2.0.0": {
+    "aar_sha256": "bab33a4eb35ae3c81f7697cf2a350d12706dd1698fba2cf610fdc67499d98967",
+    "pom_sha256": "8caa491a1e7aff0c42128066fc3445c8bb374f7ee3f119f4a7e1faf28447aa66",
+    "classes": [
+      "com/xuexiang/xutil/app/PackageUtils",
+      "com/xuexiang/xutil/app/SocialShareUtils",
+      "com/xuexiang/xutil/app/notify/builder/BaseBuilder",
+      "com/xuexiang/xutil/app/notify/builder/MailboxBuilder",
+      "com/xuexiang/xutil/app/notify/builder/ProgressBuilder",
+      "com/xuexiang/xutil/common/IDCardUtils",
+      "com/xuexiang/xutil/display/CProgressDialogUtils",
+      "com/xuexiang/xutil/system/PhoneUtils",
+      "com/xuexiang/xutil/system/bt/BluetoothHelper",
+      "com/xuexiang/xutil/system/wifi/WifiHelper"
+    ],
+    "upstream_pom_sha256": "63c4d58f5b661ab589d65f972bd469f1de2269fee6f0c495a4dacb84d1a1b64b"
+  },
+  "com.github.getActivity:DeviceCompat:2.3": {
+    "aar_sha256": "742a585b0bd5eab8b5da38b4fc7ee130c4d628e2daba70bcd2df64aab341ee18",
+    "pom_sha256": "728ab22633eb4a0d09c8470a51ec2416a7c4265a94578da70c838e4583f2e842",
+    "classes": [
+      "com/hjq/device/compat/DeviceMarketName"
+    ],
+    "upstream_pom_sha256": "c98c8fd62848d5c5796b0dc8149cdb32177494521e1f7fd43aa49c18138431dd"
+  }
+}

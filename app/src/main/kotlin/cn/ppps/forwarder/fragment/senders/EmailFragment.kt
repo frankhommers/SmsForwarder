@@ -1,0 +1,742 @@
+package cn.ppps.forwarder.fragment.senders
+
+import android.app.Activity
+import android.app.PendingIntent
+import android.content.Intent
+import android.os.Environment
+import android.text.TextUtils
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.LinearLayout
+import androidx.fragment.app.viewModels
+import com.google.gson.Gson
+import com.hjq.permissions.OnPermissionCallback
+import com.hjq.permissions.XXPermissions
+import com.hjq.permissions.permission.PermissionLists
+import com.hjq.permissions.permission.base.IPermission
+import cn.ppps.forwarder.R
+import cn.ppps.forwarder.core.BaseFragment
+import cn.ppps.forwarder.core.Core
+import cn.ppps.forwarder.database.entity.Sender
+import cn.ppps.forwarder.database.viewmodel.BaseViewModelFactory
+import cn.ppps.forwarder.database.viewmodel.SenderViewModel
+import cn.ppps.forwarder.databinding.FragmentSendersEmailBinding
+import cn.ppps.forwarder.entity.MsgInfo
+import cn.ppps.forwarder.entity.setting.EmailSetting
+import cn.ppps.forwarder.utils.Base64
+import cn.ppps.forwarder.utils.CommonUtils
+import cn.ppps.forwarder.utils.EVENT_TOAST_ERROR
+import cn.ppps.forwarder.utils.KEY_SENDER_CLONE
+import cn.ppps.forwarder.utils.KEY_SENDER_ID
+import cn.ppps.forwarder.utils.KEY_SENDER_TEST
+import cn.ppps.forwarder.utils.KEY_SENDER_TYPE
+import cn.ppps.forwarder.utils.Log
+import cn.ppps.forwarder.utils.SettingUtils
+import cn.ppps.forwarder.utils.XToastUtils
+import cn.ppps.forwarder.utils.mail.OpenKeychainHelper
+import cn.ppps.forwarder.utils.sender.EmailUtils
+import com.jeremyliao.liveeventbus.LiveEventBus
+import com.xuexiang.xaop.annotation.SingleClick
+import com.xuexiang.xpage.annotation.Page
+import com.xuexiang.xrouter.annotation.AutoWired
+import com.xuexiang.xrouter.launcher.XRouter
+import com.xuexiang.xui.utils.CountDownButtonHelper
+import com.xuexiang.xui.widget.actionbar.TitleBar
+import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
+import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import com.xuexiang.xui.widget.spinner.materialspinner.MaterialSpinner
+import com.xuexiang.xutil.resource.ResUtils.getStringArray
+import io.reactivex.SingleObserver
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
+import org.openintents.openpgp.OpenPgpError
+import org.openintents.openpgp.util.OpenPgpApi
+import org.pgpainless.PGPainless
+import org.pgpainless.key.info.KeyRingInfo
+import java.io.ByteArrayInputStream
+import java.io.File
+import java.io.FileInputStream
+import java.security.KeyStore
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
+import java.util.Date
+
+@Page(name = "Email")
+@Suppress("PrivatePropertyName")
+class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClickListener {
+
+    private val TAG: String = EmailFragment::class.java.simpleName
+    private var titleBar: TitleBar? = null
+    private val viewModel by viewModels<SenderViewModel> { BaseViewModelFactory(context) }
+    private var mCountDownHelper: CountDownButtonHelper? = null
+    private var mailType: String = getString(R.string.other_mail_type) //Mailbox Type
+    private var recipientItemMap: MutableMap<Int, LinearLayout> = mutableMapOf()
+    private val downloadPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+
+    //Encryption protocol: S/MIME,OpenPGP,OpenKeychain,Plain（Do not provide a certificate）
+    private var encryptionProtocol: String = "Plain"
+
+    //OpenKeychainSign Key（0=Encrypt only not to sign）
+    private var openKeychainSignKeyId: Long = 0L
+    private var openKeychainSignKeyDesc: String = ""
+    private var openKeychainHelper: OpenKeychainHelper? = null
+
+    @JvmField
+    @AutoWired(name = KEY_SENDER_ID)
+    var senderId: Long = 0
+
+    @JvmField
+    @AutoWired(name = KEY_SENDER_TYPE)
+    var senderType: Int = 0
+
+    @JvmField
+    @AutoWired(name = KEY_SENDER_CLONE)
+    var isClone: Boolean = false
+
+    override fun initArgs() {
+        XRouter.getInstance().inject(this)
+    }
+
+    override fun viewBindingInflate(
+        inflater: LayoutInflater,
+        container: ViewGroup,
+    ): FragmentSendersEmailBinding {
+        return FragmentSendersEmailBinding.inflate(inflater, container, false)
+    }
+
+    override fun initTitle(): TitleBar? {
+        titleBar = super.initTitle()!!.setImmersive(false).setTitle(R.string.email)
+        return titleBar
+    }
+
+    /**
+     * Initialize controls
+     */
+    override fun initViews() {
+        //Add a countdown to the test button to prevent repeated clicks
+        mCountDownHelper = CountDownButtonHelper(binding!!.btnTest, SettingUtils.requestTimeout)
+        mCountDownHelper!!.setOnCountDownListener(object : CountDownButtonHelper.OnCountDownListener {
+            override fun onCountDown(time: Int) {
+                binding!!.btnTest.text = String.format(getString(R.string.seconds_n), time)
+            }
+
+            override fun onFinished() {
+                binding!!.btnTest.text = getString(R.string.test)
+            }
+        })
+
+        val mailTypeArray = getStringArray(R.array.MailType)
+        binding!!.spMailType.setOnItemSelectedListener { _: MaterialSpinner?, position: Int, _: Long, item: Any ->
+            mailType = item.toString()
+            //XToastUtils.warning(mailType)
+            binding!!.layoutServiceSetting.visibility = if (position == mailTypeArray.size - 1) View.VISIBLE else View.GONE
+        }
+        binding!!.spMailType.setOnNothingSelectedListener {
+            mailType = mailTypeArray[mailTypeArray.size - 1]
+            binding!!.spMailType.selectedIndex = mailTypeArray.size - 1
+            binding!!.layoutServiceSetting.visibility = View.VISIBLE
+        }
+        binding!!.spMailType.selectedIndex = mailTypeArray.size - 1
+        binding!!.layoutServiceSetting.visibility = View.VISIBLE
+
+        binding!!.rgEncryptionProtocol.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                R.id.rb_encryption_protocol_smime -> {
+                    encryptionProtocol = "S/MIME"
+                    binding!!.layoutSenderKeystore.visibility = View.VISIBLE
+                    binding!!.layoutOpenkeychainSignKey.visibility = View.GONE
+                    binding!!.tvSenderKeystore.text = getString(R.string.sender_smime_keystore)
+                    binding!!.tvEmailTo.text = getString(R.string.email_to_smime)
+                    binding!!.tvEmailToTips.text = getString(R.string.email_to_smime_tips)
+                }
+
+                R.id.rb_encryption_protocol_openpgp -> {
+                    encryptionProtocol = "OpenPGP"
+                    binding!!.layoutSenderKeystore.visibility = View.VISIBLE
+                    binding!!.layoutOpenkeychainSignKey.visibility = View.GONE
+                    binding!!.tvSenderKeystore.text = getString(R.string.sender_openpgp_keystore)
+                    binding!!.tvEmailTo.text = getString(R.string.email_to_openpgp)
+                    binding!!.tvEmailToTips.text = getString(R.string.email_to_openpgp_tips)
+                }
+
+                R.id.rb_encryption_protocol_openkeychain -> {
+                    encryptionProtocol = "OpenKeychain"
+                    binding!!.layoutSenderKeystore.visibility = View.GONE
+                    binding!!.layoutOpenkeychainSignKey.visibility = View.VISIBLE
+                    binding!!.tvEmailTo.text = getString(R.string.email_to_openkeychain)
+                    binding!!.tvEmailToTips.text = getString(R.string.email_to_openkeychain_tips)
+                    if (!OpenKeychainHelper.isProviderInstalled(requireContext())) {
+                        XToastUtils.warning(R.string.openkeychain_not_installed)
+                    }
+                }
+
+                else -> {
+                    encryptionProtocol = "Plain"
+                    binding!!.layoutSenderKeystore.visibility = View.GONE
+                    binding!!.layoutOpenkeychainSignKey.visibility = View.GONE
+                    binding!!.tvEmailTo.text = getString(R.string.email_to)
+                    binding!!.tvEmailToTips.text = getString(R.string.email_to_tips)
+                }
+            }
+
+            //Iterate layout_recipients Sub-elements, Settings layout_recipient_keystore Visibility
+            //Plain Certificate not required；OpenKeychain The public key is automatically matched by pressing the mailbox and does not require a certificate
+            for (recipientItem in recipientItemMap.values) {
+                val layoutRecipientKeystore = recipientItem.findViewById<LinearLayout>(R.id.layout_recipient_keystore)
+                layoutRecipientKeystore.visibility = if (encryptionProtocol == "Plain" || encryptionProtocol == "OpenKeychain") View.GONE else View.VISIBLE
+            }
+        }
+
+        //Create Tab Button
+        CommonUtils.createTagButtons(requireContext(), binding!!.glTitleTemplate, binding!!.etTitleTemplate)
+        CommonUtils.createTagButtons(requireContext(), binding!!.glNickname, binding!!.etNickname)
+
+        //Add
+        if (senderId <= 0) {
+            titleBar?.setSubTitle(getString(R.string.add_sender))
+            binding!!.btnDel.setText(R.string.discard)
+            return
+        }
+
+        //Edit
+        binding!!.btnDel.setText(R.string.del)
+        Core.sender.get(senderId).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<Sender> {
+            override fun onSubscribe(d: Disposable) {}
+
+            override fun onError(e: Throwable) {
+                e.printStackTrace()
+                Log.e(TAG, "onError:$e")
+            }
+
+            override fun onSuccess(sender: Sender) {
+                if (isClone) {
+                    titleBar?.setSubTitle(getString(R.string.clone_sender) + ": " + sender.name)
+                    binding!!.btnDel.setText(R.string.discard)
+                } else {
+                    titleBar?.setSubTitle(getString(R.string.edit_sender) + ": " + sender.name)
+                }
+                binding!!.etName.setText(sender.name)
+                binding!!.sbEnable.isChecked = sender.status == 1
+                val settingVo = Gson().fromJson(sender.jsonSetting, EmailSetting::class.java)
+                Log.d(TAG, settingVo.toString())
+                if (settingVo != null) {
+                    if (!TextUtils.isEmpty(settingVo.mailType)) {
+                        mailType = settingVo.mailType
+                        //TODO: ReplacemailTypeUse the current language so language changes do not invalidate old settings？
+                        if (mailType == "other") {
+                            mailType = getString(R.string.other_mail_type)
+                        }
+                        binding!!.spMailType.setSelectedItem(mailType)
+                        if (mailType != getString(R.string.other_mail_type)) {
+                            binding!!.layoutServiceSetting.visibility = View.GONE
+                        }
+                    }
+                    binding!!.etFromEmail.setText(settingVo.fromEmail)
+                    binding!!.etPwd.setText(settingVo.pwd)
+                    binding!!.etFromEmailAlias.setText(settingVo.fromEmailAlias)
+                    binding!!.etNickname.setText(settingVo.nickname)
+                    binding!!.etHost.setText(settingVo.host)
+                    binding!!.etPort.setText(settingVo.port)
+                    binding!!.sbSsl.isChecked = settingVo.ssl == true
+                    binding!!.sbStartTls.isChecked = settingVo.startTls == true
+                    binding!!.etTitleTemplate.setText(settingVo.title)
+                    encryptionProtocol = settingVo.encryptionProtocol
+                    binding!!.rgEncryptionProtocol.check(settingVo.getEncryptionProtocolCheckId())
+                    if (settingVo.recipients.isNotEmpty()) {
+                        for ((email, cert) in settingVo.recipients) {
+                            addRecipientItem(email, cert)
+                        }
+                    } else {
+                        //Compatible with old versions
+                        val emails = settingVo.toEmail.split(",")
+                        if (emails.isNotEmpty()) {
+                            for (email in emails.toTypedArray()) {
+                                addRecipientItem(email)
+                            }
+                        }
+                    }
+                    binding!!.etSenderKeystore.setText(settingVo.keystore)
+                    binding!!.etSenderPassword.setText(settingVo.password)
+                    openKeychainSignKeyId = settingVo.openKeychainSignKeyId
+                    openKeychainSignKeyDesc = settingVo.openKeychainSignKeyDesc
+                    updateOpenKeychainSignKeyText()
+                }
+            }
+        })
+    }
+
+    override fun initListeners() {
+        binding!!.btnTest.setOnClickListener(this)
+        binding!!.btnDel.setOnClickListener(this)
+        binding!!.btnSave.setOnClickListener(this)
+        binding!!.btnAddRecipient.setOnClickListener {
+            addRecipientItem()
+        }
+        binding!!.btnSenderKeystorePicker.setOnClickListener {
+            pickCert(binding!!.etSenderKeystore)
+        }
+        binding!!.btnOpenkeychainSignKeyPicker.setOnClickListener {
+            pickOpenKeychainSignKey()
+        }
+        binding!!.btnOpenkeychainSignKeyClear.setOnClickListener {
+            openKeychainSignKeyId = 0L
+            openKeychainSignKeyDesc = ""
+            updateOpenKeychainSignKeyText()
+        }
+        LiveEventBus.get(KEY_SENDER_TEST, String::class.java).observe(this) { mCountDownHelper?.finish() }
+    }
+
+    @SingleClick
+    override fun onClick(v: View) {
+        try {
+            when (v.id) {
+
+                R.id.btn_test -> {
+                    mCountDownHelper?.start()
+                    Thread {
+                        try {
+                            val settingVo = checkSetting()
+                            Log.d(TAG, settingVo.toString())
+                            val name = binding!!.etName.text.toString().trim().takeIf { it.isNotEmpty() } ?: getString(R.string.test_sender_name)
+                            val msgInfo = MsgInfo("sms", getString(R.string.test_phone_num), String.format(getString(R.string.test_sender_sms), name), Date(), getString(R.string.test_sim_info))
+                            EmailUtils.sendMsg(settingVo, msgInfo)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            Log.e(TAG, "onClick error:$e")
+                            LiveEventBus.get(EVENT_TOAST_ERROR, String::class.java).post(e.message.toString())
+                        }
+                        LiveEventBus.get(KEY_SENDER_TEST, String::class.java).post("finish")
+                    }.start()
+                    return
+                }
+
+                R.id.btn_del -> {
+                    if (senderId <= 0 || isClone) {
+                        popToBack()
+                        return
+                    }
+
+                    MaterialDialog.Builder(requireContext()).title(R.string.delete_sender_title).content(R.string.delete_sender_tips).positiveText(R.string.lab_yes).negativeText(R.string.lab_no).onPositive { _: MaterialDialog?, _: DialogAction? ->
+                        viewModel.delete(senderId)
+                        XToastUtils.success(R.string.delete_sender_toast)
+                        popToBack()
+                    }.show()
+                    return
+                }
+
+                R.id.btn_save -> {
+                    val name = binding!!.etName.text.toString().trim()
+                    if (TextUtils.isEmpty(name)) {
+                        throw Exception(getString(R.string.invalid_name))
+                    }
+
+                    val status = if (binding!!.sbEnable.isChecked) 1 else 0
+                    val settingVo = checkSetting()
+                    if (isClone) senderId = 0
+                    val senderNew = Sender(senderId, senderType, name, Gson().toJson(settingVo), status)
+                    Log.d(TAG, senderNew.toString())
+
+                    viewModel.insertOrUpdate(senderNew)
+                    XToastUtils.success(R.string.tipSaveSuccess)
+                    popToBack()
+                    return
+                }
+            }
+        } catch (e: Exception) {
+            XToastUtils.error(e.message.toString())
+            e.printStackTrace()
+            Log.e(TAG, "onClick error:$e")
+        }
+    }
+
+    private fun checkSetting(): EmailSetting {
+        val fromEmail = binding!!.etFromEmail.text.toString().trim()
+        val pwd = binding!!.etPwd.text.toString().trim()
+        val recipients = getRecipientsFromRecipientItemMap()
+        if (TextUtils.isEmpty(fromEmail) || TextUtils.isEmpty(pwd) || recipients.isEmpty()) {
+            throw Exception(getString(R.string.invalid_email))
+        }
+        for ((email, cert) in recipients) {
+            if (!CommonUtils.checkEmail(email)) {
+                throw Exception(String.format(getString(R.string.invalid_recipient_email), email))
+            }
+            Log.d(TAG, "email: $email, cert: $cert")
+            when (encryptionProtocol) {
+                "OpenKeychain" -> {
+                    if (!OpenKeychainHelper.isProviderInstalled(requireContext())) {
+                        throw Exception(getString(R.string.openkeychain_not_installed))
+                    }
+                }
+
+                "S/MIME" -> {
+                    when {
+                        cert.first.isNotEmpty() && cert.second.isNotEmpty() -> {
+                            try {
+                                // It's a good judgment.PKCS12Private Key Certificate
+                                val fileInputStream = if (cert.first.startsWith("/")) {
+                                    FileInputStream(cert.first)
+                                } else {
+                                    val decodedBytes = Base64.decode(cert.first)
+                                    ByteArrayInputStream(decodedBytes)
+                                }
+                                val keyStore = KeyStore.getInstance("PKCS12")
+                                keyStore.load(fileInputStream, cert.second.toCharArray())
+                                val alias = keyStore.aliases().nextElement()
+                                val recipientPublicKey = keyStore.getCertificate(alias) as X509Certificate
+                                Log.d(TAG, "PKCS12 Certificate: $recipientPublicKey")
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                throw Exception(String.format(getString(R.string.invalid_pkcs12_certificate), email))
+                            }
+                        }
+
+                        cert.first.isNotEmpty() && cert.second.isEmpty() -> {
+                            try {
+                                // It's a good judgment.X.509Public Key Certificate
+                                val fileInputStream = if (cert.first.startsWith("/")) {
+                                    FileInputStream(cert.first)
+                                } else {
+                                    val decodedBytes = Base64.decode(cert.first)
+                                    ByteArrayInputStream(decodedBytes)
+                                }
+                                val certFactory = CertificateFactory.getInstance("X.509")
+                                val recipientPublicKey = certFactory.generateCertificate(fileInputStream) as X509Certificate
+                                Log.d(TAG, "X.509 Certificate: $recipientPublicKey")
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                throw Exception(String.format(getString(R.string.invalid_x509_certificate), email))
+                            }
+                        }
+                    }
+                }
+
+                "OpenPGP" -> {
+                    when {
+                        cert.first.isNotEmpty() && cert.second.isNotEmpty() -> {
+                            try {
+                                //Extract a public key from a private key certificate file
+                                val recipientPrivateKeyStream = if (cert.first.startsWith("/")) {
+                                    FileInputStream(cert.first)
+                                } else {
+                                    val decodedBytes = Base64.decode(cert.first)
+                                    ByteArrayInputStream(decodedBytes)
+                                }
+                                val recipientPGPSecretKeyRing = PGPainless.readKeyRing().secretKeyRing(recipientPrivateKeyStream)
+                                val recipientPGPPublicKeyRing = PGPainless.extractCertificate(recipientPGPSecretKeyRing!!)
+                                val keyInfo = KeyRingInfo(recipientPGPPublicKeyRing)
+                                Log.d(TAG, "recipientPGPPublicKeyRing: $keyInfo")
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                throw Exception(String.format(getString(R.string.invalid_x509_certificate), email))
+                            }
+                        }
+
+                        cert.first.isNotEmpty() && cert.second.isEmpty() -> {
+                            try {
+                                //Extract a public key from a certificate file
+                                val recipientPublicKeyStream = if (cert.first.startsWith("/")) {
+                                    FileInputStream(cert.first)
+                                } else {
+                                    val decodedBytes = Base64.decode(cert.first)
+                                    ByteArrayInputStream(decodedBytes)
+                                }
+                                val recipientPGPPublicKeyRing = PGPainless.readKeyRing().publicKeyRing(recipientPublicKeyStream)
+                                val keyInfo = KeyRingInfo(recipientPGPPublicKeyRing!!)
+                                Log.d(TAG, "recipientPGPPublicKeyRing: $keyInfo")
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                throw Exception(String.format(getString(R.string.invalid_x509_certificate), email))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        val host = binding!!.etHost.text.toString().trim()
+        val port = binding!!.etPort.text.toString().trim()
+        if (mailType == getString(R.string.other_mail_type) && (TextUtils.isEmpty(host) || TextUtils.isEmpty(port))) {
+            throw Exception(getString(R.string.invalid_email_server))
+        }
+
+        val fromEmailAlias = binding!!.etFromEmailAlias.text.toString().trim()
+        val nickname = binding!!.etNickname.text.toString().trim()
+        val ssl = binding!!.sbSsl.isChecked
+        val startTls = binding!!.sbStartTls.isChecked
+        val title = binding!!.etTitleTemplate.text.toString().trim()
+        val keystore = binding!!.etSenderKeystore.text.toString().trim()
+        val password = binding!!.etSenderPassword.text.toString().trim()
+        if (keystore.isNotEmpty()) {
+            val senderPrivateKeyStream = if (keystore.startsWith("/")) {
+                FileInputStream(keystore)
+            } else {
+                val decodedBytes = Base64.decode(keystore)
+                ByteArrayInputStream(decodedBytes)
+            }
+            if (senderPrivateKeyStream.available() <= 0) {
+                throw Exception(getString(R.string.invalid_sender_keystore))
+            }
+            when (encryptionProtocol) {
+                "S/MIME" -> {
+                    try {
+                        // It's a good judgment.PKCS12Private Key Certificate
+                        val keyStore = KeyStore.getInstance("PKCS12")
+                        keyStore.load(senderPrivateKeyStream, password.toCharArray())
+                        val alias = keyStore.aliases().nextElement()
+                        val certificate = keyStore.getCertificate(alias) as X509Certificate
+                        Log.d(TAG, "PKCS12 Certificate: $certificate")
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        throw Exception(getString(R.string.invalid_sender_keystore))
+                    }
+                }
+
+                "OpenPGP" -> {
+                    try {
+                        val senderPGPSecretKeyRing = PGPainless.readKeyRing().secretKeyRing(senderPrivateKeyStream)
+                        val keyInfo = KeyRingInfo(senderPGPSecretKeyRing!!)
+                        Log.d(TAG, "senderPGPSecretKeyRing: $keyInfo")
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        throw Exception(getString(R.string.invalid_sender_keystore))
+                    }
+                }
+            }
+
+        }
+
+        return EmailSetting(mailType, fromEmail, pwd, nickname, host, port, ssl, startTls, title, recipients, "", keystore, password, encryptionProtocol, fromEmailAlias, openKeychainSignKeyId, openKeychainSignKeyDesc)
+    }
+
+    //recipientSerial number
+    private var recipientItemId = 0
+
+    /**
+     * Dynamic Adds & Deletesrecipient
+     *
+     * @param email            recipientofemail
+     * @param cert             recipientofcert，Do not set when empty
+     */
+    private fun addRecipientItem(email: String = "", cert: Any? = null) {
+        val itemAddRecipient = View.inflate(requireContext(), R.layout.item_add_recipient, null) as LinearLayout
+        val etRecipientEmail = itemAddRecipient.findViewById<EditText>(R.id.et_recipient_email)
+        val etRecipientKeystore = itemAddRecipient.findViewById<EditText>(R.id.et_recipient_keystore)
+        val etRecipientPassword = itemAddRecipient.findViewById<EditText>(R.id.et_recipient_password)
+        etRecipientEmail.setText(email)
+        Log.d(TAG, "cert: $cert")
+        when (cert) {
+            is String -> etRecipientKeystore.setText(cert)
+            is Pair<*, *> -> {
+                Log.d(TAG, "cert.first: ${cert.first}")
+                Log.d(TAG, "cert.second: ${cert.second}")
+                etRecipientKeystore.setText(cert.first.toString())
+                etRecipientPassword.setText(cert.second.toString())
+            }
+        }
+
+        val ivDel = itemAddRecipient.findViewById<ImageView>(R.id.iv_del)
+        ivDel.tag = recipientItemId
+        ivDel.setOnClickListener {
+            val itemId = it.tag as Int
+            binding!!.layoutRecipients.removeView(recipientItemMap[itemId])
+            recipientItemMap.remove(itemId)
+        }
+
+        val btnFilePicker = itemAddRecipient.findViewById<Button>(R.id.btn_file_picker)
+        btnFilePicker.tag = recipientItemId
+        btnFilePicker.setOnClickListener {
+            val itemId = it.tag as Int
+            val etKeyStore = recipientItemMap[itemId]!!.findViewById<EditText>(R.id.et_recipient_keystore)
+            pickCert(etKeyStore)
+        }
+
+        val layoutRecipientKeystore = itemAddRecipient.findViewById<LinearLayout>(R.id.layout_recipient_keystore)
+        layoutRecipientKeystore.visibility = if (encryptionProtocol == "Plain" || encryptionProtocol == "OpenKeychain") View.GONE else View.VISIBLE
+
+        binding!!.layoutRecipients.addView(itemAddRecipient)
+        recipientItemMap[recipientItemId] = itemAddRecipient
+        recipientItemId++
+    }
+
+    /**
+     * FromEditTextFetching All in Controlsrecipients
+     *
+     * @return Allrecipients
+     */
+    private fun getRecipientsFromRecipientItemMap(): MutableMap<String, Pair<String, String>> {
+        val recipients: MutableMap<String, Pair<String, String>> = mutableMapOf()
+        for (recipientItem in recipientItemMap.values) {
+            val etRecipientEmail = recipientItem.findViewById<EditText>(R.id.et_recipient_email)
+            val etRecipientKeystore = recipientItem.findViewById<EditText>(R.id.et_recipient_keystore)
+            val etRecipientPassword = recipientItem.findViewById<EditText>(R.id.et_recipient_password)
+            val email = etRecipientEmail.text.toString().trim()
+            val keystore = etRecipientKeystore.text.toString().trim()
+            val password = etRecipientPassword.text.toString().trim()
+            recipients[email] = Pair(keystore, password)
+        }
+        Log.d(TAG, "recipients: $recipients")
+        return recipients
+    }
+
+    //Select certificate file
+    private fun pickCert(etKeyStore: EditText) {
+        XXPermissions.with(this)
+            .permission(PermissionLists.getManageExternalStoragePermission())
+            .request(object : OnPermissionCallback {
+                override fun onResult(grantedList: MutableList<IPermission>, deniedList: MutableList<IPermission>) {
+                    val allGranted = deniedList.isEmpty()
+                    if (!allGranted) {
+                        // Check whether the user selected Never ask again for denied permissions
+                        val doNotAskAgain = XXPermissions.isDoNotAskAgainPermissions(requireActivity(), deniedList)
+                        if (doNotAskAgain) {
+                            XToastUtils.error(R.string.toast_denied_never)
+                            // Jump to Apply Permission System Settings page if refused permanently
+                            XXPermissions.startPermissionActivity(requireContext(), deniedList)
+                        }
+                        // Logic of failure in processing requests for permission
+                        XToastUtils.error(R.string.toast_denied)
+                        return
+                    }
+
+                    // Logic of successful processing of requests for authority
+                    val fileList = findSupportedFiles(downloadPath)
+                    if (fileList.isEmpty()) {
+                        XToastUtils.error(String.format(getString(R.string.download_certificate_first), downloadPath))
+                        return
+                    }
+                    MaterialDialog.Builder(requireContext())
+                        .title(getString(R.string.keystore_base64))
+                        .content(String.format(getString(R.string.root_directory), downloadPath))
+                        .items(fileList)
+                        .itemsCallbackSingleChoice(0) { _: MaterialDialog?, _: View?, _: Int, text: CharSequence ->
+                            val webPath = "$downloadPath/$text"
+                            etKeyStore.setText(convertCertToBase64String(webPath))
+                            true // allow selection
+                        }
+                        .positiveText(R.string.select)
+                        .negativeText(R.string.cancel)
+                        .show()
+                }
+            })
+    }
+
+    private fun findSupportedFiles(directoryPath: String): List<String> {
+        val audioFiles = mutableListOf<String>()
+        val directory = File(directoryPath)
+
+        if (directory.exists() && directory.isDirectory) {
+            directory.listFiles()?.let { files ->
+                files.filter { it.isFile && isSupportedFile(it) }.forEach { audioFiles.add(it.name) }
+            }
+        }
+
+        return audioFiles
+    }
+
+    private fun isSupportedFile(file: File): Boolean {
+        val supportedExtensions = if (encryptionProtocol == "OpenPGP") {
+            listOf("asc", "pgp")
+        } else {
+            listOf("pfx", "p12", "pem", "cer", "crt", "der")
+        }
+        return supportedExtensions.any { it.equals(file.extension, ignoreCase = true) }
+    }
+
+    private fun convertCertToBase64String(pfxFilePath: String): String {
+        val pfxInputStream = FileInputStream(pfxFilePath)
+        val pfxBytes = pfxInputStream.readBytes()
+        return Base64.encode(pfxBytes)
+    }
+
+    //RefreshOpenKeychainSign Key Display
+    private fun updateOpenKeychainSignKeyText() {
+        binding?.tvOpenkeychainSignKey?.text = if (openKeychainSignKeyId == 0L) {
+            getString(R.string.openkeychain_sign_key_none)
+        } else {
+            String.format(getString(R.string.openkeychain_sign_key_selected), openKeychainSignKeyDesc.ifEmpty { openKeychainSignKeyId.toString() })
+        }
+    }
+
+    /**
+     * SelectionOpenKeychainSign Key：
+     * First Call Back USER_INTERACTION_REQUIRED + PendingIntent（OpenKeychainKey Selection Interface），
+     * User Selection Post-Selection onActivityResult Carrying ResultsIntentRe-execution, return EXTRA_SIGN_KEY_ID
+     */
+    private fun pickOpenKeychainSignKey(data: Intent = Intent().apply { action = OpenPgpApi.ACTION_GET_SIGN_KEY_ID }) {
+        if (!OpenKeychainHelper.isProviderInstalled(requireContext())) {
+            XToastUtils.error(R.string.openkeychain_not_installed)
+            return
+        }
+        Thread {
+            try {
+                if (openKeychainHelper == null) openKeychainHelper = OpenKeychainHelper(requireContext().applicationContext)
+                val result = openKeychainHelper!!.executeApi(data, null, null)
+                when (result.getIntExtra(OpenPgpApi.RESULT_CODE, OpenPgpApi.RESULT_CODE_ERROR)) {
+                    OpenPgpApi.RESULT_CODE_SUCCESS -> {
+                        val signKeyId = result.getLongExtra(OpenPgpApi.EXTRA_SIGN_KEY_ID, 0L)
+                        //HexadecimalKeyIdAs description（openpgp-api 10.0 Do not return main userID）
+                        val keyDesc = "0x" + java.lang.Long.toHexString(signKeyId).uppercase()
+                        requireActivity().runOnUiThread {
+                            openKeychainSignKeyId = signKeyId
+                            openKeychainSignKeyDesc = keyDesc
+                            updateOpenKeychainSignKeyText()
+                        }
+                    }
+
+                    OpenPgpApi.RESULT_CODE_USER_INTERACTION_REQUIRED -> {
+                        val pi: PendingIntent? = result.getParcelableExtra(OpenPgpApi.RESULT_INTENT)
+                        if (pi != null) {
+                            requireActivity().runOnUiThread {
+                                try {
+                                    startIntentSenderForResult(pi.intentSender, REQUEST_CODE_OPENKEYCHAIN_SIGN_KEY, null, 0, 0, 0, null)
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                    XToastUtils.error(String.format(getString(R.string.openkeychain_check_failed), e.message))
+                                }
+                            }
+                        }
+                    }
+
+                    else -> {
+                        val error: OpenPgpError? = result.getParcelableExtra(OpenPgpApi.RESULT_ERROR)
+                        requireActivity().runOnUiThread {
+                            XToastUtils.error(String.format(getString(R.string.openkeychain_check_failed), error?.message ?: "unknown error"))
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Log.e(TAG, "pickOpenKeychainSignKey error: $e")
+                requireActivity().runOnUiThread {
+                    XToastUtils.error(String.format(getString(R.string.openkeychain_check_failed), e.message))
+                }
+            }
+        }.start()
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_OPENKEYCHAIN_SIGN_KEY && resultCode == Activity.RESULT_OK) {
+            //User inOpenKeychainFinish Selection/After authorization, carry the results.IntentRe-enforcement (to be completed)action）
+            val retryData = (data ?: Intent()).apply { action = OpenPgpApi.ACTION_GET_SIGN_KEY_ID }
+            pickOpenKeychainSignKey(retryData)
+        }
+    }
+
+    override fun onDestroyView() {
+        if (mCountDownHelper != null) mCountDownHelper!!.recycle()
+        openKeychainHelper?.unbind()
+        openKeychainHelper = null
+        super.onDestroyView()
+    }
+
+    companion object {
+        private const val REQUEST_CODE_OPENKEYCHAIN_SIGN_KEY = 9716
+    }
+
+}

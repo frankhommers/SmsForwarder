@@ -1,0 +1,65 @@
+package cn.ppps.forwarder.core.http.loader
+
+import android.content.Context
+import com.xuexiang.xhttp2.subsciber.impl.IProgressLoader
+import com.xuexiang.xhttp2.subsciber.impl.OnProgressCancelListener
+import com.xuexiang.xui.widget.dialog.MiniLoadingDialog
+
+/**
+ * Default Progress Loading
+ *
+ * @author xuexiang
+ * @since 2019-11-18 23:07
+ */
+class MiniLoadingDialogLoader @JvmOverloads constructor(
+    context: Context?,
+    msg: String? = "Loading...",
+) : IProgressLoader {
+    /**
+     * ProgressloadingDialog
+     */
+    private val mDialog: MiniLoadingDialog?
+
+    /**
+     * Progress-dialog cancellation listener
+     */
+    private var mOnProgressCancelListener: OnProgressCancelListener? = null
+    override fun isLoading(): Boolean {
+        return mDialog != null && mDialog.isShowing
+    }
+
+    override fun updateMessage(msg: String) {
+        mDialog?.updateMessage(msg)
+    }
+
+    override fun showLoading() {
+        if (mDialog != null && !mDialog.isShowing) {
+            mDialog.show()
+        }
+    }
+
+    override fun dismissLoading() {
+        if (mDialog != null && mDialog.isShowing) {
+            mDialog.dismiss()
+        }
+    }
+
+    override fun setCancelable(flag: Boolean) {
+        mDialog!!.setCancelable(flag)
+        if (flag) {
+            mDialog.setOnCancelListener {
+                if (mOnProgressCancelListener != null) {
+                    mOnProgressCancelListener!!.onCancelProgress()
+                }
+            }
+        }
+    }
+
+    override fun setOnProgressCancelListener(listener: OnProgressCancelListener) {
+        mOnProgressCancelListener = listener
+    }
+
+    init {
+        mDialog = MiniLoadingDialog(context, msg)
+    }
+}

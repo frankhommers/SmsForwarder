@@ -1,0 +1,65 @@
+apply plugin: 'com.xuexiang.xrouter'
+apply plugin: 'kotlin-kapt'
+//apply plugin: 'android-aspectjx'
+apply plugin: 'com.xuexiang.xaop'
+
+//Automatically add dependencies
+configurations.each { configuration ->
+    def dependencies = getProject().dependencies
+    if (configuration.name.equals("implementation")) {
+        //asProjectAddX-LibraryDependency
+        //XUIFramework
+        def xuiDep = dependencies.create(deps.xlibrary.xui)
+        xuiDep.exclude(group: 'com.alibaba.android', module: 'vlayout')
+        configuration.dependencies.add(xuiDep)
+        configuration.dependencies.add(dependencies.create(deps.androidx.appcompat))
+        configuration.dependencies.add(dependencies.create(deps.androidx.recyclerview))
+        configuration.dependencies.add(dependencies.create(deps.androidx.design))
+        configuration.dependencies.add(dependencies.create(deps.glide))
+        //XUtilTool Class
+        configuration.dependencies.add(dependencies.create(deps.xlibrary.xutil_core))
+        configuration.dependencies.add(dependencies.create(deps.xlibrary.xutil_sub))
+        //XAOPAspect
+        configuration.dependencies.add(dependencies.create(deps.xlibrary.xaop_runtime))
+        //XUpdateVersion Update
+        //XHttp2
+        configuration.dependencies.add(dependencies.create(deps.xlibrary.xhttp2))
+        configuration.dependencies.add(dependencies.create(deps.rxjava2))
+        configuration.dependencies.add(dependencies.create(deps.rxandroid))
+        configuration.dependencies.add(dependencies.create(deps.okhttp3))
+        configuration.dependencies.add(dependencies.create(deps.gson))
+        //XPage
+        configuration.dependencies.add(dependencies.create(deps.xlibrary.xpage_lib))
+        //Page Route
+        configuration.dependencies.add(dependencies.create(deps.xlibrary.xrouter_runtime))
+    }
+
+    if (configuration.name.equals("kapt")) {
+        //XPage
+        configuration.dependencies.add(dependencies.create(deps.xlibrary.xpage_compiler))
+        //Page Route
+        configuration.dependencies.add(dependencies.create(deps.xlibrary.xrouter_compiler))
+    }
+
+    if (isNeedLeakcanary.toBoolean() && configuration.name.equals("debugImplementation")) {
+        //Memory leakage monitoringleak
+        configuration.dependencies.add(dependencies.create(deps.leakcanary))
+    }
+}
+
+configurations.configureEach {
+    resolutionStrategy.force deps.okhttp3
+}
+
+/*
+aspectjx {
+    // We need to change the package name here.
+    include 'cn.ppps.forwarder'
+    // Exclude AllpackageInclude in Path`android.support`ofclassDocuments and libraries（jarDocumentation）
+    exclude 'android.support'
+    // RemovekotlinRelated. Compiler error and speed increase.
+    exclude 'kotlin.jvm', 'kotlin.internal'
+    exclude 'kotlinx.coroutines.internal', 'kotlinx.coroutines.android'
+    exclude '*.jar', '*.aar', '*.so'
+}
+*/

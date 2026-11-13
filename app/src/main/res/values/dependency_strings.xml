@@ -1,0 +1,38 @@
+<resources>
+    <!-- Override upstream default-language UI resources without modifying library binaries. -->
+    <string name="description_picture">Picture</string>
+    <string name="stfLocationOffMessage">Enable location</string>
+    <string name="stf_retry">Tap to retry</string>
+    <string name="xui_count_down_finish">Try again</string>
+    <string name="xui_jump">Skip</string>
+    <string name="xui_lab_button_cancel">Cancel</string>
+    <string name="xui_lab_button_reset">Reset</string>
+    <string name="xui_lab_button_submit">OK</string>
+    <string name="xui_met_input_error">Invalid input</string>
+    <string name="xui_met_not_allow_empty">This field is required</string>
+    <string name="xui_picker_view_cancel">Cancel</string>
+    <string name="xui_picker_view_day">Day</string>
+    <string name="xui_picker_view_hours">Hour</string>
+    <string name="xui_picker_view_minutes">Minute</string>
+    <string name="xui_picker_view_month">Month</string>
+    <string name="xui_picker_view_seconds">Second</string>
+    <string name="xui_picker_view_submit">OK</string>
+    <string name="xui_picker_view_year">Year</string>
+    <string name="xui_preview_play_failed">Playback failed</string>
+    <string name="xui_preview_video_path_error">Could not load media</string>
+    <string name="xui_rmtv_show_less">Show less</string>
+    <string name="xui_rmtv_show_more">Show more</string>
+    <string name="xui_tip_empty_message">No data</string>
+    <string name="xui_tip_error_message">An error occurred. Please retry.</string>
+    <string name="xui_tip_expand">Expand</string>
+    <string name="xui_tip_loading_message">Loading…</string>
+    <string name="xui_tip_no_network">Check your network connection</string>
+    <string name="xui_tip_no_recognize_speech">Speech input is not supported on this device</string>
+    <string name="xui_tip_retry">Retry</string>
+    <string name="xui_tip_shrink">Collapse</string>
+    <string name="xui_try_immediately">Try now</string>
+    <string name="xutil_tip_close_wifi_success">Wi-Fi disabled</string>
+    <string name="xutil_tip_close_wifiap_success">Wi-Fi hotspot disabled</string>
+    <string name="xutil_tip_open_wifiap_failed">Could not enable hotspot. Check system settings.</string>
+    <string name="xutil_tip_open_wifiap_success">Wi-Fi hotspot enabled</string>
+</resources>

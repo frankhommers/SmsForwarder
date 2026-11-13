@@ -1,0 +1,6 @@
+SmsForwarder Private — usage and attribution
+
+Use this application only on devices and accounts you control and with appropriate consent. Forwarding messages may disclose passwords, authentication codes and personal information. No warranty is provided.
+
+Upstream: SmsForwarder, pppscn and contributors, https://github.com/pppscn/SmsForwarder
+Original LICENSE and upstream notices are preserved in the source repository. Upstream README also states noncommercial restrictions, inconsistent with GitHub BSD-2-Clause metadata. This fork does not resolve that legal ambiguity or grant additional rights. Obtain clarification before commercial distribution.

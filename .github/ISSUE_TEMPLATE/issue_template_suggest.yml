@@ -1,0 +1,36 @@
+name: Submit a suggestion（Submit a suggestion）
+description: Please tell me.APPDescribe shortcomings so I can improve the application！（Please tell me the shortcomings of the APP and let me do better!）
+title: "[Suggestion]: "
+labels: ["help wanted"]
+assignees:
+  - pppscn
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Warning: Please follow issue Fill in the template carefully. Issues that do not follow the template will be closed！
+        Warning: Please fill in according to the issue template to avoid wasting your time and mine! If you do not fill in the template carefully, it will be closed directly.
+  - type: dropdown
+    id: similar-issues
+    attributes:
+      label: Has anyone ever asked a similar question?？
+      description: Has anyone asked a similar question before?
+      options:
+        - No（No）
+        - Yes（Yes）
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Do you think...APPWhat's the problem?？
+      description: What do you think is the inadequacy of the APP?
+      placeholder: You can describe it.APPIs there anything you don't like?（You can describe what dissatisfied you about the app）
+    validations:
+      required: true
+  - type: textarea
+    id: ideas
+    attributes:
+      label: How would you improve it? [Optional]
+      description: What do you think would be better to improve? [Not required]
+      placeholder: You can offer your ideas or practices to the author.（You can provide your own ideas or practices for the author's reference）

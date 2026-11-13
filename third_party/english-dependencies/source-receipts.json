@@ -1,0 +1,102 @@
+[
+  {
+    "repository": "https://github.com/pppscn/XUtil",
+    "requested_ref": "2.0.0",
+    "commit": "5448b9cd71a45ec81f39cafe7f58b92ef4706f59",
+    "archive_url": "https://api.github.com/repos/pppscn/XUtil/zipball/2.0.0",
+    "archive_sha256": "0cd9f3dfdf27891126c9cd0ad6c5f3b7049621708a7af89385488bce7928e232",
+    "source_prefix": "pppscn-XUtil-5448b9c",
+    "license": "Apache-2.0",
+    "license_note": "XUtil source headers specify Apache-2.0; no root LICENSE in this tag."
+  },
+  {
+    "repository": "https://github.com/pppscn/XAOP",
+    "requested_ref": "1.1.0",
+    "commit": "dab6b77b2f0a1382b728668434ce8f193aa7ea17",
+    "archive_url": "https://api.github.com/repos/pppscn/XAOP/zipball/1.1.0",
+    "archive_sha256": "220b4a096c7081a2e86b2d01e871a9cd9cfe9b5a08fae33fc63e844b1cc36de5",
+    "source_prefix": "pppscn-XAOP-dab6b77",
+    "license": "Apache-2.0",
+    "license_note": "Root LICENSE retained verbatim."
+  },
+  {
+    "repository": "https://github.com/pppscn/XHttp2",
+    "requested_ref": "2.0.10",
+    "commit": "9115cfcd5a5d0e0fb4fcf33e4f5e494aa2606175",
+    "archive_url": "https://api.github.com/repos/pppscn/XHttp2/zipball/2.0.10",
+    "archive_sha256": "2f27e1df8556748d71047059ee9bfd51b7d20c0fbbc2566ae27cea3914fa26e9",
+    "source_prefix": "pppscn-XHttp2-9115cfc",
+    "license": "Apache-2.0",
+    "license_note": "Root LICENSE retained verbatim."
+  },
+  {
+    "repository": "https://github.com/pppscn/XPage",
+    "requested_ref": "3.3.0",
+    "commit": "ff184a118b38ec2af70b662b873a67658f755097",
+    "archive_url": "https://api.github.com/repos/pppscn/XPage/zipball/3.3.0",
+    "archive_sha256": "902c1ce5dac293994816384784744a1a63f79443a9e9c0a541f60efb782fe2c2",
+    "source_prefix": "pppscn-XPage-ff184a1",
+    "license": "Apache-2.0",
+    "license_note": "Root LICENSE retained verbatim."
+  },
+  {
+    "repository": "https://github.com/xuexiangjys/AgentWeb",
+    "requested_ref": "1.0.1",
+    "commit": "35f1d9da4f0fb7068db0a5d7a882d975af6ad01a",
+    "archive_url": "https://api.github.com/repos/xuexiangjys/AgentWeb/zipball/1.0.1",
+    "archive_sha256": "bdf3e34624ecaa8399d3fcad997d7687ce91e0835afd4d869e5552d05d6e4fe9",
+    "source_prefix": "xuexiangjys-AgentWeb-35f1d9d",
+    "license": "Apache-2.0",
+    "license_note": "Root LICENSE retained verbatim."
+  },
+  {
+    "repository": "https://github.com/xuexiangjys/SmartRefreshLayout",
+    "requested_ref": "1.1.6",
+    "commit": "d110c199eb2402ac5002c6b53711fb797d09d2ba",
+    "archive_url": "https://api.github.com/repos/xuexiangjys/SmartRefreshLayout/zipball/1.1.6",
+    "archive_sha256": "d80d6aa493a6ce7a38e2b8c9153f1c763a9bf3fa50e8a1544b5e0b814fc9537f",
+    "source_prefix": "xuexiangjys-SmartRefreshLayout-d110c19",
+    "license": "Apache-2.0",
+    "license_note": "Root LICENSE retained verbatim."
+  },
+  {
+    "repository": "https://github.com/getActivity/DeviceCompat",
+    "requested_ref": "2.3",
+    "commit": "2c2b23c8e46f39e92f0baa68e93176baa6eb3a88",
+    "archive_url": "https://api.github.com/repos/getActivity/DeviceCompat/zipball/2.3",
+    "archive_sha256": "5bc429fa77e5be8cb02f4881948b55c078fd94db47c110b06b8295e42e774792",
+    "source_prefix": "getActivity-DeviceCompat-2c2b23c",
+    "license": "Apache-2.0",
+    "license_note": "Root LICENSE retained verbatim."
+  },
+  {
+    "repository": "https://github.com/pppscn/XUI",
+    "requested_ref": "5c31e0bfc8a68d5b27f0c5e768fe726dde781f4b",
+    "commit": "5c31e0bfc8a68d5b27f0c5e768fe726dde781f4b",
+    "archive_url": "https://api.github.com/repos/pppscn/XUI/zipball/5c31e0bfc8a68d5b27f0c5e768fe726dde781f4b",
+    "archive_sha256": "76f3e8501c1de7483bcee10a2ccea035f5bcf4b2c4b27efe39717be772827970",
+    "source_prefix": "pppscn-XUI-5c31e0b",
+    "license": "Apache-2.0",
+    "license_note": "Root LICENSE retained verbatim."
+  },
+  {
+    "repository": "https://github.com/zzhoujay/RichText",
+    "version": "3.0.8",
+    "archive_url": "https://maven.aliyun.com/repository/public/com/zzhoujay/richtext/richtext/3.0.8/richtext-3.0.8-sources.jar",
+    "archive_sha256": "dd19944f7b41e8e70bf4da3ced4310e92d70e5fb1f41ae212c6d33831d728164",
+    "source_prefix": "richtext-sources",
+    "license": "MIT",
+    "license_url": "https://raw.githubusercontent.com/zzhoujay/RichText/master/LICENSE",
+    "license_note": "Published matching-version source JAR; repository license fetched separately because source JAR has no license. License retained verbatim."
+  },
+  {
+    "repository": "https://github.com/gyf-dev/Cactus",
+    "version": "1.1.3-beta13",
+    "archive_url": "https://maven.aliyun.com/repository/public/com/gyf/cactus/cactus/1.1.3-beta13/cactus-1.1.3-beta13-sources.jar",
+    "archive_sha256": "4297a1bda19942c4a190e68ce57043cfd1dbc48b7a9717e40a291c7166dae91b",
+    "source_prefix": "cactus-sources",
+    "license": "Apache-2.0",
+    "license_url": "https://raw.githubusercontent.com/gyf-dev/Cactus/master/LICENSE",
+    "license_note": "Published matching-version source JAR; repository license fetched separately because source JAR has no license. License retained verbatim."
+  }
+]

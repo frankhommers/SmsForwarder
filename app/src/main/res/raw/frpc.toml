@@ -1,0 +1,30 @@
+#frpsserver publicIP
+serverAddr = "88.88.88.88"
+#frpsserver public port
+serverPort = 8888
+#Server connection timeout (increase to avoidfrpcstartup failure before the network is ready）
+transport.dialServerTimeout = 60
+#Exit after the first failed login
+loginFailExit = false
+#Optional, suggested to enable
+auth.method = "token"
+auth.token = "88888888"
+
+#[Choose one of the two alternatives]Each machine's name and remotePort must be unique; access through http://88.88.88.88:5000 Access
+[[proxies]]
+#The same.frpsmultiple devices under name must be unique
+name = "SmsForwarder-TCP-001"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 5000
+#Just modify the following line（frpspublic port exposed by the server and allowed through its firewall; within onefrpsmust be unique）
+remotePort = 5000
+
+#[Choose one of the two alternatives]Each machine's name and customDomains must be unique; access through http://smsf.demo.com Access
+[[proxies]]
+#The same.frpsmultiple devices under name must be unique
+name = "SmsForwarder-HTTP-001"
+type = "http"
+localPort = 5000
+#Just modify the following line (infrpsreverse-proxy the domain tovhost_http_port）
+customDomains = ["smsf.demo.com"]

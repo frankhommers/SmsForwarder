@@ -1,0 +1,445 @@
+package cn.ppps.forwarder.database
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
+import cn.ppps.forwarder.database.dao.FrpcDao
+import cn.ppps.forwarder.database.dao.LogsDao
+import cn.ppps.forwarder.database.dao.MsgDao
+import cn.ppps.forwarder.database.dao.RuleDao
+import cn.ppps.forwarder.database.dao.SenderDao
+import cn.ppps.forwarder.database.dao.TaskDao
+import cn.ppps.forwarder.database.entity.Frpc
+import cn.ppps.forwarder.database.entity.Logs
+import cn.ppps.forwarder.database.entity.LogsDetail
+import cn.ppps.forwarder.database.entity.Msg
+import cn.ppps.forwarder.database.entity.Rule
+import cn.ppps.forwarder.database.entity.Sender
+import cn.ppps.forwarder.database.entity.Task
+import cn.ppps.forwarder.database.ext.ConvertersDate
+import cn.ppps.forwarder.utils.DATABASE_NAME
+import cn.ppps.forwarder.utils.SettingUtils
+
+@Database(
+    entities = [Frpc::class, Msg::class, Logs::class, Rule::class, Sender::class, Task::class],
+    views = [LogsDetail::class],
+    version = 21,
+    exportSchema = false
+)
+@TypeConverters(ConvertersDate::class)
+abstract class AppDatabase : RoomDatabase() {
+
+    abstract fun frpcDao(): FrpcDao
+    abstract fun msgDao(): MsgDao
+    abstract fun logsDao(): LogsDao
+    abstract fun ruleDao(): RuleDao
+    abstract fun senderDao(): SenderDao
+    abstract fun taskDao(): TaskDao
+
+    companion object {
+        @Volatile
+        private var instance: AppDatabase? = null
+
+        fun getInstance(context: Context): AppDatabase {
+            return instance ?: synchronized(this) {
+                instance ?: buildDatabase(context).also { instance = it }
+            }
+        }
+
+        private fun buildDatabase(context: Context): AppDatabase {
+            val builder = Room.databaseBuilder(
+                context.applicationContext, AppDatabase::class.java, DATABASE_NAME
+            ).allowMainThreadQueries() //TODO:Allow main-thread access; optimize later
+                .addCallback(object : Callback() {
+                    override fun onCreate(db: SupportSQLiteDatabase) {
+                        //fillInDb(context.applicationContext)
+                        db.execSQL(
+                            """
+INSERT INTO "Frpc" VALUES ('830b0a0e-c2b3-4f95-b3c9-55db12923d2e', 'Remote ControlSmsForwarder', '[common]
+#frpsserver publicIP
+server_addr = 88.88.88.88
+#frpsserver public port
+server_port = 8888
+#Optional, suggested to enable
+token = 88888888
+#Server connection timeout (increase to avoidfrpcstartup failure before the network is ready）
+dial_server_timeout = 60
+#Exit after the first failed login
+login_fail_exit = false
+
+#[Choose one of the two alternatives]Must be unique per machine; access through http://88.88.88.88:5000 Access
+[SmsForwarder-TCP]
+type = tcp
+local_ip = 127.0.0.1
+local_port = 5000
+#Just modify the following line（frpsPublic Internet port where the server must be exposed）
+remote_port = 5000
+
+#[Choose one of the two alternatives]Must be unique per machine; access through http://smsf.demo.com Access
+[SmsForwarder-HTTP]
+type = http
+local_ip = 127.0.0.1
+local_port = 5000
+#Just modify the following line (infrpsreverse-proxy the domain tovhost_http_port）
+custom_domains = smsf.demo.com
+', 0, '1651334400000')
+""".trimIndent()
+                        )
+                    }
+                }).addMigrations(
+                    MIGRATION_1_2,
+                    MIGRATION_2_3,
+                    MIGRATION_3_4,
+                    MIGRATION_4_5,
+                    MIGRATION_5_6,
+                    MIGRATION_6_7,
+                    MIGRATION_7_8,
+                    MIGRATION_8_9,
+                    MIGRATION_9_10,
+                    MIGRATION_10_11,
+                    MIGRATION_11_12,
+                    MIGRATION_12_13,
+                    MIGRATION_13_14,
+                    MIGRATION_14_15,
+                    MIGRATION_15_16,
+                    MIGRATION_16_17,
+                    MIGRATION_17_18,
+                    MIGRATION_18_19,
+                    MIGRATION_19_20,
+                    MIGRATION_20_21,
+                )
+
+            /*if (BuildConfig.DEBUG) {
+                builder.setQueryCallback({ sqlQuery, bindArgs ->
+                    println("SQL_QUERY: $sqlQuery\nBIND_ARGS: $bindArgs")
+                }, Executors.newSingleThreadExecutor())
+            }*/
+
+            return builder.build()
+        }
+
+        //Forward Log AddSIMSIM slot information
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("Alter table log add column sim_info TEXT ")
+            }
+        }
+
+        //Forward rules addSIMSIM slot information
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("Alter table rule add column sim_slot TEXT NOT NULL DEFAULT 'ALL' ")
+            }
+        }
+
+        //Forward log to add forward status and return information
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("Alter table log add column forward_status INTEGER NOT NULL DEFAULT 1 ")
+                database.execSQL("Alter table log add column forward_response TEXT NOT NULL DEFAULT 'ok' ")
+            }
+        }
+
+        //Send Rule Add Custom Message Template
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("Alter table rule add column sms_template TEXT NOT NULL DEFAULT '' ")
+            }
+        }
+
+        //Add Transfer Rules and Log Classifications
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("Alter table rule add column type TEXT NOT NULL DEFAULT 'sms' ")
+                database.execSQL("Alter table log add column type TEXT NOT NULL DEFAULT 'sms' ")
+            }
+        }
+
+        //Forward rules add regular replacements
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("Alter table rule add column regex_replace TEXT NOT NULL DEFAULT '' ")
+            }
+        }
+
+        //Update log table status：0=Failed，1=Pending，2=Success
+        private val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("update log set forward_status = 2 where forward_status = 1 ")
+            }
+        }
+
+        //Rule/Channel Status：0=Disable，1=Enable
+        private val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("Alter table rule add column status INTEGER NOT NULL DEFAULT 1 ")
+                database.execSQL("update sender set status = 1 ")
+            }
+        }
+
+        //FromSQLiteMove To Room
+        private val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    """
+CREATE TABLE "Frpc" (
+  "uid" TEXT NOT NULL,
+  "name" TEXT NOT NULL,
+  "config" TEXT NOT NULL,
+  "autorun" INTEGER NOT NULL DEFAULT 0,
+  "time" INTEGER NOT NULL,
+  PRIMARY KEY ("uid")
+)
+""".trimIndent()
+                )
+                database.execSQL(
+                    """
+INSERT INTO "Frpc" VALUES ('830b0a0e-c2b3-4f95-b3c9-55db12923d2e', 'Remote ControlSmsForwarder', '
+#frpsserver publicIP
+serverAddr = "88.88.88.88"
+#frpsserver public port
+serverPort = 8888
+#Server connection timeout (increase to avoidfrpcstartup failure before the network is ready）
+transport.dialServerTimeout = 60
+#Exit after the first failed login
+loginFailExit = false
+#Optional, suggested to enable
+auth.method = "token"
+auth.token = "88888888"
+
+#[Choose one of the two alternatives]Each machine's name and remotePort must be unique; access through http://88.88.88.88:5000 Access
+[[proxies]]
+#The same.frpsmultiple devices under name must be unique
+name = "SmsForwarder-TCP-001"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 5000
+#Just modify the following line（frpspublic port exposed by the server and allowed through its firewall; within onefrpsmust be unique）
+remotePort = 5000
+
+#[Choose one of the two alternatives]Each machine's name and customDomains must be unique; access through http://smsf.demo.com Access
+[[proxies]]
+#The same.frpsmultiple devices under name must be unique
+name = "SmsForwarder-HTTP-001"
+type = "http"
+localPort = 5000
+#Just modify the following line (infrpsreverse-proxy the domain tovhost_http_port）
+customDomains = ["smsf.demo.com"]
+
+', 0, '1651334400000')
+""".trimIndent()
+                )
+
+                database.execSQL("ALTER TABLE log RENAME TO old_log")
+                database.execSQL(
+                    """
+CREATE TABLE "Logs" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "type" TEXT NOT NULL DEFAULT 'sms',
+  "from" TEXT NOT NULL DEFAULT '',
+  "content" TEXT NOT NULL DEFAULT '',
+  "rule_id" INTEGER NOT NULL DEFAULT 0,
+  "sim_info" TEXT NOT NULL DEFAULT '',
+  "forward_status" INTEGER NOT NULL DEFAULT 1,
+  "forward_response" TEXT NOT NULL DEFAULT '',
+  "time" INTEGER NOT NULL,
+  FOREIGN KEY ("rule_id") REFERENCES "Rule" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+)
+""".trimIndent()
+                )
+                database.execSQL("CREATE UNIQUE INDEX \"index_Log_id\" ON \"Logs\" ( \"id\" ASC)")
+                database.execSQL("CREATE INDEX \"index_Log_rule_id\" ON \"Logs\" ( \"rule_id\" ASC)")
+                database.execSQL("INSERT INTO Logs (id,type,`from`,content,sim_info,rule_id,forward_status,forward_response,time) SELECT _id,type,l_from,content,sim_info,rule_id,forward_status,forward_response,strftime('%s000',time) FROM old_log")
+                database.execSQL("DROP TABLE old_log")
+
+                database.execSQL("ALTER TABLE rule RENAME TO old_rule")
+                database.execSQL(
+                    """
+CREATE TABLE "Rule" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "type" TEXT NOT NULL DEFAULT 'sms',
+  "filed" TEXT NOT NULL DEFAULT 'transpond_all',
+  "check" TEXT NOT NULL DEFAULT 'is',
+  "value" TEXT NOT NULL DEFAULT '',
+  "sender_id" INTEGER NOT NULL DEFAULT 0,
+  "sms_template" TEXT NOT NULL DEFAULT '',
+  "regex_replace" TEXT NOT NULL DEFAULT '',
+  "sim_slot" TEXT NOT NULL DEFAULT 'ALL',
+  "status" INTEGER NOT NULL DEFAULT 1,
+  "time" INTEGER NOT NULL,
+  FOREIGN KEY ("sender_id") REFERENCES "Sender" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+)
+""".trimIndent()
+                )
+                database.execSQL("CREATE UNIQUE INDEX \"index_Rule_id\" ON \"Rule\" ( \"id\" ASC)")
+                database.execSQL("CREATE INDEX \"index_Rule_sender_id\" ON \"Rule\" ( \"sender_id\" ASC)")
+                database.execSQL("INSERT INTO Rule (id,type,filed,`check`,value,sender_id,time,sms_template,regex_replace,status,sim_slot) SELECT _id,type,filed,tcheck,value,sender_id,strftime('%s000',time),sms_template,regex_replace,status,sim_slot FROM old_rule")
+                database.execSQL("DROP TABLE old_rule")
+
+                database.execSQL("ALTER TABLE sender RENAME TO old_sender")
+                database.execSQL(
+                    """
+CREATE TABLE "Sender" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "type" INTEGER NOT NULL DEFAULT 1,
+  "name" TEXT NOT NULL DEFAULT '',
+  "json_setting" TEXT NOT NULL DEFAULT '',
+  "status" INTEGER NOT NULL DEFAULT 1,
+  "time" INTEGER NOT NULL
+)
+""".trimIndent()
+                )
+                database.execSQL("INSERT INTO Sender (id,name,status,type,json_setting,time) SELECT _id,name,status,type,json_setting,strftime('%s000',time) FROM old_sender")
+                database.execSQL("DROP TABLE old_sender")
+            }
+        }
+
+        //Forward Log AddSIMSIM slotID
+        private val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("Alter table Logs add column sub_id INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        //Individual forwarding rules can bind multiple senders
+        private val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("Alter table Logs add column sender_id INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("Update Logs Set sender_id = (Select sender_id from Rule where Logs.rule_id = Rule.id)")
+                database.execSQL("Alter table Rule add column sender_list TEXT NOT NULL DEFAULT ''")
+                database.execSQL("Update Rule set sender_list = sender_id")
+                database.execSQL("CREATE INDEX \"index_Rule_sender_ids\" ON \"Rule\" ( \"sender_list\" ASC)")
+                //Remove Fields：sender_id
+                /*database.execSQL("Create table Rule_t as Select id,type,filed,check,value,sender_list,sms_template,regex_replace,sim_slot,status,time from Rule where 1 = 1")
+                database.execSQL("Drop table Rule")
+                database.execSQL("Alter table Rule_t rename to Rule")
+                database.execSQL("CREATE UNIQUE INDEX \"index_Rule_id\" ON \"Rule\" ( \"id\" ASC)")*/
+            }
+        }
+
+        //Forward rules add sending channel logic
+        private val MIGRATION_12_13 = object : Migration(12, 13) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("Alter table Rule add column sender_logic TEXT NOT NULL DEFAULT 'ALL'")
+            }
+        }
+
+        //SplitLogsTable
+        private val MIGRATION_13_14 = object : Migration(13, 14) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                //database.execSQL("Create table Msg as Select id,type,`from`,content,(case when sim_info like 'SIM1%' then '0' when sim_info like 'SIM2%' then '1' else '-1' end) as sim_slot,sim_info,sub_id,time from Logs where 1 = 1")
+                database.execSQL(
+                    """
+CREATE TABLE "Msg" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "type" TEXT NOT NULL DEFAULT 'sms',
+  "from" TEXT NOT NULL DEFAULT '',
+  "content" TEXT NOT NULL DEFAULT '',
+  "sim_slot" INTEGER NOT NULL DEFAULT -1,
+  "sim_info" TEXT NOT NULL DEFAULT '',
+  "sub_id" INTEGER NOT NULL DEFAULT 0,
+  "time" INTEGER NOT NULL
+)
+""".trimIndent()
+                )
+                database.execSQL("INSERT INTO Msg (id,type,`from`,content,sim_slot,sim_info,sub_id,time) Select id,type,`from`,content,(case when sim_info like 'SIM1%' then '0' when sim_info like 'SIM2%' then '1' else '-1' end) as sim_slot,sim_info,sub_id,time from Logs where 1 = 1")
+                database.execSQL("CREATE UNIQUE INDEX \"index_Msg_id\" ON \"Msg\" ( \"id\" ASC)")
+                database.execSQL("ALTER TABLE Logs RENAME TO Logs_old")
+                //database.execSQL("Create table Logs_new as Select id,id as msg_id,rule_id,sender_id,forward_status,forward_response,time from Logs where 1 = 1")
+                database.execSQL(
+                    """
+CREATE TABLE "Logs" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "type" TEXT NOT NULL DEFAULT 'sms',
+  "msg_id" INTEGER NOT NULL DEFAULT 0,
+  "rule_id" INTEGER NOT NULL DEFAULT 0,
+  "sender_id" INTEGER NOT NULL DEFAULT 0,
+  "forward_status" INTEGER NOT NULL DEFAULT 1,
+  "forward_response" TEXT NOT NULL DEFAULT '',
+  "time" INTEGER NOT NULL,
+  FOREIGN KEY ("msg_id") REFERENCES "Msg" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY ("rule_id") REFERENCES "Rule" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY ("sender_id") REFERENCES "Sender" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+""".trimIndent()
+                )
+                database.execSQL("INSERT INTO Logs (id,type,msg_id,rule_id,sender_id,forward_status,forward_response,time) SELECT id,type,id as msg_id,rule_id,sender_id,forward_status,forward_response,time FROM Logs_old")
+                database.execSQL("DROP TABLE Logs_old")
+                database.execSQL("CREATE UNIQUE INDEX \"index_Logs_id\" ON \"Logs\" ( \"id\" ASC)")
+                database.execSQL("CREATE INDEX \"index_Logs_msg_id\" ON \"Logs\" ( \"msg_id\" ASC)")
+                database.execSQL("CREATE INDEX \"index_Logs_rule_id\" ON \"Logs\" ( \"rule_id\" ASC)")
+                database.execSQL("CREATE INDEX \"index_Logs_sender_id\" ON \"Logs\" ( \"sender_id\" ASC)")
+            }
+        }
+
+        // Define Database Migration Configuration
+        private val MIGRATION_14_15 = object : Migration(14, 15) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Create a view (enclose its name in backticks）
+                database.execSQL("CREATE VIEW `LogsDetail` AS SELECT LOGS.id,LOGS.type,LOGS.msg_id,LOGS.rule_id,LOGS.sender_id,LOGS.forward_status,LOGS.forward_response,LOGS.TIME,Rule.filed AS rule_filed,Rule.`check` AS rule_check,Rule.value AS rule_value,Rule.sim_slot AS rule_sim_slot,Sender.type AS sender_type,Sender.NAME AS sender_name FROM LOGS  LEFT JOIN Rule ON LOGS.rule_id = Rule.id LEFT JOIN Sender ON LOGS.sender_id = Sender.id")
+            }
+        }
+
+        //Do not disturb(Disable forwarding)Period
+        private val MIGRATION_15_16 = object : Migration(15, 16) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("Alter table rule add column silent_period_start INTEGER NOT NULL DEFAULT 0 ")
+                database.execSQL("Alter table rule add column silent_period_end INTEGER NOT NULL DEFAULT 0 ")
+            }
+        }
+
+        //Call type：1.Incoming call ended 2.Outgoing call ended 3.Missed call 4.Incoming call alert 5.Incoming call answered 6.Outgoing call dialed
+        private val MIGRATION_16_17 = object : Migration(16, 17) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("Alter table Msg add column call_type INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        //Automated tasks
+        private val MIGRATION_17_18 = object : Migration(17, 18) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    """
+CREATE TABLE "Task" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "type" INTEGER NOT NULL DEFAULT 1,
+  "name" TEXT NOT NULL DEFAULT '',
+  "description" TEXT NOT NULL DEFAULT '',
+  "conditions" TEXT NOT NULL DEFAULT '',
+  "actions" TEXT NOT NULL DEFAULT '',
+  "last_exec_time" INTEGER NOT NULL,
+  "next_exec_time" INTEGER NOT NULL,
+  "status" INTEGER NOT NULL DEFAULT 1
+)
+""".trimIndent()
+                )
+            }
+        }
+
+        // Schema is unchanged. Legacy localized templates require manual recreation.
+        // Keep the migration edge, but never rewrite arbitrary saved user text.
+        private val MIGRATION_18_19 = object : Migration(18, 19) {
+            override fun migrate(database: SupportSQLiteDatabase) = Unit
+        }
+
+        //Do-not-disturb weekdays
+        private val MIGRATION_19_20 = object : Migration(19, 20) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("Alter table rule add column silent_day_of_week TEXT NOT NULL DEFAULT '' ")
+            }
+        }
+
+        //Forward rules add custom names
+        private val MIGRATION_20_21 = object : Migration(20, 21) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("Alter table rule add column title TEXT NOT NULL DEFAULT '' ")
+            }
+        }
+
+    }
+
+}

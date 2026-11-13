@@ -1,0 +1,35 @@
+package cn.ppps.forwarder.core.http.subscriber
+
+import com.xuexiang.xhttp2.exception.ApiException
+import com.xuexiang.xhttp2.model.XHttpRequest
+import com.xuexiang.xhttp2.subsciber.BaseSubscriber
+import com.xuexiang.xutil.common.StringUtils
+import com.xuexiang.xutil.common.logger.Logger
+
+/**
+ * No errortoastNetwork subscriber with no error toast; log errors only
+ *
+ * @author xuexiang
+ * @since 2019-11-18 23:11
+ */
+@Suppress("unused")
+abstract class NoTipRequestSubscriber<T> : BaseSubscriber<T> {
+    /**
+     * Record the request.url,Find out which request is wrong.
+     */
+    private var mUrl: String? = null
+
+    constructor()
+    constructor(req: XHttpRequest) : this(req.url)
+    constructor(url: String?) {
+        mUrl = url
+    }
+
+    public override fun onError(e: ApiException) {
+        if (!StringUtils.isEmpty(mUrl)) {
+            Logger.e("Request Url: $mUrl", e)
+        } else {
+            Logger.e(e)
+        }
+    }
+}

@@ -1,0 +1,185 @@
+package cn.ppps.forwarder.utils.sender
+
+import android.text.TextUtils
+import android.util.Base64
+import cn.ppps.forwarder.database.entity.Rule
+import cn.ppps.forwarder.entity.MsgInfo
+import cn.ppps.forwarder.entity.result.BarkResult
+import cn.ppps.forwarder.entity.setting.BarkSetting
+import cn.ppps.forwarder.utils.Log
+import cn.ppps.forwarder.utils.RandomUtils
+import cn.ppps.forwarder.utils.SendUtils
+import cn.ppps.forwarder.utils.SettingUtils
+import cn.ppps.forwarder.utils.interceptor.BasicAuthInterceptor
+import cn.ppps.forwarder.utils.interceptor.LoggingInterceptor
+import com.google.gson.Gson
+import com.xuexiang.xhttp2.XHttp
+import com.xuexiang.xhttp2.callback.SimpleCallBack
+import com.xuexiang.xhttp2.exception.ApiException
+import java.net.URLEncoder
+import javax.crypto.Cipher
+import javax.crypto.spec.GCMParameterSpec
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
+
+@Suppress("RegExpRedundantEscape", "UselessCallOnNotNull", "CanUnescapeDollarLiteral")
+class BarkUtils {
+    companion object {
+
+        private val TAG: String = BarkUtils::class.java.simpleName
+
+        fun sendMsg(
+            setting: BarkSetting,
+            msgInfo: MsgInfo,
+            rule: Rule? = null,
+            senderIndex: Int = 0,
+            logId: Long = 0L,
+            msgId: Long = 0L
+        ) {
+            //Log.i(TAG, "sendMsg setting:$setting msgInfo:$msgInfo rule:$rule senderIndex:$senderIndex logId:$logId msgId:$msgId")
+            val title: String = if (rule != null) {
+                msgInfo.getTitleForSend(setting.title, rule.regexReplace, rule.title)
+            } else {
+                msgInfo.getTitleForSend(setting.title)
+            }
+            val content: String = if (rule != null) {
+                msgInfo.getContentForSend(rule.smsTemplate, rule.regexReplace, rule.title)
+            } else {
+                msgInfo.getContentForSend(SettingUtils.smsTemplate)
+            }
+
+            val requestUrl: String = setting.server //Send Address
+            Log.i(TAG, "requestUrl:$requestUrl")
+
+            //SupportHTTPBasic authentication(Basic Authentication)
+            val regex = "^(https?://)([^:]+):([^@]+)@(.+)"
+            val matches = Regex(regex, RegexOption.IGNORE_CASE).findAll(requestUrl).toList().flatMap(MatchResult::groupValues)
+            Log.i(TAG, "matches = $matches")
+            val request = if (matches.isNotEmpty()) {
+                XHttp.post(matches[1] + matches[4]).addInterceptor(BasicAuthInterceptor(matches[2], matches[3]))
+            } else {
+                XHttp.post(requestUrl)
+            }
+
+            val msgMap: MutableMap<String, Any> = mutableMapOf()
+            msgMap["title"] = title
+            msgMap["body"] = content
+            msgMap["isArchive"] = 1
+            if (!TextUtils.isEmpty(setting.group)) msgMap["group"] = setting.group
+            if (!TextUtils.isEmpty(setting.icon)) msgMap["icon"] = setting.icon
+            if (!TextUtils.isEmpty(setting.level)) msgMap["level"] = setting.level
+            if (!TextUtils.isEmpty(setting.sound)) msgMap["sound"] = setting.sound
+            if (!TextUtils.isEmpty(setting.badge)) msgMap["badge"] = setting.badge
+            if (!TextUtils.isEmpty(setting.url)) {
+                val replacedUrl = msgInfo.getContentForSend(setting.url, "", rule?.title ?: "")
+                msgMap["url"] = replacedUrl
+            }
+
+            if (!TextUtils.isEmpty(setting.call)) msgMap["call"] = setting.call
+
+            //Auto Copy
+            if (TextUtils.isEmpty(setting.autoCopy)) {
+                val code = VerificationCode.extract(content)
+                if (code != null) {
+                    msgMap["copy"] = code
+                    msgMap["autoCopy"] = 1
+                }
+            } else {
+                msgMap["copy"] = msgInfo.getContentForSend(setting.autoCopy, "", rule?.title ?: "")
+                msgMap["autoCopy"] = 1
+            }
+
+            val requestMsg: String = Gson().toJson(msgMap)
+            Log.i(TAG, "requestMsg:$requestMsg")
+            //Send Encryption
+            if (setting.transformation.isNullOrBlank() || "none" == setting.transformation || setting.key.isNullOrBlank()) {
+                request.upJson(requestMsg)
+            } else {
+                val transformation = setting.transformation.replace("AES128", "AES").replace("AES192", "AES").replace("AES256", "AES")
+                if (setting.iv.isNullOrBlank()) {
+                    // Left blanks are randomly generated.，GCMUse it.12bits, other16bits
+                    val ivLength = if (setting.transformation.contains("GCM")) 12 else 16
+                    setting.iv = RandomUtils.getRandomNumbersAndLetters(ivLength).toString()
+                    request.params("iv", URLEncoder.encode(setting.iv, "UTF-8"))
+                }
+                val ciphertext = encrypt(requestMsg, transformation, setting.key, setting.iv)
+                //Log.d(TAG, "ciphertext: $ciphertext")
+                //val plainText = decrypt(ciphertext, transformation, setting.key, setting.iv)
+                //Log.d(TAG, "plainText: $plainText")
+                //request.params("ciphertext", URLEncoder.encode(ciphertext, "UTF-8"))
+                //request.params("iv", URLEncoder.encode(setting.iv, "UTF-8"))
+                request.params("ciphertext", ciphertext)
+                request.headers("Content-Type", "application/x-www-form-urlencoded")
+            }
+
+            request.ignoreHttpsCert() //IgnorehttpsCertificate
+                .keepJson(true)
+                .retryCount(SettingUtils.requestRetryTimes) //Number of overtime retrys
+                .retryDelay(SettingUtils.requestDelayTime * 1000) //Timeout retry delay
+                .retryIncreaseDelay(SettingUtils.requestDelayTime * 1000) //Incremental timeout retry backoff
+                .timeStamp(true) //urlAutomatically add a time stamp to avoid cache
+                .addInterceptor(LoggingInterceptor(logId)) //Add onelogInterceptor., Record Request Log
+                .execute(object : SimpleCallBack<String>() {
+
+                    override fun onError(e: ApiException) {
+                        Log.e(TAG, e.detailMessage)
+                        val status = 0
+                        SendUtils.updateLogs(logId, status, e.displayMessage)
+                        SendUtils.senderLogic(status, msgInfo, rule, senderIndex, msgId)
+                    }
+
+                    override fun onSuccess(response: String) {
+                        Log.i(TAG, response)
+
+                        val resp = Gson().fromJson(response, BarkResult::class.java)
+                        val status = if (resp?.code == 200L) 2 else 0
+                        SendUtils.updateLogs(logId, status, response)
+                        SendUtils.senderLogic(status, msgInfo, rule, senderIndex, msgId)
+
+                    }
+
+                })
+
+        }
+
+        fun encrypt(plainText: String, transformation: String, key: String, iv: String): String {
+            //Log.d(TAG, "plainText: $plainText, transformation: $transformation, key: $key, iv: $iv")
+            val cipher = Cipher.getInstance(transformation)
+            val keySpec = SecretKeySpec(key.toByteArray(), "AES")
+            if (transformation.contains("ECB")) {
+                cipher.init(Cipher.ENCRYPT_MODE, keySpec)
+            } else if (transformation.contains("CBC")) {
+                val ivSpec = IvParameterSpec(iv.toByteArray())
+                cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec)
+            } else if (transformation.contains("GCM")) {
+                val gcmSpec = GCMParameterSpec(128, iv.toByteArray())
+                cipher.init(Cipher.ENCRYPT_MODE, keySpec, gcmSpec)
+            } else {
+                throw IllegalArgumentException("Unsupported transformation: $transformation")
+            }
+            val encryptedBytes = cipher.doFinal(plainText.toByteArray(Charsets.UTF_8))
+            return Base64.encodeToString(encryptedBytes, Base64.NO_WRAP)
+        }
+
+        fun decrypt(encryptedText: String, transformation: String, key: String, iv: String): String {
+            //Log.d(TAG, "encryptedText: $encryptedText, transformation: $transformation, key: $key, iv: $iv")
+            val cipher = Cipher.getInstance(transformation)
+            val keySpec = SecretKeySpec(key.toByteArray(), "AES")
+            if (transformation.contains("ECB")) {
+                cipher.init(Cipher.DECRYPT_MODE, keySpec)
+            } else if (transformation.contains("CBC")) {
+                val ivSpec = IvParameterSpec(iv.toByteArray())
+                cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec)
+            } else if (transformation.contains("GCM")) {
+                val gcmSpec = GCMParameterSpec(128, iv.toByteArray())
+                cipher.init(Cipher.DECRYPT_MODE, keySpec, gcmSpec)
+            } else {
+                throw IllegalArgumentException("Unsupported transformation: $transformation")
+            }
+            val encryptedBytes = Base64.decode(encryptedText, Base64.NO_WRAP)
+            val decryptedBytes = cipher.doFinal(encryptedBytes)
+            return String(decryptedBytes, Charsets.UTF_8)
+        }
+
+    }
+}

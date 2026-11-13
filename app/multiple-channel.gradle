@@ -1,0 +1,10 @@
+apply plugin: 'walle'
+
+walle {
+    // Specify the output path of the channel package
+    apkOutputFolder = new File("${project.buildDir}/outputs/channels")
+    // Customize channel packageAPKfile name
+    apkFileNameFormat = '${appName}-${packageName}-${channel}-${buildType}-v${versionName}-${versionCode}-${buildTime}.apk'
+    // Channel Profile
+    channelFile = new File("${project.getProjectDir()}/channel")
+}

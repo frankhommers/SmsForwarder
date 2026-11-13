@@ -1,0 +1,407 @@
+//file:noinspection DependencyNotationArgument
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
+
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'kotlin-parcelize'
+    id 'img-optimizer'
+    id 'com.yanzhenjie.andserver'
+    //AspectJX: https://github.com/wurensen/gradle_plugin_android_aspectjx
+    //id "io.github.wurensen.android-aspectjx" version "3.3.2"
+}
+
+/**
+ * ================================
+ * XAOP / AspectJ Toggle
+ * Only release Enable
+ * debug / test Disable all (avoid Windows File Lock）
+ * ================================
+ */
+ext.enableXaop = gradle.startParameter.taskNames.any { name ->
+    name.toLowerCase().contains("release")
+}
+println "[XAOP] enable = ${enableXaop}, tasks = ${gradle.startParameter.taskNames}"
+
+def keyProps = new Properties()
+def keyPropsFile = rootProject.file('keystore/keystore.properties')
+if (keyPropsFile.exists()) {
+    keyProps.load(new FileInputStream(keyPropsFile))
+}
+
+//Remember to set up when you're packing.trueEnable
+if (isNeedPackage.toBoolean() && isUseBooster.toBoolean()) {
+    apply plugin: 'com.didiglobal.booster'
+}
+
+// Ban Java Compiler displays obsolete API Warning
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile).configureEach {
+        options.compilerArgs << "-Xlint:-removal"
+    }
+}
+
+android {
+    buildToolsVersion build_versions.build_tools
+    compileSdkVersion build_versions.target_sdk
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    //Date compiled
+    def buildDate = new Date().format("yyMMdd", TimeZone.getTimeZone("GMT+08"))
+    //Compile Time
+    def buildTime = new Date().format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("GMT+08"))
+    //Git of Commit ID
+    def gitCommitId = getGitCommitId()
+
+    defaultConfig {
+        applicationId "nl.hommers.smsforwarder"
+        // Package only supported locales, including resources from dependencies.
+        resConfigs 'en', 'nl'
+        minSdkVersion build_versions.min_sdk
+        targetSdkVersion build_versions.target_sdk
+        versionCode build_versions.version_code
+        versionName = "${build_versions.version_name}.${buildDate}"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "BUILD_TIME", "\"${buildTime}\""
+        buildConfigField "String", "GIT_COMMIT_ID", "\"${gitCommitId}\""
+
+        multiDexEnabled true
+        //vectorDrawables.useSupportLibrary = true
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [moduleName: project.getName()]
+            }
+        }
+
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        }
+    }
+
+    signingConfigs {
+        release {
+            keyAlias keyProps['keyAlias']
+            keyPassword keyProps['keyPassword']
+            storeFile keyProps['storeFile'] ? file(keyProps['storeFile']) : null
+            storePassword keyProps['storePassword']
+        }
+
+    }
+
+    buildTypes {
+        release {
+            // Debug Mode Switches
+            debuggable false
+            jniDebuggable false
+            // Remove unused resources
+            shrinkResources true
+            // Code obfuscation toggle
+            minifyEnabled true
+            // Obfuscation configuration
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // Release signing requires a locally supplied keystore.
+            if (keyPropsFile.exists()) signingConfig signingConfigs.release
+
+            // Block R8 stack map warning
+            buildConfigField "boolean", "DISABLE_R8_WARNINGS", "true"
+        }
+        debug {
+            // Debug Mode Switches
+            debuggable true
+            jniDebuggable true
+            // Debug Skip resource shrinking and code obfuscation to avoid unnecessary resource rebuilds
+            shrinkResources false
+            minifyEnabled false
+            // Obfuscation configuration
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // Keep debug builds independent of any production signing key.
+            signingConfig signingConfigs.debug
+
+            // Block R8 stack map warning
+            buildConfigField "boolean", "DISABLE_R8_WARNINGS", "true"
+        }
+    }
+
+    //ABIConfigure - PressCPUPackage each architecture separately
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            universalApk true
+        }
+    }
+    def abiCodes = ['universal': 1, 'armeabi-v7a': 2, 'arm64-v8a': 3, 'x86': 4, 'x86_64': 5]
+    packagingOptions {
+        //RemoveFrpcLibofso，Download and load dynamically when needed
+        // Always exclude disabled FRPC native payloads.
+            exclude 'lib/armeabi-v7a/libgojni.so'
+            exclude 'lib/arm64-v8a/libgojni.so'
+            exclude 'lib/x86/libgojni.so'
+            exclude 'lib/x86_64/libgojni.so'
+        jniLibs {
+            excludes += ["kotlin/**"]
+        }
+        resources {
+            // Android resConfigs does not filter Java ResourceBundle translations.
+            excludes += ['CronParserI18N_zh*.properties', '**/messages_zh*.properties', '**/messages_ja.properties']
+            merge 'META-INF/mailcap'
+            pickFirst 'META-INF/LICENSE.md'
+            pickFirst 'META-INF/NOTICE.md'
+            excludes += ['META-INF/DEPENDENCIES.txt', 'META-INF/LICENSE.txt', 'META-INF/NOTICE.txt', 'META-INF/NOTICE', 'META-INF/LICENSE', 'META-INF/DEPENDENCIES', 'META-INF/notice.txt', 'META-INF/license.txt', 'META-INF/dependencies.txt', 'META-INF/LGPL2.1']
+            excludes += ["META-INF/*.kotlin_module", "META-INF/*.version", "kotlin/**", "DebugProbesKt.bin"]
+        }
+    }
+
+    android.applicationVariants.configureEach { variant ->
+        variant.outputs.each { output ->
+            //noinspection GrDeprecatedAPIUsage
+            def abiName = output.getFilter(com.android.build.OutputFile.ABI)
+            if (abiName == null) abiName = "universal"
+            output.versionCodeOverride = abiCodes.get(abiName, 0) * 100000 + variant.versionCode
+            output.outputFileName = "SmsF_${versionName}_${output.versionCode}_${abiName}_${variant.name}.apk"
+
+            // Modify output-metadata.json Add date of compilation, time of compilation, time of compilationGit Commit ID
+            def assembleTaskName = "assemble${variant.name.capitalize()}"
+            tasks.named(assembleTaskName) {
+                doLast {
+                    def metadataFile = file("${output.outputFile.parent}/output-metadata.json")
+                    def metadata = new JsonSlurper().parseText(metadataFile.text)
+                    metadata.buildDate = buildDate
+                    metadata.buildTime = buildTime
+                    metadata.gitCommitId = gitCommitId
+                    metadataFile.text = new JsonBuilder(metadata).toPrettyString()
+                }
+            }
+        }
+    }
+
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+    lint {
+        abortOnError false
+    }
+    namespace 'cn.ppps.forwarder'
+
+    /**
+     * ⚠️ Windows + XAOP under; avoid debug/test Trigger clean
+     */
+    if (isNeedClean.toBoolean() && enableXaop) {
+        preBuild.dependsOn clean
+    }
+}
+
+/**
+ * ================================
+ * XAOP Fallback: non- release Disable All XAOP / AspectJ Task
+ * ================================
+ */
+afterEvaluate {
+    android.applicationVariants.configureEach { variant ->
+        if (variant.buildType.name != "release") {
+            tasks.matching {
+                it.name.toLowerCase().contains("xaop") || it.name.toLowerCase().contains("aspectj")
+            }.configureEach {
+                enabled = false
+                println "[XAOP] disable task: ${name}"
+            }
+        }
+    }
+}
+
+/**
+ * Unit Test Force Closed XAOP
+ */
+tasks.withType(Test).configureEach {
+    systemProperty "xaop.enable", "false"
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //frpc
+    implementation files('libs/frpclib.aar')
+
+    //MQTTAgreements
+    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+
+    testImplementation deps.junit
+    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+    androidTestImplementation deps.espresso.core
+
+    //noinspection GradleDependency
+    implementation 'androidx.core:core-ktx:1.9.0'
+    //noinspection GradleDependency
+    implementation 'androidx.activity:activity-ktx:1.6.1'
+    //noinspection GradleDependency
+    implementation 'androidx.fragment:fragment-ktx:1.5.5'
+    implementation "androidx.cardview:cardview:1.0.0"
+    //noinspection GradleDependency
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
+
+    //Package splitting
+    implementation deps.androidx.multidex
+
+    //vLayout：https://github.com/alibaba/vlayout
+    implementation 'com.alibaba.android:vlayout:1.3.0'
+    //Pull to refresh
+    implementation 'com.github.xuexiangjys.SmartRefreshLayout:refresh-header:1.1.6'
+    implementation 'com.github.xuexiangjys.SmartRefreshLayout:refresh-layout:1.1.6'
+    //WebView
+    implementation 'com.github.xuexiangjys.AgentWeb:agentweb-core:1.0.1'
+    implementation 'com.github.xuexiangjys.AgentWeb:agentweb-download:1.0.1'//Optional
+    //Screen FitAutoSize：https://github.com/JessYanCoding/AndroidAutoSize
+    implementation 'me.jessyan:autosize:1.2.1'
+
+    //Skeleton placeholder controls
+    implementation 'me.samlss:broccoli:1.0.0'
+
+    //RichText：https://github.com/zzhoujay/RichText
+    implementation 'com.zzhoujay.richtext:richtext:3.0.8'
+
+    //Meituan multi-channel packaging
+    //implementation 'com.meituan.android.walle:library:1.1.6'
+
+    def work_version = '2.8.1'
+    //noinspection GradleDependency
+    api("androidx.work:work-multiprocess:$work_version")
+    //noinspection GradleDependency
+    api("androidx.work:work-runtime-ktx:$work_version")
+
+    //Android Room
+    def room_version = '2.5.2'
+    //noinspection GradleDependency
+    implementation "androidx.room:room-ktx:$room_version"
+    //noinspection GradleDependency
+    implementation "androidx.room:room-runtime:$room_version"
+    //noinspection GradleDependency
+    implementation "androidx.room:room-paging:$room_version"
+    //noinspection GradleDependency
+    implementation "androidx.room:room-rxjava2:$room_version"
+    //noinspection KaptUsageInsteadOfKsp
+    kapt "androidx.room:room-compiler:$room_version"
+
+    //CodeView：https://github.com/AmrDeveloper/CodeView
+    implementation 'io.github.amrdeveloper:codeview:1.3.9'
+
+    //LiveEventBus：https://github.com/JeremyLiao/LiveEventBus
+    implementation 'io.github.jeremyliao:live-event-bus-x:1.8.0'
+
+    //MarkdownView：https://github.com/tiagohm/MarkdownView
+    implementation 'com.github.pppscn.MarkdownView:library:0.19.0'
+    //implementation 'com.github.pppscn.MarkdownView:emoji:0.19.0'
+
+    def retrofit2_version = '2.9.0'
+    //noinspection GradleDependency
+    implementation "com.squareup.retrofit2:retrofit:$retrofit2_version"
+    //noinspection GradleDependency
+    implementation "com.squareup.retrofit2:converter-gson:$retrofit2_version"
+    //noinspection GradleDependency
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofit2_version"
+
+    def paging_version = "3.1.1"
+    //noinspection GradleDependency
+    implementation "androidx.paging:paging-runtime-ktx:$paging_version"
+    // alternatively - without Android dependencies for tests
+    //noinspection GradleDependency
+    testImplementation "androidx.paging:paging-common-ktx:$paging_version"
+
+    //Permission request framework：https://github.com/getActivity/XXPermissions
+    implementation 'com.github.getActivity:XXPermissions:28.0'
+    //Language switching framework：https://github.com/getActivity/MultiLanguages
+    implementation 'com.github.getActivity:MultiLanguages:10.2'
+
+    // https://jakartaee.github.io/mail-api/Android
+    implementation "com.sun.mail:jakarta.mail:2.0.2"
+    implementation "com.sun.activation:jakarta.activation:2.0.1"
+
+    //SM cryptographic algorithmsSM4 ofJAVAAchieved(Based onBCAchieved)
+    def bouncycastle_version = '1.77'
+    //noinspection GradleDependency
+    api "org.bouncycastle:bcprov-jdk18on:$bouncycastle_version"
+    //Mail S/MIME Encryption and Signature
+    //implementation "org.spongycastle:bcmail-jdk18on:$bouncycastle_version" //AndroidWrong reporting.
+    //noinspection GradleDependency
+    implementation "org.bouncycastle:bcpkix-jdk18on:$bouncycastle_version"
+    //implementation "org.bouncycastle:bctls-jdk18on:$bouncycastle_version"
+    //Mail PGP Encryption and Signature
+    //implementation "org.bouncycastle:bcpg-jdk18on:$bouncycastle_version" //ThunderbirdUnable to decrypt
+    //PGPainless: https://github.com/pgpainless/pgpainless
+    //noinspection GradleDependency
+    implementation 'org.pgpainless:pgpainless-core:1.6.7'
+    //OpenKeychain OpenPGP API：https://github.com/open-keychain/openpgp-api
+    implementation 'org.sufficientlysecure:openpgp-api:10.0'
+
+    //Android Keep Alive(Android keep-alive)，Cactus Dual-process foreground service，JobScheduler，onePix(A pixel)，WorkManager，Silent music
+    //https://github.com/gyf-dev/Cactus
+    implementation 'com.gyf.cactus:cactus:1.1.3-beta13'
+
+    //HTTPServers：https://github.com/yanzhenjie/AndServer
+    implementation 'cn.ppps.andserver:api:2.1.12'
+    kapt 'cn.ppps.andserver:processor:2.1.12'
+
+    //Location uses Android built-in LocationManager to provide location functionality：https://github.com/jenly1314/Location
+    implementation 'com.github.pppscn:location:1.0.0'
+
+    //Partial implementation of Quartz Cron Java for Android: https://github.com/gatewayapps/crondroid
+    implementation 'gatewayapps.crondroid:crondroid:1.0.0'
+    //Java Parser For Cron Expressions: https://github.com/grahamar/cron-parser
+    implementation 'net.redhogs.cronparser:cron-parser-core:3.5'
+
+    //Sidebar Menu：https://github.com/yarolegovich/SlidingRootNav
+    implementation 'com.yarolegovich:sliding-root-nav:1.1.1'
+}
+// Fail before packaging if sources or regenerated AARs have drifted.
+if (!rootProject.hasProperty('englishDependencyBootstrap')) {
+    def verifyEnglishDependencies = tasks.register('verifyEnglishDependencies', Exec) {
+        workingDir rootProject.projectDir
+        commandLine 'python3', 'scripts/rebuild_english_dependencies.py', '--verify-only'
+    }
+    tasks.named('preBuild').configure { dependsOn verifyEnglishDependencies }
+} else {
+    tasks.matching { it.name.startsWith('package') || it.name.startsWith('assemble') }.configureEach {
+        doFirst { throw new GradleException('Bootstrap is only for rebuilding dependencies, never packaging an APK') }
+    }
+}
+
+//AutoAddX-LibraryDependency
+apply from: 'x-library.gradle'
+//walleMulti-channel packing.
+//apply from: 'multiple-channel.gradle'
+
+//Access commit ID
+def getGitCommitId() {
+    try {
+        def proc = ['git', 'rev-parse', '--short', 'HEAD'].execute(null, rootDir)
+        proc.waitFor()
+        return proc.exitValue() == 0
+                ? proc.text.trim()
+                : "unknown"
+    } catch (Throwable ignore) {
+        return "unknown"
+    }
+}

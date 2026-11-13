@@ -1,0 +1,394 @@
+[
+  {
+    "class": "com/gyf/cactus/ext/NotificationExtKt",
+    "original": "cactus-sources/com/gyf/cactus/ext/NotificationExt.kt",
+    "sha256": "5ed78839c95241951f1c454b9aeda2f21c9dbb41f9fd9a6c0892ad61f96646b0",
+    "patched": "src/kotlin/com/gyf/cactus/ext/NotificationExt.kt",
+    "patched_sha256": "7bec132bb8c6702a4b47310a1178131ffaeabe4968388680a14ac0133730be65"
+  },
+  {
+    "class": "com/hjq/device/compat/DeviceMarketName",
+    "original": "getActivity-DeviceCompat-2c2b23c/library/src/main/java/com/hjq/device/compat/DeviceMarketName.java",
+    "sha256": "af999465076cfa237197b9f321453acee965271a76493cc119bd4b650f245ae5",
+    "patched": "src/java/com/hjq/device/compat/DeviceMarketName.java",
+    "patched_sha256": "9c905f28592a496b6fc0bba375002e3b00bc02298b7a992a6ecba68af6f4e85e"
+  },
+  {
+    "class": "com/just/agentweb/action/ActionActivity",
+    "original": "xuexiangjys-AgentWeb-35f1d9d/agentweb-core/src/main/java/com/just/agentweb/action/ActionActivity.java",
+    "sha256": "ab89dd54657e606a7e32a691c39b169005abe018e05a12c4fd3c1a2b95d8bd54",
+    "patched": "src/java/com/just/agentweb/action/ActionActivity.java",
+    "patched_sha256": "44858815e2bef6a74dcfc11652d300465e8bddb5a2a995b0ebd6df969b79f393"
+  },
+  {
+    "class": "com/just/agentweb/download/DefaultDownloadImpl",
+    "original": "xuexiangjys-AgentWeb-35f1d9d/agentweb-download/src/main/java/com/just/agentweb/download/DefaultDownloadImpl.java",
+    "sha256": "1a74f2bdaf790c93fa4a944af185e155a77c0c1360beff9311f79ea19f81562c",
+    "patched": "src/java/com/just/agentweb/download/DefaultDownloadImpl.java",
+    "patched_sha256": "41edf9ba119abea4a33cad15496750fdf219090d0699789ec7a44bfe8b58a89e"
+  },
+  {
+    "class": "com/just/agentweb/download/Downloader",
+    "original": "xuexiangjys-AgentWeb-35f1d9d/agentweb-download/src/main/java/com/just/agentweb/download/Downloader.java",
+    "sha256": "75762378aa43b5319be0ae1fbd8a3f57177fdeeff567fb2838dc3843120c59e1",
+    "patched": "src/java/com/just/agentweb/download/Downloader.java",
+    "patched_sha256": "8cec6c36899780939ad64362354f449b3181379e296ccffdc2f23a64ba50e01a"
+  },
+  {
+    "class": "com/just/agentweb/widget/AgentWebView",
+    "original": "xuexiangjys-AgentWeb-35f1d9d/agentweb-core/src/main/java/com/just/agentweb/widget/AgentWebView.java",
+    "sha256": "c0e6ccba1dedbd2d20425698d4df7c2e7561547e491d5478a02671ae50ffc421",
+    "patched": "src/java/com/just/agentweb/widget/AgentWebView.java",
+    "patched_sha256": "751315711639c1381290136c74668cbd0c81e88fae9dbcaace21f59c08dc2b77"
+  },
+  {
+    "class": "com/scwang/smartrefresh/layout/SmartRefreshLayout",
+    "original": "xuexiangjys-SmartRefreshLayout-d110c19/refresh-layout/src/main/java/com/scwang/smartrefresh/layout/SmartRefreshLayout.java",
+    "sha256": "7c8cbc5ebee01dcc07eb8f348085df76626e09e6f47fd601b900294bd0c20a0f",
+    "patched": "src/java/com/scwang/smartrefresh/layout/SmartRefreshLayout.java",
+    "patched_sha256": "b31313b77b4535e95135fa3173360f0e0b7782f0beea351d757d9cdaf195e224"
+  },
+  {
+    "class": "com/xuexiang/xaop/XAOP",
+    "original": "pppscn-XAOP-dab6b77/xaop-runtime/src/main/java/com/xuexiang/xaop/XAOP.java",
+    "sha256": "f64c89d5fb8e3ec8b3c651defc062319d8e4dabdca31a382fa49de65362178ec",
+    "patched": "src/java/com/xuexiang/xaop/XAOP.java",
+    "patched_sha256": "119be34ecb90fdc605e73eea6bcbf889639c41ad5d7f27817081a076074c0905"
+  },
+  {
+    "class": "com/xuexiang/xaop/aspectj/IOThreadAspectJ",
+    "original": "pppscn-XAOP-dab6b77/xaop-runtime/src/main/java/com/xuexiang/xaop/aspectj/IOThreadAspectJ.java",
+    "sha256": "e622ba958385962995117a0b20d65e7098cf70305b1f4b7aabc9d629f5d52058",
+    "patched": "src/java/com/xuexiang/xaop/aspectj/IOThreadAspectJ.java",
+    "patched_sha256": "7e50231c50713c6b47dd2d7059f876ce89b0f604f06a5ebd1061a4fe491876b5"
+  },
+  {
+    "class": "com/xuexiang/xaop/aspectj/InterceptAspectJ",
+    "original": "pppscn-XAOP-dab6b77/xaop-runtime/src/main/java/com/xuexiang/xaop/aspectj/InterceptAspectJ.java",
+    "sha256": "9e9e66dea387c5cf63c8ee54fcd120e7f4791b130a746b54e5cec7c8b7bbdc0a",
+    "patched": "src/java/com/xuexiang/xaop/aspectj/InterceptAspectJ.java",
+    "patched_sha256": "a5a6cc5801f5133328b30b6212a271b8a0a3bc8a14ad650209ad52b64c6a17c3"
+  },
+  {
+    "class": "com/xuexiang/xaop/aspectj/MainThreadAspectJ",
+    "original": "pppscn-XAOP-dab6b77/xaop-runtime/src/main/java/com/xuexiang/xaop/aspectj/MainThreadAspectJ.java",
+    "sha256": "d253c09d6a7615fba53f814e7dacb21f747ef3913d4c6613212f3f11b0c29502",
+    "patched": "src/java/com/xuexiang/xaop/aspectj/MainThreadAspectJ.java",
+    "patched_sha256": "e161fd5147de8f7cc73d95a9de3cd9e4faa0479fd46283aa085375a04114831d"
+  },
+  {
+    "class": "com/xuexiang/xaop/aspectj/PermissionAspectJ",
+    "original": "pppscn-XAOP-dab6b77/xaop-runtime/src/main/java/com/xuexiang/xaop/aspectj/PermissionAspectJ.java",
+    "sha256": "287168fd3a0d476343bc60d174e661c2540057aa039747bde9115004799f8bf6",
+    "patched": "src/java/com/xuexiang/xaop/aspectj/PermissionAspectJ.java",
+    "patched_sha256": "e217d85e712e6843de66b86e22620de5a72c4f389ac8c435559cd811e46673bb"
+  },
+  {
+    "class": "com/xuexiang/xaop/aspectj/SingleClickAspectJ",
+    "original": "pppscn-XAOP-dab6b77/xaop-runtime/src/main/java/com/xuexiang/xaop/aspectj/SingleClickAspectJ.java",
+    "sha256": "f2ecd8f8fa2d4fd06801d653f9ac42fae7917e449e90ccebc8465dad7ef37994",
+    "patched": "src/java/com/xuexiang/xaop/aspectj/SingleClickAspectJ.java",
+    "patched_sha256": "f08af44d1d8064b552bbf17e24e590a8017bcf4baa7066c389bb2750553dc00c"
+  },
+  {
+    "class": "com/xuexiang/xhttp2/XHttp",
+    "original": "pppscn-XHttp2-9115cfc/xhttp2-lib/src/main/java/com/xuexiang/xhttp2/XHttp.java",
+    "sha256": "eedc48bd559484132915248f3a74c8f28e1ccf0a5288969ce130496078470e64",
+    "patched": "src/java/com/xuexiang/xhttp2/XHttp.java",
+    "patched_sha256": "22e79e85f3f3498bc3f4d90a2a61bd06685cd10d466c29f9b56de498ef09edb7"
+  },
+  {
+    "class": "com/xuexiang/xhttp2/XHttpProxy",
+    "original": "pppscn-XHttp2-9115cfc/xhttp2-lib/src/main/java/com/xuexiang/xhttp2/XHttpProxy.java",
+    "sha256": "17569a9aa03dd6571896db042a27362ff1a35d6f67043090d194c0fc3d76d8d4",
+    "patched": "src/java/com/xuexiang/xhttp2/XHttpProxy.java",
+    "patched_sha256": "a62fff0766ad486ab0adee8e36a3ef370bbd3218a254521352ec60d8155dc2a1"
+  },
+  {
+    "class": "com/xuexiang/xhttp2/exception/ApiException",
+    "original": "pppscn-XHttp2-9115cfc/xhttp2-lib/src/main/java/com/xuexiang/xhttp2/exception/ApiException.java",
+    "sha256": "6fe434c6fc46e72c0c9cfe6e772ae9f9d2f8a438f65eed1cd2c14f402f1dd786",
+    "patched": "src/java/com/xuexiang/xhttp2/exception/ApiException.java",
+    "patched_sha256": "60eb4e0cd0a44a245b47f651eadfb2fbd04fc1513f9c317ee72918127bab8ff1"
+  },
+  {
+    "class": "com/xuexiang/xhttp2/subsciber/ProgressDialogLoader",
+    "original": "pppscn-XHttp2-9115cfc/xhttp2-lib/src/main/java/com/xuexiang/xhttp2/subsciber/ProgressDialogLoader.java",
+    "sha256": "e2cacd87b7f102020c5f84571d5b89dceb83071f84a2f341e1b46c95825f7309",
+    "patched": "src/java/com/xuexiang/xhttp2/subsciber/ProgressDialogLoader.java",
+    "patched_sha256": "6db815576b06da91b2f9b2232b4ffd4d8a570b1f1b3e00091d2f9ff62e17f452"
+  },
+  {
+    "class": "com/xuexiang/xhttp2/transform/func/RetryExceptionFunc",
+    "original": "pppscn-XHttp2-9115cfc/xhttp2-lib/src/main/java/com/xuexiang/xhttp2/transform/func/RetryExceptionFunc.java",
+    "sha256": "b09bd03269f76d47c5c4c14c9a3b253fc508c7fcfe6e4c241f3fedd46f7e11fc",
+    "patched": "src/java/com/xuexiang/xhttp2/transform/func/RetryExceptionFunc.java",
+    "patched_sha256": "590912d14f2b04fbe8b31f9ce6055fac641ea726f3ee44b47085f6db60c766d7"
+  },
+  {
+    "class": "com/xuexiang/xhttp2/utils/TypeUtils",
+    "original": "pppscn-XHttp2-9115cfc/xhttp2-lib/src/main/java/com/xuexiang/xhttp2/utils/TypeUtils.java",
+    "sha256": "cee689b6cfc3beeaa5079e5ee1c90fec700b7ba7c594194cef9a0c5192ade91a",
+    "patched": "src/java/com/xuexiang/xhttp2/utils/TypeUtils.java",
+    "patched_sha256": "cf2f506b5d3c295980fed99daf88e409711e436000da5f293f49ed4a8691efa9"
+  },
+  {
+    "class": "com/xuexiang/xpage/PageConfig",
+    "original": "pppscn-XPage-ff184a1/xpage-lib/src/main/java/com/xuexiang/xpage/PageConfig.java",
+    "sha256": "5d1cb522289c0ee87eaab7ddfc3a008d13285109b945238a600a3d78eeddca09",
+    "patched": "src/java/com/xuexiang/xpage/PageConfig.java",
+    "patched_sha256": "eb8bdce3e46f1c56280c3bcda8399a74c4f665b8519431e91caa6e4be8c05c25"
+  },
+  {
+    "class": "com/xuexiang/xpage/core/CoreConfig",
+    "original": "pppscn-XPage-ff184a1/xpage-lib/src/main/java/com/xuexiang/xpage/core/CoreConfig.java",
+    "sha256": "23083bf32403811f0fb55ad1768243e576b5ab3840525d6a7041a66ae4ce7123",
+    "patched": "src/java/com/xuexiang/xpage/core/CoreConfig.java",
+    "patched_sha256": "c0557e09d2623e21826a3793d084a1c11082486d17051854bb0f0ce321441874"
+  },
+  {
+    "class": "com/xuexiang/xui/XUI",
+    "original": "pppscn-XUI-5c31e0b/xui_lib/src/main/java/com/xuexiang/xui/XUI.java",
+    "sha256": "4748abb5f434acd501f12b3e2bffd814eac21f2ed118b4c225b12cb947d104f2",
+    "patched": "src/java/com/xuexiang/xui/XUI.java",
+    "patched_sha256": "6f74b6ecaa0c7a2ea0ce199093c1204f8332da64cd0519a17ec8e6b21b2ebc53"
+  },
+  {
+    "class": "com/xuexiang/xui/adapter/recyclerview/DividerItemDecoration",
+    "original": "pppscn-XUI-5c31e0b/xui_lib/src/main/java/com/xuexiang/xui/adapter/recyclerview/DividerItemDecoration.java",
+    "sha256": "2084866a206275b73d53cf7ff238214b61a522f6a7eac5b58ae776db8491162d",
+    "patched": "src/java/com/xuexiang/xui/adapter/recyclerview/DividerItemDecoration.java",
+    "patched_sha256": "05c6224165145834e014e4bb2563054b1f9ff90235dc866b8f830feacc45b09d"
+  },
+  {
+    "class": "com/xuexiang/xui/utils/SnackbarUtils",
+    "original": "pppscn-XUI-5c31e0b/xui_lib/src/main/java/com/xuexiang/xui/utils/SnackbarUtils.java",
+    "sha256": "69910bb18deb3d9d1a37a051a6425ece3d5620783deae9b982a51ab356888fed",
+    "patched": "src/java/com/xuexiang/xui/utils/SnackbarUtils.java",
+    "patched_sha256": "3e52950261e30afb9ec8c95e0d360668111ea061e9e3ac9677e53211f6b42f71"
+  },
+  {
+    "class": "com/xuexiang/xui/widget/imageview/RadiusImageView",
+    "original": "pppscn-XUI-5c31e0b/xui_lib/src/main/java/com/xuexiang/xui/widget/imageview/RadiusImageView.java",
+    "sha256": "a2a8771e2460ca1b8d6a1ffa0dd2c002396d0cb3d70c3dfc78a9e8c6cfde9a18",
+    "patched": "src/java/com/xuexiang/xui/widget/imageview/RadiusImageView.java",
+    "patched_sha256": "63d05dd545ddaea269ccc4ab7636b1cd1626381b35e3ef2a666e4c2251aed065"
+  },
+  {
+    "class": "com/xuexiang/xui/widget/imageview/preview/view/BezierBannerView",
+    "original": "pppscn-XUI-5c31e0b/xui_lib/src/main/java/com/xuexiang/xui/widget/imageview/preview/view/BezierBannerView.java",
+    "sha256": "9b5b2ace38ec9e83340153d7d5b3fa16ca947ab804a7d740853edeee5311b882",
+    "patched": "src/java/com/xuexiang/xui/widget/imageview/preview/view/BezierBannerView.java",
+    "patched_sha256": "067783bc2ff037e43b93621c90b3ea52fe0304e739623172641dea620b5e1f64"
+  },
+  {
+    "class": "com/xuexiang/xui/widget/picker/wheelview/WheelView",
+    "original": "pppscn-XUI-5c31e0b/xui_lib/src/main/java/com/xuexiang/xui/widget/picker/wheelview/WheelView.java",
+    "sha256": "52dc62a24fdfb9807c0edf8d4560aea0b037d1ac2c060de653e06a82f40515f5",
+    "patched": "src/java/com/xuexiang/xui/widget/picker/wheelview/WheelView.java",
+    "patched_sha256": "6ebe3f5f0c530e424f96ceb748269cf13d2f1bbf3958153bb010f1d6619d4ec6"
+  },
+  {
+    "class": "com/xuexiang/xui/widget/picker/widget/builder/TimePickerBuilder",
+    "original": "pppscn-XUI-5c31e0b/xui_lib/src/main/java/com/xuexiang/xui/widget/picker/widget/builder/TimePickerBuilder.java",
+    "sha256": "53d4b199c97443e7ab1c5fb99cabc5917cbce2ed6d475eafc90f3a88c62ecbce",
+    "patched": "src/java/com/xuexiang/xui/widget/picker/widget/builder/TimePickerBuilder.java",
+    "patched_sha256": "fcc710163bc50147a2af3156ad003cf25e7b7151fd4cb1cb1238b54e9084cd53"
+  },
+  {
+    "class": "com/xuexiang/xui/widget/picker/widget/utils/ChinaDateUtils",
+    "original": "pppscn-XUI-5c31e0b/xui_lib/src/main/java/com/xuexiang/xui/widget/picker/widget/utils/ChinaDateUtils.java",
+    "sha256": "5e94c43a58c6d2b86228d866e7bea0f28ad5e41d1accd7ece554198396664d18",
+    "patched": "src/java/com/xuexiang/xui/widget/picker/widget/utils/ChinaDateUtils.java",
+    "patched_sha256": "82c13043e14fe337efaae06bb80bd817905d33eb69558d352ba13eb6314b99bd"
+  },
+  {
+    "class": "com/xuexiang/xui/widget/slideback/SlideBackManager",
+    "original": "pppscn-XUI-5c31e0b/xui_lib/src/main/java/com/xuexiang/xui/widget/slideback/SlideBackManager.java",
+    "sha256": "ecd80e9772fc5da14a93cde79577fa49f4da1e635a598109371df409903a859c",
+    "patched": "src/java/com/xuexiang/xui/widget/slideback/SlideBackManager.java",
+    "patched_sha256": "b5b2124dc6ded54046036049ea4be5f6764c3c76108ef74941ad15a1f2a2e2ff"
+  },
+  {
+    "class": "com/xuexiang/xui/widget/tabbar/XUIItemViewsAdapter",
+    "original": "pppscn-XUI-5c31e0b/xui_lib/src/main/java/com/xuexiang/xui/widget/tabbar/XUIItemViewsAdapter.java",
+    "sha256": "5a944ca14b28962471fe00bec5b56bf36cbea66bb2b7b1765dd535a21462c5f8",
+    "patched": "src/java/com/xuexiang/xui/widget/tabbar/XUIItemViewsAdapter.java",
+    "patched_sha256": "dcb48559e0c136d34818b98d2f7efc51e2205bebb966b9bd1b0f66d12b470aed"
+  },
+  {
+    "class": "com/xuexiang/xui/widget/textview/marqueen/ComplexItemEntity",
+    "original": "pppscn-XUI-5c31e0b/xui_lib/src/main/java/com/xuexiang/xui/widget/textview/marqueen/ComplexItemEntity.java",
+    "sha256": "162a1710c849b93f51f5e75681629b6836f57ba4637f01cd967a1595db562339",
+    "patched": "src/java/com/xuexiang/xui/widget/textview/marqueen/ComplexItemEntity.java",
+    "patched_sha256": "6db140bc18e5eee774add8152dea0777a234986b84d04395b323cb4a100f3b09"
+  },
+  {
+    "class": "com/xuexiang/xui/widget/textview/span/AlignMiddleImageSpan",
+    "original": "pppscn-XUI-5c31e0b/xui_lib/src/main/java/com/xuexiang/xui/widget/textview/span/AlignMiddleImageSpan.java",
+    "sha256": "59422533bf2399e40f57894574b3881107ab7dca99902bd6ed9c8422ff430cc9",
+    "patched": "src/java/com/xuexiang/xui/widget/textview/span/AlignMiddleImageSpan.java",
+    "patched_sha256": "35bb48cca37e185b247e6ce0ee8629fa073d83ff0f65ea055ce97c6208ed46f2"
+  },
+  {
+    "class": "com/xuexiang/xutil/XUtil",
+    "original": "pppscn-XUtil-5448b9c/xutil-core/src/main/java/com/xuexiang/xutil/XUtil.java",
+    "sha256": "cca6e1b0be783e93eb313cc77eb81bdc6070970039aae958b0a274c90bcf306d",
+    "patched": "src/java/com/xuexiang/xutil/XUtil.java",
+    "patched_sha256": "ef095a93b90f7203df2639f297f20ba31ee5312a83af913ba1a461e5df796f12"
+  },
+  {
+    "class": "com/xuexiang/xutil/app/PackageUtils",
+    "original": "pppscn-XUtil-5448b9c/xutil-sub/src/main/java/com/xuexiang/xutil/app/PackageUtils.java",
+    "sha256": "9282dbd86c1c14579ae497128a890dfe5716d1630cfe8f34b19159e280a9e3d5",
+    "patched": "src/java/com/xuexiang/xutil/app/PackageUtils.java",
+    "patched_sha256": "f7df1773e36b98fb0b758b702650fdee302404ec82b97dd549ec9099e2c61bfd"
+  },
+  {
+    "class": "com/xuexiang/xutil/app/ProcessUtils",
+    "original": "pppscn-XUtil-5448b9c/xutil-core/src/main/java/com/xuexiang/xutil/app/ProcessUtils.java",
+    "sha256": "ba63dc97a7013138b24c8afdeb2686c9a64bfba6e61fc13738b12675254eed73",
+    "patched": "src/java/com/xuexiang/xutil/app/ProcessUtils.java",
+    "patched_sha256": "5095619670e3437d7695a6370c87acd52e70f8bcfca1f93adfc05f057e82fdf4"
+  },
+  {
+    "class": "com/xuexiang/xutil/app/SocialShareUtils",
+    "original": "pppscn-XUtil-5448b9c/xutil-sub/src/main/java/com/xuexiang/xutil/app/SocialShareUtils.java",
+    "sha256": "19f79ae6344418a7a1644516e556b243cf310f079a3ee6e8ceb631e7791357b5",
+    "patched": "src/java/com/xuexiang/xutil/app/SocialShareUtils.java",
+    "patched_sha256": "c75dee3f8383da3a0fc2e7aeee59b4e181533d5c6890e0b944658dba577d8ad9"
+  },
+  {
+    "class": "com/xuexiang/xutil/app/notify/builder/BaseBuilder",
+    "original": "pppscn-XUtil-5448b9c/xutil-sub/src/main/java/com/xuexiang/xutil/app/notify/builder/BaseBuilder.java",
+    "sha256": "70cd7a1645296ceb06ca4b99959e27ebe81d0784ae77d53890d766c491b2af73",
+    "patched": "src/java/com/xuexiang/xutil/app/notify/builder/BaseBuilder.java",
+    "patched_sha256": "59dcb8674ee665a391968d1ed1503305d7eb95cbebed507f71384ea0f31980e4"
+  },
+  {
+    "class": "com/xuexiang/xutil/app/notify/builder/MailboxBuilder",
+    "original": "pppscn-XUtil-5448b9c/xutil-sub/src/main/java/com/xuexiang/xutil/app/notify/builder/MailboxBuilder.java",
+    "sha256": "9d3d06d8b81b1b1c1582f4501ceafe7c2b518a00a5098e3c789ab690325f4f01",
+    "patched": "src/java/com/xuexiang/xutil/app/notify/builder/MailboxBuilder.java",
+    "patched_sha256": "e6541186045a645a2246e08b2c628af94fe2ab5b4bd42b3b3fd07421dbdb8815"
+  },
+  {
+    "class": "com/xuexiang/xutil/app/notify/builder/ProgressBuilder",
+    "original": "pppscn-XUtil-5448b9c/xutil-sub/src/main/java/com/xuexiang/xutil/app/notify/builder/ProgressBuilder.java",
+    "sha256": "314669271b3bfab091e1c1781b33816ea8cb40f1bf99e7b48a3ba23b22d63ebf",
+    "patched": "src/java/com/xuexiang/xutil/app/notify/builder/ProgressBuilder.java",
+    "patched_sha256": "edbc4bf70f314bbf3196d91b72d5bb7bab531900ab14b7e315ee45e98a773f2b"
+  },
+  {
+    "class": "com/xuexiang/xutil/common/ClickUtils",
+    "original": "pppscn-XUtil-5448b9c/xutil-core/src/main/java/com/xuexiang/xutil/common/ClickUtils.java",
+    "sha256": "cfebca00f9b302d8d2ccfb6e566887affb05b134d631a44e1874e4a338edf295",
+    "patched": "src/java/com/xuexiang/xutil/common/ClickUtils.java",
+    "patched_sha256": "45b3825c94e695808ff399eddf040bb42d69bd7a9efd34c17c8398e6d095bff2"
+  },
+  {
+    "class": "com/xuexiang/xutil/common/IDCardUtils",
+    "original": "pppscn-XUtil-5448b9c/xutil-sub/src/main/java/com/xuexiang/xutil/common/IDCardUtils.java",
+    "sha256": "a9ea854bdf5c138dc8c813e3a77fae7210969a858b1d73fde881a8358eb6c3df",
+    "patched": "src/java/com/xuexiang/xutil/common/IDCardUtils.java",
+    "patched_sha256": "eb6f6ba1384c5e7c44e0aeb4629a1b8bf1b5532b8915e36cecf4f50611db44a2"
+  },
+  {
+    "class": "com/xuexiang/xutil/data/ConvertTools",
+    "original": "pppscn-XUtil-5448b9c/xutil-core/src/main/java/com/xuexiang/xutil/data/ConvertTools.java",
+    "sha256": "5066a6772eb3ab3a5f75d17c03ab9912631e09f1f5f00e5823a4b0eea900fef6",
+    "patched": "src/java/com/xuexiang/xutil/data/ConvertTools.java",
+    "patched_sha256": "b9f7e6b76e68d0d6b7fee7f99166c84c6e873aa9200f27f0a6a3ba77fa132a8b"
+  },
+  {
+    "class": "com/xuexiang/xutil/data/DateUtils",
+    "original": "pppscn-XUtil-5448b9c/xutil-core/src/main/java/com/xuexiang/xutil/data/DateUtils.java",
+    "sha256": "14d00c5691f697d8321a4f68272bcfb721de4dc89b71a0938f31fe48d1148a8d",
+    "patched": "src/java/com/xuexiang/xutil/data/DateUtils.java",
+    "patched_sha256": "637836b7635d63537cb3d22dce1f1ef280e77ea02230a5c5e4e9c4ff71119ccb"
+  },
+  {
+    "class": "com/xuexiang/xutil/display/CProgressDialogUtils",
+    "original": "pppscn-XUtil-5448b9c/xutil-sub/src/main/java/com/xuexiang/xutil/display/CProgressDialogUtils.java",
+    "sha256": "b97f9e841b1e21bec4c0bc78f3f925527497769c839b2a032124110b2bbee5b2",
+    "patched": "src/java/com/xuexiang/xutil/display/CProgressDialogUtils.java",
+    "patched_sha256": "856740d9291aef17b83ba4d7af0fdffb02b91edbb7a5be87dadce5d982b7b1a5"
+  },
+  {
+    "class": "com/xuexiang/xutil/display/ScreenUtils",
+    "original": "pppscn-XUtil-5448b9c/xutil-core/src/main/java/com/xuexiang/xutil/display/ScreenUtils.java",
+    "sha256": "784227226337a223b5a0f7915fbb4a9ca0254387cb07acaa59cbb9411a04f0d3",
+    "patched": "src/java/com/xuexiang/xutil/display/ScreenUtils.java",
+    "patched_sha256": "98297f86d8f544842aad7e007b8eeff4c385b9a93836ca537b6ebd69831d89de"
+  },
+  {
+    "class": "com/xuexiang/xutil/net/NetworkUtils",
+    "original": "pppscn-XUtil-5448b9c/xutil-core/src/main/java/com/xuexiang/xutil/net/NetworkUtils.java",
+    "sha256": "629e2bd63485f161e44cbb0e2199c5a579b2543bf44e09dac01539e8402e67ad",
+    "patched": "src/java/com/xuexiang/xutil/net/NetworkUtils.java",
+    "patched_sha256": "05084bea67bc32b9500fd650e728718f341e087d8f4b8d4a883bbc54c04e2f03"
+  },
+  {
+    "class": "com/xuexiang/xutil/system/PhoneUtils",
+    "original": "pppscn-XUtil-5448b9c/xutil-sub/src/main/java/com/xuexiang/xutil/system/PhoneUtils.java",
+    "sha256": "734f60e5eb43cbae8319d011edb8bf2a54256e391beacd068b698008f87403a6",
+    "patched": "src/java/com/xuexiang/xutil/system/PhoneUtils.java",
+    "patched_sha256": "cc275dd26bdc7c3456b22f4021e36277bfc1a5bb17b9ec5f800bd554ed75d131"
+  },
+  {
+    "class": "com/xuexiang/xutil/system/bt/BluetoothHelper",
+    "original": "pppscn-XUtil-5448b9c/xutil-sub/src/main/java/com/xuexiang/xutil/system/bt/BluetoothHelper.java",
+    "sha256": "999b1ef591410a5573f48524aca85a017c02deeecf2d022c9c317b0257be0310",
+    "patched": "src/java/com/xuexiang/xutil/system/bt/BluetoothHelper.java",
+    "patched_sha256": "ee052557f723d712455a24367b63052fdeef88bb8ebef34036b3025b96456df9"
+  },
+  {
+    "class": "com/xuexiang/xutil/system/wifi/WifiHelper",
+    "original": "pppscn-XUtil-5448b9c/xutil-sub/src/main/java/com/xuexiang/xutil/system/wifi/WifiHelper.java",
+    "sha256": "69c80e1bcd7bc8b6c42d76bc94671f4b2717eecdf3b72ecc0e8a2ac2885c14cc",
+    "patched": "src/java/com/xuexiang/xutil/system/wifi/WifiHelper.java",
+    "patched_sha256": "713f41f825024b30dc5c66eb2f961d03d0f772149a0c6747adf6a325250cfddf"
+  },
+  {
+    "class": "com/zzhoujay/richtext/exceptions/BitmapCacheException",
+    "original": "richtext-sources/com/zzhoujay/richtext/exceptions/BitmapCacheException.java",
+    "sha256": "dfa556b1784a2688a869e782c8df4ede4f714481e12f0026d66ab88fbedaa5ac",
+    "patched": "src/java/com/zzhoujay/richtext/exceptions/BitmapCacheException.java",
+    "patched_sha256": "85d111d2cd361b73f24915d3f74eb52fb6d7e9490c78019be618a04e6e0b9cd4"
+  },
+  {
+    "class": "com/zzhoujay/richtext/exceptions/BitmapCacheLoadFailureException",
+    "original": "richtext-sources/com/zzhoujay/richtext/exceptions/BitmapCacheLoadFailureException.java",
+    "sha256": "c35d48d8136f743d2fe98ff6f70efa72bbb712e6200da6c6ca46d388255cd053",
+    "patched": "src/java/com/zzhoujay/richtext/exceptions/BitmapCacheLoadFailureException.java",
+    "patched_sha256": "72b022b34c7bb347b5ed4897a8c0443bdb8098d0522060a8112f682a32ed40b4"
+  },
+  {
+    "class": "com/zzhoujay/richtext/exceptions/BitmapCacheNotFoundException",
+    "original": "richtext-sources/com/zzhoujay/richtext/exceptions/BitmapCacheNotFoundException.java",
+    "sha256": "c3b298891b85677e985eb9fab504c7a4df68e22793a859ae2f626b7d68d7ffc8",
+    "patched": "src/java/com/zzhoujay/richtext/exceptions/BitmapCacheNotFoundException.java",
+    "patched_sha256": "4b3d1961e17a27a5a1e131022582c27e070f291bea67afbfff16433a5985a2c7"
+  },
+  {
+    "class": "com/zzhoujay/richtext/exceptions/ImageDownloaderNonExistenceException",
+    "original": "richtext-sources/com/zzhoujay/richtext/exceptions/ImageDownloaderNonExistenceException.java",
+    "sha256": "caa89164b7c08c919386af446405c171f44c573840425318a3495caa28e76338",
+    "patched": "src/java/com/zzhoujay/richtext/exceptions/ImageDownloaderNonExistenceException.java",
+    "patched_sha256": "93068b7f139ae3c43eca9c724a6c5d47a869665efaf85e516871a337176a5686"
+  },
+  {
+    "class": "com/zzhoujay/richtext/exceptions/ImageWrapperMultiSourceException",
+    "original": "richtext-sources/com/zzhoujay/richtext/exceptions/ImageWrapperMultiSourceException.java",
+    "sha256": "fe0372f4de3529d938fb0cc55ac3ce5ad76be231ffb64aa4ceb41babee185a57",
+    "patched": "src/java/com/zzhoujay/richtext/exceptions/ImageWrapperMultiSourceException.java",
+    "patched_sha256": "b8240c1c3ce384c66f80ac37dbde5df7eedf77471946951a38e4ffa6fafe7ae1"
+  },
+  {
+    "class": "com/zzhoujay/richtext/exceptions/ResetImageSourceException",
+    "original": "richtext-sources/com/zzhoujay/richtext/exceptions/ResetImageSourceException.java",
+    "sha256": "dc498e84f660f3d0b33add63a50baaeabc25d775cb1241e79fc20fe284f53b28",
+    "patched": "src/java/com/zzhoujay/richtext/exceptions/ResetImageSourceException.java",
+    "patched_sha256": "77679c64c87d91e3f630a76fc8ced79f2e4e72b1b44717e280acf54341119693"
+  }
+]

@@ -1,0 +1,412 @@
+package cn.ppps.forwarder.service
+
+import android.annotation.SuppressLint
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
+import android.content.Intent
+import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.MediaPlayer
+import android.os.Build
+import android.os.IBinder
+import android.text.TextUtils
+import androidx.core.app.NotificationCompat
+import androidx.lifecycle.Observer
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import cn.ppps.forwarder.App
+import cn.ppps.forwarder.R
+import cn.ppps.forwarder.activity.MainActivity
+import cn.ppps.forwarder.core.Core
+import cn.ppps.forwarder.entity.action.AlarmSetting
+import cn.ppps.forwarder.utils.ACTION_START
+import cn.ppps.forwarder.utils.ACTION_STOP
+import cn.ppps.forwarder.utils.ACTION_STOP_ALARM
+import cn.ppps.forwarder.utils.ACTION_UPDATE_NOTIFICATION
+import cn.ppps.forwarder.utils.CommonUtils
+import cn.ppps.forwarder.utils.EVENT_ALARM_ACTION
+import cn.ppps.forwarder.utils.EVENT_FRPC_RUNNING_ERROR
+import cn.ppps.forwarder.utils.EVENT_FRPC_RUNNING_SUCCESS
+import cn.ppps.forwarder.utils.FRONT_CHANNEL_ID
+import cn.ppps.forwarder.utils.FRONT_CHANNEL_NAME
+import cn.ppps.forwarder.utils.FRONT_NOTIFY_ID
+import cn.ppps.forwarder.utils.FlashUtils
+import cn.ppps.forwarder.utils.INTENT_FRPC_APPLY_FILE
+import cn.ppps.forwarder.utils.HttpServerUtils
+import cn.ppps.forwarder.utils.Log
+import cn.ppps.forwarder.utils.SettingUtils
+import cn.ppps.forwarder.utils.TASK_CONDITION_CRON
+import cn.ppps.forwarder.utils.VibrationUtils
+import cn.ppps.forwarder.utils.task.CronJobScheduler
+import cn.ppps.forwarder.workers.LoadAppListWorker
+import com.jeremyliao.liveeventbus.LiveEventBus
+import com.xuexiang.xutil.XUtil
+import frpclib.Frpclib
+import io.reactivex.Single
+import io.reactivex.SingleObserver
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import java.io.File
+
+@SuppressLint("SimpleDateFormat")
+@Suppress("PrivatePropertyName", "DeferredResultUnused", "OPT_IN_USAGE", "DEPRECATION")
+class ForegroundService : Service() {
+
+    private val TAG: String = ForegroundService::class.java.simpleName
+    private var notificationManager: NotificationManager? = null
+
+    private val compositeDisposable = CompositeDisposable()
+    private val frpcObserver = Observer { uid: String ->
+        if (!App.FrpclibInited || Frpclib.isRunning(uid)) return@Observer
+
+        Core.frpc.get(uid).flatMap { (uid1, _, config) ->
+            val error = Frpclib.runContent(uid1, config)
+            Single.just(error)
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<String> {
+            override fun onSubscribe(d: Disposable) {
+                compositeDisposable.add(d)
+            }
+
+            override fun onError(e: Throwable) {
+                e.printStackTrace()
+                Log.e(TAG, "onError: ${e.message}")
+                LiveEventBus.get(EVENT_FRPC_RUNNING_ERROR, String::class.java).post(uid)
+            }
+
+            override fun onSuccess(msg: String) {
+                if (!TextUtils.isEmpty(msg)) {
+                    Log.e(TAG, msg)
+                    LiveEventBus.get(EVENT_FRPC_RUNNING_ERROR, String::class.java).post(uid)
+                } else {
+                    LiveEventBus.get(EVENT_FRPC_RUNNING_SUCCESS, String::class.java).post(uid)
+                }
+            }
+        })
+    }
+
+    // Vibration control
+    private lateinit var vibrationUtils: VibrationUtils
+    private var isVibrating = false
+
+    // Flash control
+    private lateinit var flashUtils: FlashUtils
+    private var isFlash = false
+
+    // Music Player
+    private var alarmPlayer: MediaPlayer? = null
+    private var alarmPlayTimes = 0
+    private val alarmObserver = Observer<AlarmSetting> { alarm ->
+        Log.d(TAG, "Received alarm: $alarm")
+        //Stop vibrating
+        if (vibrationUtils.isVibrating) {
+            vibrationUtils.stopVibration()
+        }
+        //Stop the flashes.
+        if (::flashUtils.isInitialized && flashUtils.isFlashing) {
+            flashUtils.stopFlashing()
+        }
+        //Stop playing music
+        alarmPlayer?.release()
+        alarmPlayer = null
+        if (alarm.action == "start") {
+            //Play Music
+            if (alarm.playTimes >= 0) {
+                //Get Volume
+                val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+                val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+                val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+                Log.d(TAG, "maxVolume=$maxVolume, currentVolume=$currentVolume")
+                //Set Volume
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (maxVolume * alarm.volume / 100), 0)
+                //Play Music
+                alarmPlayer = MediaPlayer().apply {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        val audioAttributes = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
+                        setAudioAttributes(audioAttributes)
+                    } else {
+                        // For Android 5.0 Previous version, use setAudioStreamType
+                        val audioStreamType = AudioManager.STREAM_ALARM
+                        setAudioStreamType(audioStreamType)
+                    }
+
+                    try {
+                        if (alarm.music.isEmpty() || !File(alarm.music).exists()) {
+                            val fd = resources.openRawResourceFd(R.raw.alarm)
+                            setDataSource(fd.fileDescriptor, fd.startOffset, fd.length)
+                        } else {
+                            setDataSource(alarm.music)
+                        }
+
+                        setOnPreparedListener {
+                            Log.d(TAG, "MediaPlayer prepared")
+                            start()
+                            alarmPlayTimes++
+                            //Update Notification Bar
+                            updateNotification(alarm.description, R.drawable.auto_task_icon_alarm, true)
+                        }
+
+                        setOnCompletionListener {
+                            Log.d(TAG, "MediaPlayer completed")
+                            if (alarm.playTimes == 0 || alarmPlayTimes < alarm.playTimes) {
+                                start()
+                                alarmPlayTimes++
+                            } else {
+                                stop()
+                                reset()
+                                release()
+                                alarmPlayer = null
+                                alarmPlayTimes = 0
+                                //Restore Volume
+                                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, currentVolume, 0)
+                                //Restore Notification Bar
+                                updateNotification(SettingUtils.notifyContent)
+                            }
+                        }
+
+                        setOnErrorListener { _, what, extra ->
+                            Log.e(TAG, "MediaPlayer error: what=$what, extra=$extra")
+                            release()
+                            return@setOnErrorListener true
+                        }
+
+                        setVolume(alarm.volume / 100F, alarm.volume / 100F)
+                        prepareAsync()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "MediaPlayer Exception: ${e.message}")
+                    }
+                }
+            }
+            //Vibration Alarm
+            if (alarm.repeatTimes >= 0) {
+                isVibrating = true
+                vibrationUtils.startVibration(alarm.vibrate, alarm.repeatTimes)
+            }
+            //Flash Alert
+            if (alarm.flashTimes >= 0 && ::flashUtils.isInitialized && flashUtils.isFlashSupported) {
+                isFlash = true
+                flashUtils.startFlashing(alarm.flash, alarm.flashTimes)
+            }
+        }
+    }
+
+    companion object {
+        var isRunning = false
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+
+        //Pure client mode
+        if (SettingUtils.enablePureClientMode) return
+
+        //Create notification channels
+        createNotificationChannel()
+
+        //Initialise Vibration
+        vibrationUtils = VibrationUtils(this)
+
+        //Initializing flashlights
+        flashUtils = FlashUtils(this)
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+        //Pure client mode
+        if (SettingUtils.enablePureClientMode) return START_NOT_STICKY
+
+        if (intent != null) {
+            when (intent.action) {
+                ACTION_START -> {
+                    startForegroundService()
+                }
+
+                ACTION_STOP -> {
+                    stopForegroundService()
+                }
+
+                ACTION_UPDATE_NOTIFICATION -> {
+                    updateNotification(foregroundNotificationContent())
+                }
+
+                ACTION_STOP_ALARM -> {
+                    alarmPlayer?.release()
+                    alarmPlayer = null
+                    updateNotification(SettingUtils.notifyContent)
+                }
+            }
+        }
+        return START_STICKY
+    }
+
+    override fun onDestroy() {
+        //Non-pure client mode
+        if (!SettingUtils.enablePureClientMode) stopForegroundService()
+        if (::flashUtils.isInitialized) {
+            flashUtils.release()
+        }
+        super.onDestroy()
+    }
+
+    override fun onBind(intent: Intent): IBinder? {
+        return null
+    }
+
+    private fun startForegroundService() {
+        if (isRunning) return
+        isRunning = true
+
+        val notification = createNotification(foregroundNotificationContent())
+        startForeground(FRONT_NOTIFY_ID, notification)
+
+        try {
+            //Toggle notification listener service
+            if (SettingUtils.enableAppNotify && CommonUtils.isNotificationListenerServiceEnabled(this)) {
+                CommonUtils.toggleNotificationListenerService(this)
+            }
+
+            //Start a time job
+            GlobalScope.async(Dispatchers.IO) {
+                val taskList = Core.task.getByType(TASK_CONDITION_CRON)
+                taskList.forEach { task ->
+                    Log.d(TAG, "task = $task")
+                    CronJobScheduler.cancelTask(task.id)
+                    CronJobScheduler.scheduleTask(task)
+                }
+            }
+
+            //Asynchronously load all installed App Information
+            if (SettingUtils.enableLoadAppList) {
+                val request = OneTimeWorkRequestBuilder<LoadAppListWorker>().build()
+                WorkManager.getInstance(XUtil.getContext()).enqueue(request)
+            }
+
+            //Start Frpc
+            if (App.FrpclibInited) {
+                //Listening.FrpcStart Command
+                LiveEventBus.get(INTENT_FRPC_APPLY_FILE, String::class.java).observeForever(frpcObserver)
+                //Self StartedFrpc
+                GlobalScope.async(Dispatchers.IO) {
+                    val frpcList = Core.frpc.getAutorun()
+
+                    if (frpcList.isEmpty()) {
+                        Log.d(TAG, "No self-starter.Frpc")
+                        return@async
+                    }
+
+                    for (frpc in frpcList) {
+                        Log.d(TAG, "Self StartedFrpc: $frpc")
+                        GlobalScope.async(Dispatchers.IO) {
+                            val error = Frpclib.runContent(frpc.uid, frpc.config)
+                            Log.d(TAG, "Self StartedFrpc: uid=${frpc.uid}, error=$error")
+                            if (!TextUtils.isEmpty(error)) {
+                                Log.e(TAG, error)
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Play the alarm.
+            LiveEventBus.get<AlarmSetting>(EVENT_ALARM_ACTION).observeForever(alarmObserver)
+
+        } catch (e: Exception) {
+            handleException(e, "startForegroundService")
+        }
+
+    }
+
+    private fun stopForegroundService() {
+        try {
+            stopForeground(true)
+            stopSelf()
+            compositeDisposable.dispose()
+            isRunning = false
+            alarmPlayer?.release()
+            alarmPlayer = null
+            //Stop vibrating
+            if (vibrationUtils.isVibrating) {
+                vibrationUtils.stopVibration()
+            }
+            //Stop the flashes.
+            if (::flashUtils.isInitialized && flashUtils.isFlashing) {
+                flashUtils.stopFlashing()
+            }
+        } catch (e: Exception) {
+            handleException(e, "stopForegroundService")
+        }
+    }
+
+    private fun createNotificationChannel() {
+        notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val notificationChannel = NotificationChannel(FRONT_CHANNEL_ID, FRONT_CHANNEL_NAME, importance)
+            notificationChannel.description = getString(R.string.notification_content)
+            notificationChannel.enableLights(true)
+            notificationChannel.lightColor = Color.GREEN
+            notificationChannel.vibrationPattern = longArrayOf(0, 1000, 500, 1000)
+            notificationChannel.enableVibration(true)
+            if (notificationManager != null) {
+                notificationManager!!.createNotificationChannel(notificationChannel)
+            }
+        }
+    }
+
+    private fun foregroundNotificationContent(): String = if (HttpServerUtils.safetyMeasures == 0) {
+        getString(R.string.http_server_no_security_warning)
+    } else {
+        SettingUtils.notifyContent
+    }
+
+    private fun createNotification(content: String, largeIconResId: Int? = null, showStopButton: Boolean = false): Notification {
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val flags = if (Build.VERSION.SDK_INT >= 30) PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, flags)
+
+        val builder = NotificationCompat.Builder(this, FRONT_CHANNEL_ID).setContentTitle(getString(R.string.app_name)).setContentText(content).setSmallIcon(R.drawable.ic_forwarder).setContentIntent(pendingIntent).setWhen(System.currentTimeMillis())
+
+        // Set Large Icon (optional)）
+        if (largeIconResId != null) {
+            builder.setLargeIcon(BitmapFactory.decodeResource(resources, largeIconResId))
+        } else {
+            builder.setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_menu_frpc))
+        }
+
+        // Add Stop button (optional)）
+        if (showStopButton) {
+            val stopIntent = Intent(this, ForegroundService::class.java).apply {
+                action = ACTION_STOP_ALARM
+            }
+            val stopPendingIntent = PendingIntent.getService(this, 0, stopIntent, flags)
+            builder.addAction(R.drawable.ic_stop, getString(R.string.stop), stopPendingIntent)
+        }
+
+        return builder.build()
+    }
+
+    private fun updateNotification(updatedContent: String, largeIconResId: Int? = null, showStopButton: Boolean = false) {
+        try {
+            val notification = createNotification(updatedContent, largeIconResId, showStopButton)
+            notificationManager?.notify(FRONT_NOTIFY_ID, notification)
+        } catch (e: Exception) {
+            handleException(e, "updateNotification")
+        }
+    }
+
+    private fun handleException(e: Exception, methodName: String) {
+        e.printStackTrace()
+        Log.e(TAG, "$methodName: $e")
+        isRunning = false
+    }
+
+}

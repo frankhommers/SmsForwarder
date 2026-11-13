@@ -1,0 +1,110 @@
+name: Submit Bug（Bug Report）
+description: Please tell me.APPDescribe the problem so I can try to fix it！（Please tell me the problem with the APP and I will try my best to fix it!）
+title: "[Bug]: "
+labels: ["bug"]
+assignees:
+  - pppscn
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Warning: Please follow issue Fill in the template carefully. Issues that do not follow the template will be closed！
+        Warning: Please fill in according to the issue template to avoid wasting your time and mine! If you do not fill in the template carefully, it will be closed directly.
+  - type: dropdown
+    id: similar-issues
+    attributes:
+      label: Has anyone ever asked a similar question?
+      description: Whether someone has raised similar issues
+      options:
+        - No（No）
+        - Yes（Yes）
+    validations:
+      required: true
+  - type: dropdown
+    id: latest-version
+    attributes:
+      label: Does this still occur in the latest version
+      description: Is there this problem when upgrading to the latest version
+      options:
+        - No（No）
+        - Yes（Yes）
+    validations:
+      required: true
+  - type: dropdown
+    id: read-wiki
+    attributes:
+      label: Have you checkedWikiThe documentation did not resolve the issue
+      description: Whether you have consulted the Wiki documentation that has not been resolved
+      options:
+        - No（No）
+        - Yes（Yes）
+    validations:
+      required: true
+  - type: input
+    id: app-version
+    attributes:
+      label: APPVersion
+      description: APP Version
+      placeholder: v3.x.x
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem description
+      description: Description of the problem
+      placeholder: You can describe it.APPIs there anything you don't like?（You can describe what dissatisfied you about the app）
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to reproduce
+      description: Reproduction steps
+      placeholder: Issues without reproduction steps are not currently accepted Bug ticket (Note：Bug tickets without reproduction steps are currently not accepted)
+    validations:
+      required: true
+  - type: dropdown
+    id: required
+    attributes:
+      label: Does it always occur
+      description: Whether it is required
+      options:
+        - No（No）
+        - Yes（Yes）
+    validations:
+      required: true
+  - type: input
+    id: brand-model
+    attributes:
+      label: Affected phone
+      description: The mobile phone information with the problem
+      placeholder: Enter the manufacturer and model of the affected phone（Please fill in the brand and model of the problem）
+    validations:
+      required: true
+  - type: input
+    id: android-version
+    attributes:
+      label: Affected Android and system version
+      description: Android version, system version in question
+      placeholder: For example:：Android 12,MIUI 13
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Provide screenshots or videos
+      description: Provide screenshots or videos
+      placeholder: Required if an error occurred (if there is an error, please fill in)
+  - type: textarea
+    id: stack
+    attributes:
+      label: Error stack trace [please providelogcatcaptured logs; see： https://blog.csdn.net/m0_64776928/article/details/126005119 ]
+      description: Provide a stack trace
+      placeholder: Provide as required, this is not mandatory (as needed, this is not mandatory)
+  - type: textarea
+    id: solution
+    attributes:
+      label: Provide solutions
+      description: Provide a solution
+      placeholder: If it's settled, write down your solution. It's not mandatory. (if it has been solved, this is not mandatory)
