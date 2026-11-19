@@ -51,7 +51,7 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xpage.base.XPageActivity
 import com.xuexiang.xpage.base.XPageFragment
 import com.xuexiang.xpage.core.PageOption
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 import com.xuexiang.xutil.common.logger.Logger
 import com.xuexiang.xutil.net.JsonUtil
 

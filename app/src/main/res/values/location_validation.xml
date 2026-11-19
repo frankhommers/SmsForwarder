@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Arrive/Leave Location editor: coordinate validation and the unsupported address-keyword mode. -->
+<resources>
+    <string name="location_validation_longitude_help">From -180 to 180, e.g. 4.8952. Negative is west.</string>
+    <string name="location_validation_latitude_help">From -90 to 90, e.g. 52.3702. Negative is south.</string>
+    <string name="location_validation_longitude_error">Enter a longitude from -180 to 180.</string>
+    <string name="location_validation_latitude_error">Enter a latitude from -90 to 90.</string>
+    <string name="location_validation_radius_error">Enter a radius greater than 0 meters.</string>
+    <string name="location_validation_address_option">Match address keywords (unavailable)</string>
+    <string name="location_validation_address_unavailable">Not available: the app does not look up addresses, so this would never trigger.</string>
+    <string name="location_validation_legacy_notice">Unsupported old condition: it never triggers. Kept unchanged unless you choose GPS coordinates.</string>
+    <string name="location_validation_address_saved">Saved keyword, kept for reference only.</string>
+    <string name="location_validation_filled">Current coordinates filled in.</string>
+    <string name="location_validation_legacy_row">Unsupported: %s</string>
+</resources>

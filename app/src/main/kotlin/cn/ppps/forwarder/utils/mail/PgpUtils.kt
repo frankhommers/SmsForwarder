@@ -62,10 +62,10 @@ class PgpUtils(
     fun sendPlainEmail(): Pair<Boolean, String> = try {
         val message = buildOriginalMessage()
         Transport.send(message)
-        Pair(true, "Email sent successfully")
+        Pair(true, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_sent))
     } catch (e: Exception) {
         e.printStackTrace()
-        Pair(false, "Failed to send email: ${e.message ?: e.toString()}")
+        Pair(false, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_failed, e.message ?: e.toString()))
     }
 
     /** Send signed email */
@@ -74,10 +74,10 @@ class PgpUtils(
         val message = buildOriginalMessage()
         signMessage(message) // Directly modify originalmessage，Do Not Reuse New
         Transport.send(message)
-        Pair(true, "Signed email sent successfully")
+        Pair(true, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_sent))
     } catch (e: Exception) {
         e.printStackTrace()
-        Pair(false, "Failed to send signed email: ${e.message ?: e.toString()}")
+        Pair(false, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_failed, e.message ?: e.toString()))
     }
 
     /** Send Encrypted Email */
@@ -86,10 +86,10 @@ class PgpUtils(
         val message = buildOriginalMessage()
         encryptMessage(message)
         Transport.send(message)
-        Pair(true, "Encrypted email sent successfully")
+        Pair(true, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_sent))
     } catch (e: Exception) {
         e.printStackTrace()
-        Pair(false, "Failed to send encrypted email: ${e.message ?: e.toString()}")
+        Pair(false, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_failed, e.message ?: e.toString()))
     }
 
     /** Send signed+encrypted email */
@@ -99,10 +99,26 @@ class PgpUtils(
         val message = buildOriginalMessage()
         encryptAndSignMessage(message)
         Transport.send(message)
-        Pair(true, "Signed and encrypted email sent successfully")
+        Pair(true, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_sent))
     } catch (e: Exception) {
         e.printStackTrace()
-        Pair(false, "Failed to send signed+encrypted email: ${e.message ?: e.toString()}")
+        Pair(false, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_failed, e.message ?: e.toString()))
+    }
+
+    /**
+     * Build (without sending) the PGP/MIME message: signed when [sign], encrypted to [recipientPGPPublicKeyRing]
+     * when [encrypt]. Throws when signing or encryption fails.
+     */
+    fun prepareMessage(encrypt: Boolean, sign: Boolean): MimeMessage {
+        if (sign) checkPgpSignParams()
+        if (encrypt) checkPgpEncParams()
+        val message = buildOriginalMessage()
+        when {
+            encrypt && sign -> encryptAndSignMessage(message)
+            encrypt -> encryptMessage(message)
+            sign -> signMessage(message)
+        }
+        return message
     }
 
     /** Build Original MimeMessage */
@@ -152,7 +168,7 @@ class PgpUtils(
         val secretKeyRing = senderPGPSecretKeyRing!!
         // Secure access to first userID，Avoid null pointers
         val userId = secretKeyRing.secretKey.publicKey.userIDs.asSequence().firstOrNull()
-            ?: throw IllegalArgumentException("PGPNo user found in private keyringID")
+            ?: throw IllegalArgumentException(cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_pgp_user_missing))
 
         // UseBINARY_DOCUMENTAdaptive CompositeMIMEContent (binary flow), without text standardization
         val signingOptions = SigningOptions().addInlineSignature(
@@ -178,7 +194,7 @@ class PgpUtils(
         val protector = SecretKeyRingProtector.unlockAnyKeyWith(Passphrase.fromPassword(senderPGPSecretKeyPassword))
         val secretKeyRing = senderPGPSecretKeyRing!!
         val userId = secretKeyRing.secretKey.publicKey.userIDs.asSequence().firstOrNull()
-            ?: throw IllegalArgumentException("PGPNo user found in private keyringID")
+            ?: throw IllegalArgumentException(cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_pgp_user_missing))
 
         val signingOptions = SigningOptions().addInlineSignature(
             protector,
@@ -239,17 +255,17 @@ class PgpUtils(
     // ValidationPGPValidate signing parameters early to prevent null-pointer errors
     private fun checkPgpSignParams() {
         if (senderPGPSecretKeyRing == null) {
-            throw IllegalArgumentException("SenderPGPPrivate Keyring（senderPGPSecretKeyRing）Can't be empty.")
+            throw IllegalArgumentException(cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_pgp_private_missing))
         }
         if (senderPGPSecretKeyPassword.isBlank()) {
-            throw IllegalArgumentException("SenderPGPPrivate key password（senderPGPSecretKeyPassword）Can't be empty.")
+            throw IllegalArgumentException(cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_pgp_password_missing))
         }
     }
 
     // ValidationPGPEncryption Required Parameters
     private fun checkPgpEncParams() {
         if (recipientPGPPublicKeyRing == null) {
-            throw IllegalArgumentException("ReceiverPGPPublic Keyring（recipientPGPPublicKeyRing）Can't be empty.")
+            throw IllegalArgumentException(cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_pgp_public_missing))
         }
     }
 }

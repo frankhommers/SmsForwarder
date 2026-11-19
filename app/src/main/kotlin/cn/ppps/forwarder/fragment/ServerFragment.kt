@@ -11,7 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.RadioGroup
-import androidx.core.content.ContextCompat
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import cn.ppps.forwarder.App
 import cn.ppps.forwarder.R
 import cn.ppps.forwarder.core.BaseFragment
@@ -34,10 +34,10 @@ import com.hjq.permissions.permission.PermissionLists
 import com.hjq.permissions.permission.base.IPermission
 import com.xuexiang.xaop.annotation.SingleClick
 import com.xuexiang.xpage.annotation.Page
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.button.SmoothCheckBox
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
-import com.xuexiang.xui.widget.picker.XSeekBar
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.TargetCheckBox as SmoothCheckBox
+import cn.ppps.forwarder.widget.material.MaterialDialog
+import cn.ppps.forwarder.widget.material.TargetSlider as XSeekBar
 import com.xuexiang.xutil.app.ServiceUtils
 import com.xuexiang.xutil.data.ConvertTools
 import com.xuexiang.xutil.net.NetworkUtils
@@ -83,7 +83,7 @@ class ServerFragment : BaseFragment<FragmentServerBinding?>(), View.OnClickListe
         binding!!.btnToggleServer.setOnClickListener(this)
 
         binding!!.scbServerAutorun.isChecked = HttpServerUtils.enableServerAutorun
-        binding!!.scbServerAutorun.setOnCheckedChangeListener { _: SmoothCheckBox, isChecked: Boolean ->
+        binding!!.scbServerAutorun.setOnCheckedChangeListener { _: android.widget.CompoundButton, isChecked: Boolean ->
             HttpServerUtils.enableServerAutorun = isChecked
         }
         //Start UpdateUITimer
@@ -227,6 +227,9 @@ class ServerFragment : BaseFragment<FragmentServerBinding?>(), View.OnClickListe
         binding!!.xsbTimeTolerance.setOnSeekBarListener { _: XSeekBar?, newValue: Int ->
             HttpServerUtils.timeTolerance = newValue
         }
+        // Visible value: registered AFTER setOnSeekBarListener, which clears all earlier change listeners.
+        showTimeTolerance(binding!!.xsbTimeTolerance.selectedNumber)
+        binding!!.xsbTimeTolerance.addOnChangeListener { _, value, _ -> showTimeTolerance(value.toInt()) }
 
         //webClient
         binding!!.etWebPath.setText(HttpServerUtils.serverWebPath)
@@ -396,6 +399,23 @@ class ServerFragment : BaseFragment<FragmentServerBinding?>(), View.OnClickListe
             }
 
             R.id.btn_path_picker -> {
+                // Explain "All files access" in the app before Android's own settings page opens.
+                if (XXPermissions.isGrantedPermission(requireContext(), PermissionLists.getManageExternalStoragePermission())) {
+                    pickWebClientFolder()
+                } else {
+                    cn.ppps.forwarder.widget.material.StoragePermissionDialog.show(requireContext(), R.string.infra_form_storage_server_message) { pickWebClientFolder() }
+                }
+            }
+
+            else -> {}
+        }
+    }
+
+    private fun showTimeTolerance(seconds: Int) {
+        binding?.tvTimeToleranceValue?.text = getString(R.string.infra_form_time_tolerance_value, seconds)
+    }
+
+    private fun pickWebClientFolder() {
                 // Request for storage privileges
                 XXPermissions.with(this)
                     .permission(PermissionLists.getManageExternalStoragePermission())
@@ -442,15 +462,11 @@ class ServerFragment : BaseFragment<FragmentServerBinding?>(), View.OnClickListe
                             }.positiveText(R.string.select).negativeText(R.string.cancel).show()
                         }
                     })
-            }
-
-            else -> {}
-        }
     }
 
     private fun initLocalIpOnly() {
         updateLocalIpOnly(HttpServerUtils.serverLocalIpOnly)
-        binding!!.sbServerLocalIpOnly.setOnCheckedChangeListener { _: SmoothCheckBox, isChecked: Boolean ->
+        binding!!.sbServerLocalIpOnly.setOnCheckedChangeListener { _: android.widget.CompoundButton, isChecked: Boolean ->
             if (isUpdatingLocalIpOnly) return@setOnCheckedChangeListener
             if (isChecked || HttpServerUtils.safetyMeasures != 0) {
                 HttpServerUtils.serverLocalIpOnly = isChecked
@@ -482,9 +498,11 @@ class ServerFragment : BaseFragment<FragmentServerBinding?>(), View.OnClickListe
         HttpServerUtils.serverLocalIpOnly = localIpOnly
     }
 
+    /** Clone needs RSA or SM4: the switch is visibly disabled (value kept off) and the reason shown only while it applies. */
     private fun updateCloneEncryptionRequirement() {
-        val colorRes = if (HttpServerUtils.isCloneEncryptionEnabled()) R.color.gray_text_light else R.color.red
-        binding!!.tvCloneEncryptionRequirement.setTextColor(ContextCompat.getColor(requireContext(), colorRes))
+        val available = HttpServerUtils.isCloneEncryptionEnabled()
+        binding!!.sbApiClone.isEnabled = available
+        binding!!.tvCloneEncryptionRequirement.visibility = if (available) View.GONE else View.VISIBLE
     }
 
     private fun displayListenIp(): String {

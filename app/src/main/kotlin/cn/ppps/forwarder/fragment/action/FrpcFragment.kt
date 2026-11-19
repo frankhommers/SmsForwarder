@@ -38,7 +38,7 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 import com.xuexiang.xutil.resource.ResUtils.getDrawable
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -68,6 +68,10 @@ class FrpcFragment : BaseFragment<FragmentTasksActionFrpcBinding?>(), View.OnCli
     @JvmField
     @AutoWired(name = KEY_EVENT_DATA_ACTION)
     var eventData: String? = null
+
+    // This fork ships no tunnel client (App.FrpclibInited is always false). The editor then explains that,
+    // shows a saved action read-only and never changes or replaces its stored configuration.
+    private val tunnelAvailable: Boolean get() = cn.ppps.forwarder.App.FrpclibInited
 
     override fun initArgs() {
         XRouter.getInstance().inject(this)
@@ -103,15 +107,24 @@ class FrpcFragment : BaseFragment<FragmentTasksActionFrpcBinding?>(), View.OnCli
             }
         })
 
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             val settingVo = Gson().fromJson(eventData, FrpcSetting::class.java)
             binding!!.rgFrpcState.check(if (settingVo.action == "start") R.id.rb_start_server else R.id.rb_stop_server)
-            Log.d(TAG, "initViews settingVo:$settingVo")
+            // Show the configurations stored in this action instead of an empty list.
+            frpcListSelected.addAll(settingVo.frpcList.orEmpty()) // Gson leaves it null in very old JSON
         }
 
         //InitializeFrpcdropdown
         initFrpc()
+        showAvailability()
+    }
+
+    private fun showAvailability() {
+        val b = binding!!
+        b.editorFormFrpcUnavailable.visibility = if (tunnelAvailable) View.GONE else View.VISIBLE
+        if (tunnelAvailable) return
+        // Nothing here can run: keep the stored choice visible, but do not offer to change, apply or test it.
+        listOf(b.rbStartServer, b.rbStopServer, b.spFrpc, b.btnSave, b.btnTest).forEach { it.isEnabled = false }
     }
 
     override fun onDestroyView() {
@@ -128,13 +141,13 @@ class FrpcFragment : BaseFragment<FragmentTasksActionFrpcBinding?>(), View.OnCli
 
     @SingleClick
     override fun onClick(v: View) {
+        if (!tunnelAvailable && v.id != R.id.btn_del) return
         try {
             when (v.id) {
                 R.id.btn_test -> {
                     mCountDownHelper?.start()
                     try {
                         val settingVo = checkSetting()
-                        Log.d(TAG, settingVo.toString())
                         val taskAction = TaskSetting(TASK_ACTION_FRPC, getString(R.string.task_frpc), settingVo.description, Gson().toJson(settingVo), requestCode)
                         val taskActionsJson = Gson().toJson(arrayListOf(taskAction))
                         val msgInfo = MsgInfo("task", getString(R.string.task_frpc), settingVo.description, Date(), getString(R.string.task_frpc))
@@ -201,7 +214,7 @@ class FrpcFragment : BaseFragment<FragmentTasksActionFrpcBinding?>(), View.OnCli
 
         // Initialized SelectedFrpcList RecyclerView and Adapter
         frpcRecyclerView = binding!!.recyclerFrpcs
-        frpcRecyclerAdapter = FrpcRecyclerAdapter(frpcListSelected, { position ->
+        frpcRecyclerAdapter = FrpcRecyclerAdapter(frpcListSelected, if (!tunnelAvailable) null else { position ->
             frpcListSelected.removeAt(position)
             frpcRecyclerAdapter.notifyItemRemoved(position)
             frpcRecyclerAdapter.notifyItemRangeChanged(position, frpcListSelected.size) // Update Index
@@ -220,7 +233,6 @@ class FrpcFragment : BaseFragment<FragmentTasksActionFrpcBinding?>(), View.OnCli
             override fun onDragFinished() {
                 frpcListSelected = frpcRecyclerAdapter.itemList
                 //frpcRecyclerAdapter.notifyDataSetChanged()
-                Log.d(TAG, "onDragFinished: $frpcListSelected")
             }
         })
         val frpcTouchHelper = ItemTouchHelper(frpcMoveCallback)
@@ -244,7 +256,7 @@ class FrpcFragment : BaseFragment<FragmentTasksActionFrpcBinding?>(), View.OnCli
             @SuppressLint("NotifyDataSetChanged")
             override fun onSuccess(frpcList: List<Frpc>) {
                 if (frpcList.isEmpty()) {
-                    XToastUtils.error(R.string.add_frpc_first)
+                    if (tunnelAvailable) XToastUtils.error(R.string.add_frpc_first)
                     return
                 }
 
@@ -254,7 +266,7 @@ class FrpcFragment : BaseFragment<FragmentTasksActionFrpcBinding?>(), View.OnCli
                     val name = if (frpc.name.length > 20) frpc.name.substring(0, 19) else frpc.name
                     frpcSpinnerList.add(FrpcSpinnerItem(name, getDrawable(frpc.imageId), frpc.uid, frpc.status))
                 }
-                frpcSpinnerAdapter = FrpcSpinnerAdapter(frpcSpinnerList).setIsFilterKey(true).setFilterColor("#EF5362").setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
+                frpcSpinnerAdapter = FrpcSpinnerAdapter(frpcSpinnerList).setIsFilterKey(true).setFilterColor(String.format("#%06X", com.google.android.material.color.MaterialColors.getColor(binding!!.root, com.google.android.material.R.attr.colorPrimary) and 0xFFFFFF)).setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
                 binding!!.spFrpc.setAdapter(frpcSpinnerAdapter)
                 //frpcSpinnerAdapter.notifyDataSetChanged()
 

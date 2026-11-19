@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Insert data / Preview buttons below template fields (TemplatePicker). Overlays pick the M3 icon-button styles. -->
+<resources>
+    <style name="Template.ThemeOverlay.TonalButton" parent="">
+        <item name="materialButtonStyle">@style/Widget.Material3.Button.TonalButton.Icon</item>
+    </style>
+    <style name="Template.ThemeOverlay.OutlinedButton" parent="">
+        <item name="materialButtonStyle">@style/Widget.Material3.Button.OutlinedButton.Icon</item>
+    </style>
+</resources>

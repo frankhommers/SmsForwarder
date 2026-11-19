@@ -8,7 +8,7 @@
     android:orientation="vertical"
     tools:ignore="Overdraw">
 
-    <com.xuexiang.xui.widget.tabbar.EasyIndicator
+    <cn.ppps.forwarder.widget.material.TargetTabs
         android:id="@+id/tabBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,7 +27,7 @@
         app:srlEnableAutoLoadMore="true"
         app:srlEnableLoadMore="false">
 
-        <com.scwang.smartrefresh.header.MaterialHeader
+        <cn.ppps.forwarder.widget.MaterialHeader
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

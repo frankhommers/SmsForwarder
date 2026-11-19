@@ -19,7 +19,6 @@ class CallController {
     @PostMapping("/query")
     fun query(@RequestBody bean: BaseRequest<CallQueryData>): List<CallInfo> {
         val callQueryData = bean.data
-        Log.d(TAG, callQueryData.toString())
 
         val limit = callQueryData.pageSize
         val offset = (callQueryData.pageNum - 1) * limit

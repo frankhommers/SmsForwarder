@@ -44,15 +44,23 @@ class OpenKeychainMailUtils(
 
     /** Send encrypted (optional) mail with public key byOpenKeychainAutomatic Matching */
     fun sendEncryptedEmail(): Pair<Boolean, String> = try {
-        if (toAddress.isEmpty()) throw IllegalArgumentException("Recipient Mailbox（toAddress）Can't be empty.")
+        if (toAddress.isEmpty()) throw IllegalArgumentException(cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_recipient_required))
         val message = buildOriginalMessage()
         applyOpenKeychainToOriginalMessage(message)
         Transport.send(message)
         val signed = if (signKeyId != 0L) "signed and " else ""
-        Pair(true, "OpenKeychain ${signed}encrypted email sent successfully")
+        Pair(true, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_sent))
     } catch (e: Exception) {
         e.printStackTrace()
-        Pair(false, "Failed to send OpenKeychain encrypted email: ${e.message ?: e.toString()}")
+        Pair(false, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_failed, e.message ?: e.toString()))
+    }
+
+    /** Build (without sending) the message encrypted by OpenKeychain for all recipients. Throws on failure. */
+    fun prepareMessage(): MimeMessage {
+        if (toAddress.isEmpty()) throw IllegalArgumentException(cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_recipient_required))
+        val message = buildOriginalMessage()
+        applyOpenKeychainToOriginalMessage(message)
+        return message
     }
 
     /** Build Original MimeMessage（with PgpUtils.buildOriginalMessage consistent） */

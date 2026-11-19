@@ -45,13 +45,11 @@ class DingtalkInnerRobotUtils private constructor() {
             }
 
             val requestUrl = "https://api.dingtalk.com/v1.0/oauth2/accessToken"
-            Log.d(TAG, "requestUrl：$requestUrl")
 
             val msgMap: MutableMap<String, Any> = mutableMapOf()
             msgMap["appKey"] = setting.appKey
             msgMap["appSecret"] = setting.appSecret
             val requestMsg: String = Gson().toJson(msgMap)
-            Log.i(TAG, "requestMsg:$requestMsg")
 
             val request = XHttp.post(requestUrl)
 
@@ -66,7 +64,6 @@ class DingtalkInnerRobotUtils private constructor() {
 
                 //Proxy authentication credentials
                 if (setting.proxyAuthenticator && (!TextUtils.isEmpty(setting.proxyUsername) || !TextUtils.isEmpty(setting.proxyPassword))) {
-                    Log.i(TAG, "proxyUsername = ${setting.proxyUsername}, proxyPassword = ${setting.proxyPassword}")
 
                     if (setting.proxyType == Proxy.Type.HTTP) {
                         request.okproxyAuthenticator { _: Route?, response: Response ->
@@ -86,7 +83,6 @@ class DingtalkInnerRobotUtils private constructor() {
 
             request.upJson(requestMsg)
                 .keepJson(true)
-                .ignoreHttpsCert()
                 .retryCount(SettingUtils.requestRetryTimes) //Number of overtime retrys
                 .retryDelay(SettingUtils.requestDelayTime * 1000) //Timeout retry delay
                 .retryIncreaseDelay(SettingUtils.requestDelayTime * 1000) //Incremental timeout retry backoff
@@ -102,7 +98,6 @@ class DingtalkInnerRobotUtils private constructor() {
                     }
 
                     override fun onSuccess(response: String) {
-                        Log.i(TAG, response)
 
                         val resp = Gson().fromJson(response, DingtalkInnerRobotResult::class.java)
                         if (!TextUtils.isEmpty(resp?.accessToken)) {
@@ -129,7 +124,6 @@ class DingtalkInnerRobotUtils private constructor() {
             msgId: Long = 0L
         ) {
             val requestUrl = "https://api.dingtalk.com/v1.0/robot/oToMessages/batchSend"
-            Log.d(TAG, "requestUrl：$requestUrl")
 
             val content: String = if (rule != null) {
                 msgInfo.getContentForSend(rule.smsTemplate, rule.regexReplace, rule.title)
@@ -156,7 +150,6 @@ class DingtalkInnerRobotUtils private constructor() {
             textMsgMap["msgParam"] = Gson().toJson(msgParam)
 
             val requestMsg: String = Gson().toJson(textMsgMap)
-            Log.i(TAG, "requestMsg:$requestMsg")
 
             val request = XHttp.post(requestUrl)
 
@@ -171,7 +164,6 @@ class DingtalkInnerRobotUtils private constructor() {
 
                 //Proxy authentication credentials
                 if (setting.proxyAuthenticator && (!TextUtils.isEmpty(setting.proxyUsername) || !TextUtils.isEmpty(setting.proxyPassword))) {
-                    Log.i(TAG, "proxyUsername = ${setting.proxyUsername}, proxyPassword = ${setting.proxyPassword}")
 
                     if (setting.proxyType == Proxy.Type.HTTP) {
                         request.okproxyAuthenticator { _: Route?, response: Response ->
@@ -192,7 +184,6 @@ class DingtalkInnerRobotUtils private constructor() {
             val accessToken: String by SharedPreference("accessToken_" + setting.agentID, "")
             request.upJson(requestMsg).headers("x-acs-dingtalk-access-token", accessToken)
                 .keepJson(true)
-                .ignoreHttpsCert()
                 .retryCount(SettingUtils.requestRetryTimes) //Number of overtime retrys
                 .retryDelay(SettingUtils.requestDelayTime * 1000) //Timeout retry delay
                 .retryIncreaseDelay(SettingUtils.requestDelayTime * 1000) //Incremental timeout retry backoff
@@ -208,7 +199,6 @@ class DingtalkInnerRobotUtils private constructor() {
                     }
 
                     override fun onSuccess(response: String) {
-                        Log.i(TAG, response)
 
                         val resp = Gson().fromJson(response, DingtalkInnerRobotResult::class.java)
                         val status = if (!TextUtils.isEmpty(resp?.processQueryKey)) 2 else 0

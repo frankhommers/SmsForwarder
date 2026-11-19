@@ -1,0 +1,4 @@
+<resources>
+    <string name="email_provider_custom">Other (custom SMTP)</string>
+    <string name="email_provider_legacy">%1$s (saved legacy provider)</string>
+</resources>

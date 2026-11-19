@@ -29,7 +29,7 @@
                 app:srcCompat="@drawable/icon_api_location"
                 tools:ignore="ImageContrastCheck" />
 
-            <com.xuexiang.xui.widget.grouplist.XUIGroupListView
+            <cn.ppps.forwarder.widget.material.TargetInfoList
                 android:id="@+id/info_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -46,9 +46,9 @@
         android:orientation="horizontal"
         android:padding="10dp">
 
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_refresh"
-            style="@style/SuperButton.Blue.Icon"
+            style="@style/MaterialActionButton"
             android:layout_marginStart="20dp"
             android:drawableStart="@drawable/ic_refresh"
             android:paddingStart="20dp"

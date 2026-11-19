@@ -7,7 +7,7 @@
     },
     {
       "title": "Privacy",
-      "content": "Analytics, upstream updates and executable downloads are removed. Public IP discovery uses the owner-approved ip.hommers.it service. Read the bundled privacy notice in About."
+      "content": "Analytics and upstream downloads are removed. This version checks its own GitHub releases for updates; turn this off in About. Public IP lookups use ip.hommers.it. Read the privacy notice in About."
     }
   ]
 }

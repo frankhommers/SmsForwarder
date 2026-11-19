@@ -64,7 +64,7 @@ def source_gate():
             for label, pattern in [('format', FORMAT), ('template', TOKENS)]:
                 if Counter(pattern.findall(base[key])) != Counter(pattern.findall(translated[key])):
                     failures.append(f'{locale}/{key}: {label} placeholder mismatch')
-            if (key.isupper() or (key.endswith('_regex') and key != 'btn_regex') or key == 'regex_multi_match' or (key.startswith('url_') and key != 'url_scheme_tips') or key == 'other_mail_type') and base[key] != translated[key]:
+            if (key.isupper() or (key.endswith('_regex') and key != 'btn_regex') or key == 'regex_multi_match' or (key.startswith('url_') and key not in ('url_scheme_tips', 'url_scheme')) or key == 'other_mail_type') and base[key] != translated[key]:
                 failures.append(f'{locale}/{key}: protocol identifier changed')
     if base != en:
         failures.append('Default resource strings must equal English')

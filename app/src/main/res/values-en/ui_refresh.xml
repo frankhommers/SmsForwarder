@@ -1,0 +1,50 @@
+<resources>
+    <string name="target_legacy">Unsupported legacy target</string>
+    <string name="target_legacy_help">This provider is no longer offered in the editor. Its saved configuration and existing forwarding rules are retained unchanged. You can delete it explicitly or create a supported target.</string>
+    <string name="add_item">Add item</string>
+    <string name="remove_item">Remove</string>
+    <string name="add_parameter">Add parameter</string>
+    <string name="item_key">Parameter name</string>
+    <string name="item_value">Value</string>
+    <string name="item_invalid">Enter one item here; use Add for another item.</string>
+    <string name="webhook_mode">Request data</string>
+    <string name="webhook_mode_parameters">Parameters</string>
+    <string name="webhook_mode_json">JSON body</string>
+    <string name="webhook_mode_legacy">Legacy payload (unchanged)</string>
+    <string name="webhook_mode_change">Clear the current data before choosing another format or HTTP method. No automatic conversion is performed.</string>
+    <string name="webhook_query_help">Each row becomes a URL parameter. Without rows, from and content are sent.</string>
+    <string name="webhook_form_help">Each row becomes a form field. Without rows, from, content and timestamp are sent.</string>
+    <string name="webhook_json_help">One JSON object or array, for example {\"text\":\"[msg]\"}.</string>
+    <string name="webhook_substitution">Insert data adds fields such as [msg]; Preview shows the request with sample data.</string>
+    <string name="webhook_legacy_help">Existing data is kept as it is. Clear this field to choose another format.</string>
+    <string name="webhook_advanced_show">Advanced: headers, authentication, signing, proxy ▾</string>
+    <string name="webhook_advanced_hide">Hide advanced settings ▴</string>
+    <string name="webhook_headers_help">For example Authorization: Bearer &lt;token&gt;.</string>
+    <string name="webhook_add_header">Add header</string>
+    <string name="webhook_sign_help">Optional. Lets your server verify that requests come from this app.</string>
+    <string name="webhook_response_help">Optional. Marks a delivery as failed when the answer lacks this text.</string>
+    <string name="webhook_test_help">Test sends a real sample request without saving.</string>
+    <string name="webhook_json_invalid">Enter a valid JSON object or array, with quoted placeholder values.</string>
+    <string name="webhook_header_invalid">Use a unique header name and a single-line value. Remove empty rows.</string>
+    <string name="webhook_type_conflict">Content-Type conflicts with this data format. Edit or remove that header in Advanced.</string>
+    <string name="webhook_port_invalid">Enter a proxy port between 1 and 65535.</string>
+    <string name="webhook_url_invalid">Enter a full http:// or https:// URL with a host.</string>
+    <string name="webhook_result_success">Webhook request succeeded. Response content omitted for privacy.</string>
+    <string name="webhook_result_failed">Webhook request failed or response did not match. Details omitted for privacy.</string>
+    <string name="form_secret_label">Signing secret</string>
+    <string name="form_response_label">Response must contain</string>
+    <string name="form_body_label">Request body</string>
+    <string name="form_quiet_days">Days</string>
+    <string name="form_help_content_description">Help: %1$s</string>
+    <string name="webhook_params_dialog">What the app sends to your server. Parameters: a list of names and values. JSON body: one JSON text you write yourself. Both can contain webhook fields such as [msg] for the formatted message and [from] for the sender, and message data such as {{FROM}}. Insert data adds one at the cursor; Preview shows the request with sample data and sends nothing.</string>
+    <string name="webhook_sign_dialog">Lets your server check that a request really comes from this app. With a secret filled in, the app adds a timestamp and a signature (sign) to every request. Leave it empty if your server does not check signatures.</string>
+    <string name="webhook_response_dialog">Use this when your server answers with a fixed text on success, for example ok. If that text is missing from the answer, the delivery is logged as Failed. Leave it empty to accept every answer that is not an error. A failed check does not start a new attempt; you can resend from the log.</string>
+    <string name="webhook_headers_dialog">Extra HTTP headers sent with every request. Most servers need one only for a login token. Leave this empty if your server needs none.</string>
+    <string name="regex_find_label">Find (regular expression)</string>
+    <string name="regex_replace_label">Replace with</string>
+    <string name="regex_add_replacement">Add replacement</string>
+    <string name="regex_invalid_pattern">Not a valid regular expression</string>
+    <string name="regex_pattern_required">Enter a regular expression</string>
+    <string name="regex_separator_forbidden">Cannot contain ===</string>
+    <string name="regex_trailing_equals">Cannot end with =</string>
+</resources>

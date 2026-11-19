@@ -36,10 +36,10 @@ import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.adapter.recyclerview.RecyclerViewHolder
 import com.xuexiang.xui.utils.DensityUtils
 import com.xuexiang.xui.utils.WidgetUtils
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.alpha.XUIAlphaTextView
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import cn.ppps.forwarder.widget.material.TitleBar
+import com.google.android.material.textview.MaterialTextView as XUIAlphaTextView
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
 import gatewayapps.crondroid.CronExpression
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -77,6 +77,39 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
     private lateinit var actionsRecyclerView: RecyclerView
     private lateinit var actionsAdapter: TaskSettingAdapter
     private var actionsList = mutableListOf<TaskSetting>()
+    private var restoredDraft = false
+    private var draftName = ""
+    private var draftEnabled = false
+    private var formLoad: Disposable? = null
+    private var resultKey = "task.result." + UUID.randomUUID().toString()
+
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (savedInstanceState?.containsKey("draft.conditions") == true) {
+            restoredDraft = true
+            resultKey = savedInstanceState.getString("draft.result")!!
+            draftName = savedInstanceState.getString("draft.name").orEmpty()
+            draftEnabled = savedInstanceState.getBoolean("draft.enabled")
+            conditionsList = Gson().fromJson(savedInstanceState.getString("draft.conditions"), Array<TaskSetting>::class.java).toMutableList()
+            actionsList = Gson().fromJson(savedInstanceState.getString("draft.actions"), Array<TaskSetting>::class.java).toMutableList()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: android.os.Bundle) {
+        outState.putString("draft.result", resultKey)
+        outState.putString("draft.name", binding?.etName?.text?.toString() ?: draftName)
+        outState.putBoolean("draft.enabled", binding?.sbStatus?.isChecked ?: draftEnabled)
+        outState.putString("draft.conditions", Gson().toJson(conditionsList))
+        outState.putString("draft.actions", Gson().toJson(actionsList))
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onDestroyView() {
+        formLoad?.dispose(); formLoad = null
+        binding?.let { draftName = it.etName.text.toString(); draftEnabled = it.sbStatus.isChecked; restoredDraft = true }
+        if (dialog.isShowing) dialog.dismiss()
+        super.onDestroyView()
+    }
 
     private var TASK_CONDITION_FRAGMENT_LIST = listOf(
         PageInfo(
@@ -290,7 +323,6 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
             override fun onDragFinished() {
                 //conditionsListKeep withadapterconsistent
                 conditionsList = conditionsAdapter.itemList
-                Log.d(TAG, "onDragFinished: $conditionsList")
                 //conditionsAdapter.notifyDataSetChanged()
             }
         })
@@ -309,7 +341,6 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
             override fun onDragFinished() {
                 //actionsListKeep withadapterconsistent
                 actionsList = actionsAdapter.itemList
-                Log.d(TAG, "onDragFinished: $actionsList")
                 //actionsAdapter.notifyDataSetChanged()
             }
         })
@@ -323,11 +354,20 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
             binding!!.btnDel.setText(R.string.discard)
         } else { //Edit & Cloning
             binding!!.btnDel.setText(R.string.del)
-            initForm()
+            if (!restoredDraft) initForm()
         }
     }
 
     override fun initListeners() {
+        parentFragmentManager.setFragmentResultListener(resultKey, viewLifecycleOwner) { _, result ->
+            onFragmentResult(result.getInt("request"), result.getInt("result"), result.getParcelable("data"))
+        }
+        if (restoredDraft) {
+            binding!!.etName.setText(draftName)
+            binding!!.sbStatus.isChecked = draftEnabled
+            binding!!.layoutAddCondition.visibility = if (conditionsList.size >= MAX_SETTING_NUM) View.GONE else View.VISIBLE
+            binding!!.layoutAddAction.visibility = if (actionsList.size >= MAX_SETTING_NUM) View.GONE else View.VISIBLE
+        }
         binding!!.layoutAddCondition.setOnClickListener(this)
         binding!!.layoutAddAction.setOnClickListener(this)
         binding!!.btnTest.setOnClickListener(this)
@@ -346,7 +386,7 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
                     tvTitle.text = if (conditionsList.isEmpty()) getString(R.string.select_task_trigger) else getString(R.string.select_task_condition)
 
                     val recyclerView: RecyclerView = bottomSheet.findViewById(R.id.recyclerView)
-                    WidgetUtils.initGridRecyclerView(recyclerView, 4, DensityUtils.dp2px(1f))
+                    WidgetUtils.initGridRecyclerView(recyclerView, if (resources.configuration.screenWidthDp < 600) 2 else 4, DensityUtils.dp2px(1f))
                     val widgetItemAdapter = WidgetItemAdapter(TASK_CONDITION_FRAGMENT_LIST)
                     widgetItemAdapter.setOnItemClickListener(that)
                     recyclerView.adapter = widgetItemAdapter
@@ -358,14 +398,20 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
                     dialog.setCancelable(true)
                     dialog.setCanceledOnTouchOutside(true)
                     dialog.show()
-                    WidgetUtils.transparentBottomSheetDialogBackground(dialog)
+                    // Keep the close action in the viewport; only the choices scroll.
+                    val sheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+                    sheet?.let {
+                        it.layoutParams.height = (resources.displayMetrics.heightPixels * 0.85f).toInt()
+                        it.requestLayout()
+                        com.google.android.material.bottomsheet.BottomSheetBehavior.from(it).state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+                    }
                 }
 
                 R.id.layout_add_action -> {
                     val bottomSheet: View = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_task_action_bottom_sheet, null)
                     val recyclerView: RecyclerView = bottomSheet.findViewById(R.id.recyclerView)
 
-                    WidgetUtils.initGridRecyclerView(recyclerView, 4, DensityUtils.dp2px(1f))
+                    WidgetUtils.initGridRecyclerView(recyclerView, if (resources.configuration.screenWidthDp < 600) 2 else 4, DensityUtils.dp2px(1f))
                     val widgetItemAdapter = WidgetItemAdapter(TASK_ACTION_FRAGMENT_LIST)
                     widgetItemAdapter.setOnItemClickListener(that)
                     recyclerView.adapter = widgetItemAdapter
@@ -377,7 +423,13 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
                     dialog.setCancelable(true)
                     dialog.setCanceledOnTouchOutside(true)
                     dialog.show()
-                    WidgetUtils.transparentBottomSheetDialogBackground(dialog)
+                    // Keep the close action in the viewport; only the choices scroll.
+                    val sheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+                    sheet?.let {
+                        it.layoutParams.height = (resources.displayMetrics.heightPixels * 0.85f).toInt()
+                        it.requestLayout()
+                        com.google.android.material.bottomsheet.BottomSheetBehavior.from(it).state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+                    }
                 }
 
                 R.id.btn_test -> {
@@ -399,7 +451,6 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
                 R.id.btn_save -> {
                     val taskNew = checkForm()
                     if (isClone) taskNew.id = 0
-                    Log.d(TAG, taskNew.toString())
                     //Save task
                     if (taskNew.id > 0) {
                         Core.task.update(taskNew)
@@ -423,7 +474,7 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
     //Initializing forms
     private fun initForm() {
         Core.task.get(taskId).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<Task> {
-            override fun onSubscribe(d: Disposable) {}
+            override fun onSubscribe(d: Disposable) { formLoad = d }
 
             override fun onError(e: Throwable) {
                 e.printStackTrace()
@@ -432,7 +483,7 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
 
             @SuppressLint("NotifyDataSetChanged")
             override fun onSuccess(task: Task) {
-                Log.d(TAG, task.toString())
+                if (binding == null || restoredDraft) return
                 if (isClone) {
                     titleBar?.setSubTitle(getString(R.string.clone_task))
                     binding!!.btnDel.setText(R.string.discard)
@@ -447,7 +498,6 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
                         for (condition in conditionList) {
                             this@TasksEditFragment.conditionsList.add(condition)
                         }
-                        Log.d(TAG, "conditionsList: ${this@TasksEditFragment.conditionsList}")
                         conditionsAdapter.notifyDataSetChanged()
                         binding!!.layoutAddCondition.visibility = if (this@TasksEditFragment.conditionsList.size >= MAX_SETTING_NUM) View.GONE else View.VISIBLE
                     }
@@ -456,7 +506,6 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
                         for (action in actionList) {
                             this@TasksEditFragment.actionsList.add(action)
                         }
-                        Log.d(TAG, "actionsList: ${this@TasksEditFragment.actionsList}")
                         actionsAdapter.notifyDataSetChanged()
                         binding!!.layoutAddAction.visibility = if (this@TasksEditFragment.actionsList.size >= MAX_SETTING_NUM) View.GONE else View.VISIBLE
                     }
@@ -601,7 +650,8 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
             }
 
             @Suppress("UNCHECKED_CAST") PageOption.to(Class.forName(widgetInfo.classPath) as Class<XPageFragment>) //Targetfragment
-                .setRequestCode(0) //requestCode: 0 Add,>0 Edit（itemListXxx Indexes added1）
+                .putString("task.result.receiver", resultKey)
+                .putInt("task.result.request", 0) //requestCode: 0 Add,>0 Edit（itemListXxx Indexes added1）
                 .putString(KEY_EVENT_PARAMS_CONDITION, widgetInfo.params)
                 .open(this)
         } catch (e: Exception) {
@@ -614,7 +664,7 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
     @SuppressLint("NotifyDataSetChanged")
     override fun onFragmentResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onFragmentResult(requestCode, resultCode, data)
-        Log.d(TAG, "requestCode:$requestCode resultCode:$resultCode data:$data")
+        Log.d(TAG, "requestCode:$requestCode resultCode:$resultCode")
         if (data != null) {
             val extras = data.extras ?: return
 
@@ -659,7 +709,7 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
                 //actionsAdapter.notifyDataSetChanged()
                 binding!!.layoutAddAction.visibility = if (actionsList.size >= MAX_SETTING_NUM) View.GONE else View.VISIBLE
             }
-            Log.d(TAG, "requestCode:$requestCode resultCode:$resultCode setting:$setting")
+            Log.d(TAG, "requestCode:$requestCode resultCode:$resultCode")
         }
     }
 
@@ -683,7 +733,7 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
         // Edit condition items
         // Based on position Edit selected items
         val condition = conditionsList[position]
-        Log.d(TAG, "editCondition: $position, $condition")
+        Log.d(TAG, "editCondition: $position")
 
         val widgetInfoIndex = condition.type - KEY_BACK_CODE_CONDITION
         //To judge if there is.
@@ -691,7 +741,8 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
         val widgetInfo = TASK_CONDITION_FRAGMENT_LIST[condition.type - KEY_BACK_CODE_CONDITION]
         @Suppress("UNCHECKED_CAST")
         PageOption.to(Class.forName(widgetInfo.classPath) as Class<XPageFragment>) //Targetfragment
-            .setRequestCode(position + 1) //requestCode: 0 Add,>0 Edit（conditionsList Indexes added1）
+            .putString("task.result.receiver", resultKey)
+            .putInt("task.result.request", position + 1) //requestCode: 0 Add,>0 Edit（conditionsList Indexes added1）
             .putString(KEY_EVENT_DATA_CONDITION, condition.setting)
             .putString(KEY_EVENT_PARAMS_CONDITION, widgetInfo.params)
             .open(this)
@@ -708,7 +759,7 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
         // Edit action items
         // Based on position Edit selected items
         val action = actionsList[position]
-        Log.d(TAG, "editAction: $position, $action")
+        Log.d(TAG, "editAction: $position")
 
         val widgetInfoIndex = action.type - KEY_BACK_CODE_ACTION
         //To judge if there is.
@@ -716,7 +767,8 @@ class TasksEditFragment : BaseFragment<FragmentTasksEditBinding?>(), View.OnClic
         val widgetInfo = TASK_ACTION_FRAGMENT_LIST[action.type - KEY_BACK_CODE_ACTION]
         @Suppress("UNCHECKED_CAST")
         PageOption.to(Class.forName(widgetInfo.classPath) as Class<XPageFragment>) //Targetfragment
-            .setRequestCode(position + 1) //requestCode: 0 Add,>0 Edit（actionsList Indexes added1）
+            .putString("task.result.receiver", resultKey)
+            .putInt("task.result.request", position + 1) //requestCode: 0 Add,>0 Edit（actionsList Indexes added1）
             .putString(KEY_EVENT_DATA_ACTION, action.setting)
             .open(this)
     }

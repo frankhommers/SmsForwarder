@@ -1,116 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/xui_config_color_background"
-    android:orientation="vertical">
-
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:overScrollMode="never">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:layout_margin="10dp"
-                android:contentDescription="@string/task_frpc"
-                app:srcCompat="@drawable/auto_task_icon_frpc"
-                tools:ignore="ImageContrastCheck" />
-
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/task_frpc"
-                    android:textSize="@dimen/text_size_big"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tv_description"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/task_frpc_tips"
-                    android:textSize="@dimen/text_size_mini"
-                    tools:ignore="SmallSp" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginBottom="5dp"
-                    android:background="?attr/xui_config_color_separator_light" />
-
-                <RadioGroup
-                    android:id="@+id/rg_frpc_state"
-                    style="@style/rg_style"
-                    android:orientation="horizontal"
-                    android:paddingBottom="@dimen/config_padding_5dp">
-
-                    <RadioButton
-                        android:id="@+id/rb_start_server"
-                        style="@style/rg_rb_style"
-                        android:checked="true"
-                        android:text="@string/start_server"
-                        tools:ignore="TouchTargetSizeCheck" />
-
-                    <RadioButton
-                        android:id="@+id/rb_stop_server"
-                        style="@style/rg_rb_style"
-                        android:text="@string/stop_server"
-                        tools:ignore="TouchTargetSizeCheck" />
-
-                </RadioGroup>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:text="@string/specified_uid"
-                        android:textStyle="bold" />
-
-                    <com.xuexiang.xui.widget.spinner.editspinner.EditSpinner
-                        android:id="@+id/sp_frpc"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_weight="1"
-                        app:es_hint="@string/choose_frpc"
-                        app:es_maxLength="20"
-                        app:es_maxLine="1" />
-
-                </LinearLayout>
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recycler_frpcs"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/config_margin_5dp" />
-
+<!--
+  Task-action form (ActionForm.* on top of the Form.* recipe, privacy-verification/form-pattern/PATTERN.md).
+  This fork has no tunnel client (App.FrpclibInited is false): FrpcFragment shows the notice below and the saved
+  choice read-only, with Apply and Test disabled; Discard leaves a saved action untouched. Ids and stored data unchanged.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:background="?attr/xui_config_color_background" android:orientation="vertical">
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:overScrollMode="never">
+        <LinearLayout style="@style/Form.Content">
+            <androidx.appcompat.widget.AppCompatImageView style="@style/ActionForm.Hero" android:contentDescription="@string/task_frpc" app:srcCompat="@drawable/auto_task_icon_frpc" tools:ignore="ImageContrastCheck" />
+            <LinearLayout style="@style/Form.Section.First">
+                <TextView style="@style/Form.SectionTitle" android:text="@string/task_frpc" />
+                <TextView android:id="@+id/tv_description" style="@style/Form.Supporting" android:text="@string/editor_form_frpc_purpose" />
+                <TextView android:id="@+id/editor_form_frpc_unavailable" style="@style/EditorForm.Notice" android:text="@string/editor_form_frpc_unavailable" />
             </LinearLayout>
-
+            <LinearLayout style="@style/Form.Section">
+                <TextView style="@style/Form.GroupTitle" android:text="@string/editor_form_frpc_action" />
+                <RadioGroup android:id="@+id/rg_frpc_state" style="@style/Form.OptionGroup">
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_start_server" style="@style/Form.Option" android:checked="true" android:text="@string/start_server" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_stop_server" style="@style/Form.Option" android:text="@string/stop_server" />
+                </RadioGroup>
+            </LinearLayout>
+            <LinearLayout style="@style/Form.Section">
+                <cn.ppps.forwarder.widget.material.TargetEditDropdown android:id="@+id/sp_frpc" style="@style/Form.Dropdown" android:theme="@style/ThemeOverlay.Material3.AutoCompleteTextView.OutlinedBox" app:es_hint="@string/editor_form_frpc_configs" app:helperText="@string/editor_form_frpc_configs_helper" app:es_maxLength="20" app:es_maxLine="1" />
+                <androidx.recyclerview.widget.RecyclerView android:id="@+id/recycler_frpcs" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+            </LinearLayout>
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
 
     <LinearLayout
@@ -120,23 +34,23 @@
         android:orientation="horizontal"
         android:padding="10dp">
 
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_del"
-            style="@style/SuperButton.Gray.Icon.Spacing"
+            style="@style/MaterialActionButton.Secondary"
             android:drawableStart="@drawable/ic_delete"
             android:text="@string/discard"
             tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
 
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_save"
-            style="@style/SuperButton.Blue.Icon.Spacing"
+            style="@style/MaterialActionButton"
             android:drawableStart="@drawable/ic_save"
-            android:text="@string/submit"
+            android:text="@string/m3_apply"
             tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
 
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_test"
-            style="@style/SuperButton.Green.Icon.Spacing"
+            style="@style/MaterialActionButton.Secondary"
             android:drawableStart="@drawable/ic_test"
             android:text="@string/test"
             tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />

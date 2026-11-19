@@ -39,12 +39,10 @@ class GotifyUtils {
             }
 
             val requestUrl: String = setting.webServer //Send Address
-            Log.i(TAG, "requestUrl:$requestUrl")
 
             //SupportHTTPBasic authentication(Basic Authentication)
             val regex = "^(https?://)([^:]+):([^@]+)@(.+)"
             val matches = Regex(regex, RegexOption.IGNORE_CASE).findAll(requestUrl).toList().flatMap(MatchResult::groupValues)
-            Log.i(TAG, "matches = $matches")
             val request = if (matches.isNotEmpty()) {
                 XHttp.post(matches[1] + matches[4]).addInterceptor(BasicAuthInterceptor(matches[2], matches[3]))
             } else {
@@ -54,7 +52,6 @@ class GotifyUtils {
             request.params("title", title)
                 .params("message", content)
                 .params("priority", setting.priority)
-                .ignoreHttpsCert() //IgnorehttpsCertificate
                 .keepJson(true)
                 .retryCount(SettingUtils.requestRetryTimes) //Number of overtime retrys
                 .retryDelay(SettingUtils.requestDelayTime * 1000) //Timeout retry delay
@@ -71,7 +68,6 @@ class GotifyUtils {
                     }
 
                     override fun onSuccess(response: String) {
-                        Log.i(TAG, response)
 
                         val resp = Gson().fromJson(response, GotifyResult::class.java)
                         val status = if (resp?.id != null) 2 else 0

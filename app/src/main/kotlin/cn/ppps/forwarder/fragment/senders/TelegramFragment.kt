@@ -32,9 +32,10 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.FormHelp
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -95,6 +96,11 @@ class TelegramFragment : BaseFragment<FragmentSendersTelegramBinding?>(), View.O
             }
         })
 
+        //Display only (TargetForm): help dialogs
+        FormHelp.install(binding!!.btnHelpToken, R.string.target_form_telegram_token, R.string.target_form_telegram_token_dialog)
+        FormHelp.install(binding!!.btnHelpChat, R.string.TelegramChatId, R.string.target_form_telegram_chat_dialog)
+        FormHelp.install(binding!!.btnHelpParseMode, R.string.parse_mode, R.string.target_form_telegram_parse_mode_dialog)
+
         //Add
         if (senderId <= 0) {
             titleBar?.setSubTitle(getString(R.string.add_sender))
@@ -122,7 +128,6 @@ class TelegramFragment : BaseFragment<FragmentSendersTelegramBinding?>(), View.O
                 binding!!.etName.setText(sender.name)
                 binding!!.sbEnable.isChecked = sender.status == 1
                 val settingVo = Gson().fromJson(sender.jsonSetting, TelegramSetting::class.java)
-                Log.d(TAG, settingVo.toString())
                 if (settingVo != null) {
                     binding!!.rgMethod.check(settingVo.getMethodCheckId())
                     binding!!.etApiToken.setText(settingVo.apiToken)
@@ -173,7 +178,6 @@ class TelegramFragment : BaseFragment<FragmentSendersTelegramBinding?>(), View.O
                     Thread {
                         try {
                             val settingVo = checkSetting()
-                            Log.d(TAG, settingVo.toString())
                             val name = binding!!.etName.text.toString().trim().takeIf { it.isNotEmpty() } ?: getString(R.string.test_sender_name)
                             val msgInfo = MsgInfo("sms", getString(R.string.test_phone_num), String.format(getString(R.string.test_sender_sms), name), Date(), getString(R.string.test_sim_info))
                             TelegramUtils.sendMsg(settingVo, msgInfo)
@@ -204,14 +208,14 @@ class TelegramFragment : BaseFragment<FragmentSendersTelegramBinding?>(), View.O
                 R.id.btn_save -> {
                     val name = binding!!.etName.text.toString().trim()
                     if (TextUtils.isEmpty(name)) {
-                        throw Exception(getString(R.string.invalid_name))
+                        cn.ppps.forwarder.widget.material.FormValidation.show(binding!!.etName, getString(R.string.invalid_name))
+                        return
                     }
 
                     val status = if (binding!!.sbEnable.isChecked) 1 else 0
                     val settingVo = checkSetting()
                     if (isClone) senderId = 0
                     val senderNew = Sender(senderId, senderType, name, Gson().toJson(settingVo), status)
-                    Log.d(TAG, senderNew.toString())
 
                     viewModel.insertOrUpdate(senderNew)
                     XToastUtils.success(R.string.tipSaveSuccess)

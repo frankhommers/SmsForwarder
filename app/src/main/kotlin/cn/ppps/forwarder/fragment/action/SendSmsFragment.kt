@@ -39,7 +39,7 @@ import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xrouter.utils.TextUtils
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 import java.util.Date
 
 @Page(name = "SendSms")
@@ -102,10 +102,8 @@ class SendSmsFragment : BaseFragment<FragmentTasksActionSendSmsBinding?>(), View
             binding!!.rbSimSlot2.text = "SIM2：" + serverConfig.extraSim2
         }
 
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             val settingVo = Gson().fromJson(eventData, SmsSetting::class.java)
-            Log.d(TAG, "initViews settingVo:$settingVo")
 
             simSlot = settingVo.simSlot
             phoneNumbers = settingVo.phoneNumbers
@@ -138,6 +136,7 @@ class SendSmsFragment : BaseFragment<FragmentTasksActionSendSmsBinding?>(), View
 
     @SingleClick
     override fun onClick(v: View) {
+        if (v.id != R.id.btn_del && !cn.ppps.forwarder.utils.ItemRows.validateAll(binding!!.root)) return
         try {
             when (v.id) {
                 R.id.btn_test -> {
@@ -169,7 +168,6 @@ class SendSmsFragment : BaseFragment<FragmentTasksActionSendSmsBinding?>(), View
                                 mCountDownHelper?.start()
                                 try {
                                     val settingVo = checkSetting()
-                                    Log.d(TAG, settingVo.toString())
                                     val taskAction = TaskSetting(
                                         TASK_ACTION_SENDSMS,
                                         getString(R.string.task_sendsms),

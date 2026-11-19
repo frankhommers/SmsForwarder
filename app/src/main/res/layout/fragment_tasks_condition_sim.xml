@@ -7,86 +7,20 @@
     android:background="?attr/xui_config_color_background"
     android:orientation="vertical">
 
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:overScrollMode="never">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:layout_margin="10dp"
-                android:contentDescription="@string/task_sim"
-                app:srcCompat="@drawable/auto_task_icon_sim"
-                tools:ignore="ImageContrastCheck" />
-
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/task_sim"
-                    android:textSize="@dimen/text_size_big"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tv_description"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/task_sim_tips"
-                    android:textSize="@dimen/text_size_mini"
-                    tools:ignore="SmallSp" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginBottom="5dp"
-                    android:background="?attr/xui_config_color_separator_light" />
-
-                <RadioGroup
-                    android:id="@+id/rg_sim_state"
-                    style="@style/rg_style"
-                    android:orientation="vertical"
-                    android:paddingBottom="@dimen/config_padding_5dp">
-
-                    <RadioButton
-                        android:id="@+id/rb_sim_state_absent"
-                        style="@style/rg_rb_style_match"
-                        android:checked="true"
-                        android:text="@string/sim_state_absent"
-                        tools:ignore="TouchTargetSizeCheck" />
-
-                    <RadioButton
-                        android:id="@+id/rb_sim_state_ready"
-                        style="@style/rg_rb_style_match"
-                        android:text="@string/sim_state_ready"
-                        tools:ignore="TouchTargetSizeCheck" />
-
-                    <RadioButton
-                        android:id="@+id/rb_sim_state_unknown"
-                        style="@style/rg_rb_style_match"
-                        android:text="@string/sim_state_unknown"
-                        tools:ignore="TouchTargetSizeCheck,DuplicateSpeakableTextCheck" />
-
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:overScrollMode="never">
+        <!-- Condition form (ConditionForm.* on top of the Form.* recipe, privacy-verification/form-pattern/PATTERN.md). Stacked option rows at the 16dp keyline; ids and listener unchanged. -->
+        <LinearLayout style="@style/Form.Content">
+            <androidx.appcompat.widget.AppCompatImageView style="@style/ConditionForm.Hero" android:contentDescription="@string/task_sim" app:srcCompat="@drawable/auto_task_icon_sim" tools:ignore="ImageContrastCheck" />
+            <LinearLayout style="@style/Form.Section.First">
+                <TextView style="@style/Form.SectionTitle" android:text="@string/task_sim" />
+                <TextView android:id="@+id/tv_description" style="@style/Form.Supporting" android:text="@string/task_sim_tips" />
+                <RadioGroup android:id="@+id/rg_sim_state" style="@style/Form.OptionGroup" android:layout_marginTop="16dp">
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_sim_state_absent" style="@style/Form.Option" android:checked="true" android:text="@string/sim_state_absent" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_sim_state_ready" style="@style/Form.Option" android:text="@string/sim_state_ready" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_sim_state_unknown" style="@style/Form.Option" android:text="@string/sim_state_unknown" />
                 </RadioGroup>
-
             </LinearLayout>
-
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
 
     <LinearLayout
@@ -96,18 +30,18 @@
         android:orientation="horizontal"
         android:padding="10dp">
 
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_del"
-            style="@style/SuperButton.Gray.Icon.Spacing"
+            style="@style/MaterialActionButton.Secondary"
             android:drawableStart="@drawable/ic_delete"
             android:text="@string/discard"
             tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
 
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_save"
-            style="@style/SuperButton.Blue.Icon.Spacing"
+            style="@style/MaterialActionButton"
             android:drawableStart="@drawable/ic_save"
-            android:text="@string/submit"
+            android:text="@string/m3_apply"
             tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
 
     </LinearLayout>

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Plain colour resources (with values-night variants): theme attributes cannot be resolved here, because adapters
+     inflate this drawable through setBackgroundResource without a theme, which crashed every dropdown popup. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@color/xui_config_color_white" android:state_pressed="false" />
-    <item android:drawable="@color/xui_config_color_light_yellow" android:state_pressed="true" />
+    <item android:drawable="@color/m3_secondary_container" android:state_pressed="true" />
+    <item android:drawable="@color/m3_surface" />
 </selector>

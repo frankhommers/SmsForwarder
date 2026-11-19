@@ -31,3 +31,5 @@
 /privacy-verification/
 __pycache__/
 *.pyc
+# Release staging (scripts/release.py)
+/dist/

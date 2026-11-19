@@ -21,7 +21,7 @@ class BatteryController {
     @CrossOrigin(methods = [RequestMethod.POST])
     @PostMapping("/query")
     fun query(@RequestBody bean: BaseRequest<EmptyData>): BatteryInfo {
-        Log.d(TAG, bean.data.toString())
+        Log.d(TAG, "Local event processed")
 
         val intentFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
         val intent: Intent? = App.context.registerReceiver(null, intentFilter)

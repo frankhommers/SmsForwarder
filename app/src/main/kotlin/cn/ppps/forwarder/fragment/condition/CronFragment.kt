@@ -28,9 +28,11 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.flowlayout.FlowTagLayout
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.TargetChips as FlowTagLayout
 import gatewayapps.crondroid.CronExpression
+import cn.ppps.forwarder.utils.task.CronScheduleCheck
+import com.google.android.material.textfield.TextInputLayout
 import net.redhogs.cronparser.CronExpressionDescriptor
 import net.redhogs.cronparser.Options
 import java.text.SimpleDateFormat
@@ -82,6 +84,8 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
     private var year = "*"
     private var expression = "$second $minute $hour $day $month $week $year"
     private var description = ""
+    // Inline checks start after initViews has filled all seven fields, so half-loaded fields are never flagged.
+    private var checkReady = false
 
     override fun initArgs() {
         XRouter.getInstance().inject(this)
@@ -115,7 +119,6 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
             }
         })
 
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             val settingVo = Gson().fromJson(eventData, CronSetting::class.java)
             binding!!.tvDescription.text = settingVo.description
@@ -140,6 +143,9 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
         initMonthInputHelper()
         initWeekInputHelper()
         initYearInputHelper()
+        checkReady = true
+        // Shows the schedule, or marks invalid stored fields inline (their values are kept, not reset to *).
+        refreshCheck()
     }
 
     override fun onDestroyView() {
@@ -152,34 +158,87 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
         binding!!.btnTest.setOnClickListener(this)
         binding!!.btnDel.setOnClickListener(this)
         binding!!.btnSave.setOnClickListener(this)
+        cronInputs().forEach { input ->
+            input.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: Editable?) {
+                    refreshCheck()
+                }
+            })
+        }
         LiveEventBus.get(KEY_TEST_CONDITION, String::class.java).observe(this) {
             mCountDownHelper?.finish()
             switchInputHelper(binding!!.layoutCronExpressionCheck)
             if (it == "success") {
                 //Generate Recent10execution times
-                val nextTimeList = mutableListOf<String>()
+                // Same parser and "next time after now" rule as CronWorker; local only, nothing is scheduled.
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                val cronExpression = CronExpression(expression)
-                var nextDate = Date()
-                var times = 0
-                for (i in 0 until 10) {
-                    nextDate = cronExpression.getNextValidTimeAfter(nextDate) ?: break
-                    nextTimeList.add(dateFormat.format(nextDate))
-                    times++
-                }
+                val nextTimeList = CronScheduleCheck.nextRuns(expression, Date(), 10).map { date -> dateFormat.format(date) }
+                val times = nextTimeList.size
                 binding!!.tvDescription.text = description
                 //TODO：Older versionsAndroidParsingCronreject this expression; not handled yet
                 binding!!.tvCronExpressionCheckTips.text = if (expression == description) expression else "$expression\n$description"
-                binding!!.tvNextTimeList.text = String.format(getString(R.string.next_execution_times), times.toString(), nextTimeList.joinToString("\n"))
+                binding!!.tvNextTimeList.text = if (times == 0) getString(R.string.editor_form_cron_no_next) else String.format(getString(R.string.next_execution_times), times.toString(), nextTimeList.joinToString("\n"))
                 binding!!.tvNextTimeList.visibility = View.VISIBLE
                 binding!!.separatorCronExpressionCheck.visibility = View.VISIBLE
             } else {
-                binding!!.tvCronExpressionCheckTips.text = String.format(getString(R.string.invalid_cron_expression), it.toString())
+                // Localized result instead of the parser's English message; the field itself carries the inline error.
+                binding!!.tvCronExpressionCheckTips.text = getString(R.string.editor_form_cron_invalid_summary) + "\n" + CronScheduleCheck.expression(cronValues())
                 binding!!.tvNextTimeList.text = ""
                 binding!!.tvNextTimeList.visibility = View.GONE
                 binding!!.separatorCronExpressionCheck.visibility = View.GONE
+                refreshCheck()
             }
+            // The result sits below the fields: bring it into view so Test always shows something.
+            val panel = binding!!.layoutCronExpressionCheck
+            panel.post { panel.requestRectangleOnScreen(android.graphics.Rect(0, 0, panel.width, panel.height), false) }
         }
+    }
+
+    private fun cronInputs() = binding!!.let { listOf(it.etSecond, it.etMinute, it.etHour, it.etDay, it.etMonth, it.etWeek, it.etYear) }
+
+    private fun cronValues() = cronInputs().map { it.text.toString() }
+
+    /** Throws when this field on its own is not valid for the task runner's parser (a day/week clash is shown, not thrown). */
+    private fun requireFieldValid(index: Int) {
+        val problem = CronScheduleCheck.problems(cronValues())[index]
+        if (problem != null && problem !is CronScheduleCheck.Problem.DayWeekConflict) throw IllegalArgumentException(problem.toString())
+    }
+
+    /**
+     * Inline check of all seven fields with the task runner's parser: marks each invalid field, and shows the
+     * plain-language schedule (or "Not a valid schedule") above them. Returns whether the expression is valid.
+     */
+    private fun refreshCheck(focusFirstProblem: Boolean = false): Boolean {
+        val b = binding ?: return true
+        if (!checkReady) return true
+        val inputs = cronInputs()
+        val problems = CronScheduleCheck.problems(inputs.map { it.text.toString() })
+        inputs.forEachIndexed { index, input ->
+            val box = generateSequence(input.parent) { it.parent }.filterIsInstance<TextInputLayout>().firstOrNull()
+            val message = when (problems[index] ?: problems[CronScheduleCheck.WHOLE]?.takeIf { index == CronScheduleCheck.DAY || index == CronScheduleCheck.WEEK }) {
+                null -> null
+                is CronScheduleCheck.Problem.DayWeekConflict -> getString(R.string.editor_form_cron_day_week_conflict)
+                else -> getString(R.string.editor_form_cron_field_invalid)
+            }
+            if (box?.error?.toString() != message) box?.error = message
+        }
+        if (problems.isEmpty()) {
+            try {
+                b.tvDescription.text = checkSetting().description
+            } catch (_: Exception) {
+                // The describer can reject an expression the parser accepts; keep the previous text then.
+            }
+            return true
+        }
+        b.tvDescription.text = getString(R.string.editor_form_cron_invalid_summary)
+        if (focusFirstProblem) {
+            val input = inputs[problems.keys.firstOrNull { it >= 0 } ?: CronScheduleCheck.DAY]
+            input.requestFocus()
+            input.post { input.requestRectangleOnScreen(android.graphics.Rect(0, 0, input.width, input.height), false) }
+        }
+        return false
     }
 
     @SingleClick
@@ -191,7 +250,6 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
                     Thread {
                         try {
                             val settingVo = checkSetting()
-                            Log.d(TAG, settingVo.toString())
                             LiveEventBus.get(KEY_TEST_CONDITION, String::class.java).post("success")
                         } catch (e: Exception) {
                             LiveEventBus.get(KEY_TEST_CONDITION, String::class.java).post(e.message.toString())
@@ -208,6 +266,7 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
                 }
 
                 R.id.btn_save -> {
+                    if (!refreshCheck(focusFirstProblem = true)) return
                     val settingVo = checkSetting()
                     val intent = Intent()
                     intent.putExtra(KEY_BACK_DESCRIPTION_CONDITION, description)
@@ -355,7 +414,7 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
             //CheckcronExpressionValidity
             expression = "$second $minute $hour $day $month $week $year"
             Log.d(TAG, "afterSecondChanged expression:$expression")
-            CronExpression.validateExpression(expression)
+            requireFieldValid(0)
 
             when {
                 second == "*" -> {
@@ -397,10 +456,10 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
                 }
             }
         } catch (e: Exception) {
-            second = "*"
-            binding!!.etSecond.setText(second)
-            binding!!.rbSecondTypeAll.isChecked = true
-            XToastUtils.error("CronExpression invalid：" + e.message, 30000)
+            // Keep what was typed: the field shows the problem inline instead of silently becoming *.
+            Log.d(TAG, "afterSecondChanged invalid: ${e.message}")
+        } finally {
+            refreshCheck()
         }
     }
 
@@ -522,7 +581,7 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
             //CheckcronExpressionValidity
             expression = "$second $minute $hour $day $month $week $year"
             Log.d(TAG, "afterMinuteChanged expression:$expression")
-            CronExpression.validateExpression(expression)
+            requireFieldValid(1)
 
             when {
                 minute == "*" -> {
@@ -564,10 +623,10 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
                 }
             }
         } catch (e: Exception) {
-            minute = "*"
-            binding!!.etMinute.setText(minute)
-            binding!!.rbMinuteTypeAll.isChecked = true
-            XToastUtils.error("CronExpression invalid：" + e.message, 30000)
+            // Keep what was typed: the field shows the problem inline instead of silently becoming *.
+            Log.d(TAG, "afterMinuteChanged invalid: ${e.message}")
+        } finally {
+            refreshCheck()
         }
     }
 
@@ -689,7 +748,7 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
             //CheckcronExpressionValidity
             expression = "$second $minute $hour $day $month $week $year"
             Log.d(TAG, "afterHourChanged expression:$expression")
-            CronExpression.validateExpression(expression)
+            requireFieldValid(2)
 
             when {
                 hour == "*" -> {
@@ -731,10 +790,10 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
                 }
             }
         } catch (e: Exception) {
-            hour = "*"
-            binding!!.etHour.setText(hour)
-            binding!!.rbHourTypeAll.isChecked = true
-            XToastUtils.error("CronExpression invalid：" + e.message, 30000)
+            // Keep what was typed: the field shows the problem inline instead of silently becoming *.
+            Log.d(TAG, "afterHourChanged invalid: ${e.message}")
+        } finally {
+            refreshCheck()
         }
     }
 
@@ -883,7 +942,7 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
             //CheckcronExpressionValidity
             expression = "$second $minute $hour $day $month $week $year"
             Log.d(TAG, "afterDayChanged expression:$expression")
-            CronExpression.validateExpression(expression)
+            requireFieldValid(3)
 
             when {
                 day == "*" -> {
@@ -944,10 +1003,10 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
                 }
             }
         } catch (e: Exception) {
-            day = "*"
-            binding!!.etDay.setText(day)
-            binding!!.rbDayTypeAll.isChecked = true
-            XToastUtils.error("CronExpression invalid：" + e.message, 30000)
+            // Keep what was typed: the field shows the problem inline instead of silently becoming *.
+            Log.d(TAG, "afterDayChanged invalid: ${e.message}")
+        } finally {
+            refreshCheck()
         }
     }
 
@@ -1069,7 +1128,7 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
             //CheckcronExpressionValidity
             expression = "$second $minute $hour $day $month $week $year"
             Log.d(TAG, "afterMonthChanged expression:$expression")
-            CronExpression.validateExpression(expression)
+            requireFieldValid(4)
 
             when {
                 month == "*" -> {
@@ -1111,10 +1170,10 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
                 }
             }
         } catch (e: Exception) {
-            month = "*"
-            binding!!.etMonth.setText(month)
-            binding!!.rbMonthTypeAll.isChecked = true
-            XToastUtils.error("CronExpression invalid：" + e.message, 30000)
+            // Keep what was typed: the field shows the problem inline instead of silently becoming *.
+            Log.d(TAG, "afterMonthChanged invalid: ${e.message}")
+        } finally {
+            refreshCheck()
         }
     }
 
@@ -1272,7 +1331,7 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
             //CheckcronExpressionValidity
             expression = "$second $minute $hour $day $month $week $year"
             Log.d(TAG, "afterWeekChanged expression:$expression")
-            CronExpression.validateExpression(expression)
+            requireFieldValid(5)
 
             when {
                 week == "*" -> {
@@ -1323,10 +1382,10 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
                 }
             }
         } catch (e: Exception) {
-            week = "*"
-            binding!!.etWeek.setText(week)
-            binding!!.rbWeekTypeAll.isChecked = true
-            XToastUtils.error("CronExpression invalid：" + e.message, 30000)
+            // Keep what was typed: the field shows the problem inline instead of silently becoming *.
+            Log.d(TAG, "afterWeekChanged invalid: ${e.message}")
+        } finally {
+            refreshCheck()
         }
     }
 
@@ -1448,7 +1507,7 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
             //CheckcronExpressionValidity
             expression = "$second $minute $hour $day $month $week $year"
             Log.d(TAG, "afterYearChanged expression:$expression")
-            CronExpression.validateExpression(expression)
+            requireFieldValid(6)
 
             when {
                 year == "*" -> {
@@ -1494,10 +1553,10 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
                 }
             }
         } catch (e: Exception) {
-            year = "*"
-            binding!!.etYear.setText(year)
-            binding!!.rbYearTypeAll.isChecked = true
-            XToastUtils.error("CronExpression invalid：" + e.message, 30000)
+            // Keep what was typed: the field shows the problem inline instead of silently becoming *.
+            Log.d(TAG, "afterYearChanged invalid: ${e.message}")
+        } finally {
+            refreshCheck()
         }
     }
 
@@ -1630,8 +1689,9 @@ class CronFragment : BaseFragment<FragmentTasksConditionCronBinding?>(), View.On
             //GeneratecronExpression Description
             val options = Options()
             options.isTwentyFourHourTime = true
-            // The bundled cron descriptor supports English; do not select a removed bundle.
-            val locale = Locale.ENGLISH
+            // Use the app resource locale, not the device locale. The existing dependency
+            // includes a Dutch bundle; only the unsupported Chinese bundle is excluded.
+            val locale = if (resources.configuration.locale.language == "nl") Locale("nl") else Locale.ENGLISH
             options.isNeedSpaceBetweenWords = true
             description = CronExpressionDescriptor.getDescription(expression, options, locale)
         } else {

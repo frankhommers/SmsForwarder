@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Logs filter dialog (dialog_logs_filter.xml, LogsFragment). Namespaced: logs_filter_*. -->
+<resources>
+    <string name="logs_filter_title">Logboek filteren</string>
+    <string name="logs_filter_from_sms">Afzender bevat</string>
+    <string name="logs_filter_from_number">Telefoonnummer bevat</string>
+    <string name="logs_filter_from_app">Pakketnaam bevat</string>
+    <string name="logs_filter_app_title">Meldingstitel bevat</string>
+    <string name="logs_filter_message">Bericht bevat</string>
+    <string name="logs_filter_message_app">Meldingstekst bevat</string>
+    <string name="logs_filter_period">Periode</string>
+    <string name="logs_filter_period_help">Laat leeg voor geen grens.</string>
+    <string name="logs_filter_start">Vanaf datum en tijd</string>
+    <string name="logs_filter_end">Tot en met datum en tijd</string>
+    <string name="logs_filter_clear_start">Begintijd wissen</string>
+    <string name="logs_filter_clear_end">Eindtijd wissen</string>
+    <string name="logs_filter_end_before_start">Moet later zijn dan de begintijd</string>
+    <string name="logs_filter_result">Doorstuurresultaat</string>
+    <string name="logs_filter_none_means_all">Kies niets om alles te tonen.</string>
+</resources>

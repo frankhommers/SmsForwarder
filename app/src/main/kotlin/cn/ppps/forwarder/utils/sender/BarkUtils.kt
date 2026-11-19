@@ -49,12 +49,10 @@ class BarkUtils {
             }
 
             val requestUrl: String = setting.server //Send Address
-            Log.i(TAG, "requestUrl:$requestUrl")
 
             //SupportHTTPBasic authentication(Basic Authentication)
             val regex = "^(https?://)([^:]+):([^@]+)@(.+)"
             val matches = Regex(regex, RegexOption.IGNORE_CASE).findAll(requestUrl).toList().flatMap(MatchResult::groupValues)
-            Log.i(TAG, "matches = $matches")
             val request = if (matches.isNotEmpty()) {
                 XHttp.post(matches[1] + matches[4]).addInterceptor(BasicAuthInterceptor(matches[2], matches[3]))
             } else {
@@ -90,7 +88,6 @@ class BarkUtils {
             }
 
             val requestMsg: String = Gson().toJson(msgMap)
-            Log.i(TAG, "requestMsg:$requestMsg")
             //Send Encryption
             if (setting.transformation.isNullOrBlank() || "none" == setting.transformation || setting.key.isNullOrBlank()) {
                 request.upJson(requestMsg)
@@ -112,8 +109,7 @@ class BarkUtils {
                 request.headers("Content-Type", "application/x-www-form-urlencoded")
             }
 
-            request.ignoreHttpsCert() //IgnorehttpsCertificate
-                .keepJson(true)
+            request.keepJson(true)
                 .retryCount(SettingUtils.requestRetryTimes) //Number of overtime retrys
                 .retryDelay(SettingUtils.requestDelayTime * 1000) //Timeout retry delay
                 .retryIncreaseDelay(SettingUtils.requestDelayTime * 1000) //Incremental timeout retry backoff
@@ -129,7 +125,6 @@ class BarkUtils {
                     }
 
                     override fun onSuccess(response: String) {
-                        Log.i(TAG, response)
 
                         val resp = Gson().fromJson(response, BarkResult::class.java)
                         val status = if (resp?.code == 200L) 2 else 0

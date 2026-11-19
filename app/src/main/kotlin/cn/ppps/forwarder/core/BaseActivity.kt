@@ -17,7 +17,6 @@ import com.xuexiang.xpage.base.XPageFragment
 import com.xuexiang.xpage.core.CoreSwitchBean
 import com.xuexiang.xrouter.facade.service.SerializationService
 import com.xuexiang.xrouter.launcher.XRouter
-import com.xuexiang.xui.widget.slideback.SlideBack
 import com.xuexiang.xutil.resource.ResUtils.isRtl
 
 /**
@@ -27,7 +26,7 @@ import com.xuexiang.xutil.resource.ResUtils.isRtl
  * @since 2019/3/22 11:21
  */
 @Suppress("MemberVisibilityCanBePrivate", "UNCHECKED_CAST", "DEPRECATION", "EmptyMethod")
-open class BaseActivity<Binding : ViewBinding?> : XPageActivity() {
+open class BaseActivity<Binding : ViewBinding?> : XPageActivity(), me.jessyan.autosize.internal.CancelAdapt {
     /**
      * AccessBinding
      *
@@ -54,7 +53,15 @@ open class BaseActivity<Binding : ViewBinding?> : XPageActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         initStatusBarStyle()
-        super.onCreate(savedInstanceState)
+        // XPage 3.3 replays its launch intent after FragmentManager restores the stack.
+        // Suppress only that launch extra during restoration, retaining the full saved state.
+        val launch = intent.getParcelableExtra<CoreSwitchBean>(CoreSwitchBean.KEY_SWITCH_BEAN)
+        if (savedInstanceState != null) intent.removeExtra(CoreSwitchBean.KEY_SWITCH_BEAN)
+        try {
+            super.onCreate(savedInstanceState)
+        } finally {
+            if (launch != null) intent.putExtra(CoreSwitchBean.KEY_SWITCH_BEAN, launch)
+        }
         registerSlideBack()
 
         //Toast for all kinds of events
@@ -71,6 +78,22 @@ open class BaseActivity<Binding : ViewBinding?> : XPageActivity() {
             XToastUtils.warning(msg, 10000)
         }
     }
+
+    /** One policy for physical Back and toolbar Up; never pop a lone root into a blank page. */
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() { navigateBack() }
+
+    open fun navigateBack() {
+        val visible = supportFragmentManager.fragments.lastOrNull { it.isVisible }
+        if ((visible as? BaseFragment<*>)?.consumeNavigationBack() == true) return
+        if (supportFragmentManager.backStackEntryCount > 1) {
+            supportFragmentManager.popBackStackImmediate()
+        } else {
+            leaveNavigationRoot()
+        }
+    }
+
+    protected open fun leaveNavigationRoot() { finish() }
 
     /**
      * BuildViewBinding
@@ -118,7 +141,7 @@ open class BaseActivity<Binding : ViewBinding?> : XPageActivity() {
      * @return OpenedfragmentObject
      */
     fun <T : XPageFragment?> switchPage(clazz: Class<T>?): T {
-        return openPage(clazz, false)
+        return changePage(clazz) as T
     }
 
     /**
@@ -140,24 +163,12 @@ open class BaseActivity<Binding : ViewBinding?> : XPageActivity() {
     /**
      * Register swipe-back callback
      */
-    protected fun registerSlideBack() {
-        if (isSupportSlideBack) {
-            SlideBack.with(this)
-                .haveScroll(true)
-                .edgeMode(if (isRtl()) SlideBack.EDGE_RIGHT else SlideBack.EDGE_LEFT)
-                .callBack { popPage() }
-                .register()
-        }
-    }
+    protected fun registerSlideBack() { /* System back owns edge gestures. */ }
 
     /**
      * Unregister swipe-back callback
      */
-    protected fun unregisterSlideBack() {
-        if (isSupportSlideBack) {
-            SlideBack.unregister(this)
-        }
-    }
+    protected fun unregisterSlideBack() {}
 
     /**
      * @return Whether to support a slide back

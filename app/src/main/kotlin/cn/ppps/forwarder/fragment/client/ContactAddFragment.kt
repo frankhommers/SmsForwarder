@@ -19,7 +19,7 @@ import com.xuexiang.xhttp2.exception.ApiException
 import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.utils.TextUtils
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 import com.xuexiang.xutil.data.ConvertTools
 
 @Suppress("PrivatePropertyName")
@@ -67,6 +67,7 @@ class ContactAddFragment : BaseFragment<FragmentClientContactAddBinding?>(), Vie
 
     @SingleClick
     override fun onClick(v: View) {
+        if (v.id != R.id.btn_del && !cn.ppps.forwarder.utils.ItemRows.validateAll(binding!!.root)) return
         when (v.id) {
             R.id.btn_submit -> {
                 val requestUrl: String = HttpServerUtils.serverAddress + "/contact/add"
@@ -95,7 +96,6 @@ class ContactAddFragment : BaseFragment<FragmentClientContactAddBinding?>(), Vie
                 msgMap["data"] = dataMap
 
                 var requestMsg: String = Gson().toJson(msgMap)
-                Log.i(TAG, "requestMsg:$requestMsg")
 
                 val postRequest = XHttp.post(requestUrl).keepJson(true).timeStamp(true)
 
@@ -105,7 +105,6 @@ class ContactAddFragment : BaseFragment<FragmentClientContactAddBinding?>(), Vie
                         try {
                             requestMsg = Base64.encode(requestMsg.toByteArray())
                             requestMsg = RSACrypt.encryptByPublicKey(requestMsg, publicKey)
-                            Log.i(TAG, "requestMsg: $requestMsg")
                         } catch (e: Exception) {
                             XToastUtils.error(getString(R.string.request_failed) + e.message)
                             e.printStackTrace()
@@ -121,7 +120,6 @@ class ContactAddFragment : BaseFragment<FragmentClientContactAddBinding?>(), Vie
                             //requestMsg = Base64.encode(requestMsg.toByteArray())
                             val encryptCBC = SM4Crypt.encrypt(requestMsg.toByteArray(), sm4Key)
                             requestMsg = ConvertTools.bytes2HexString(encryptCBC)
-                            Log.i(TAG, "requestMsg: $requestMsg")
                         } catch (e: Exception) {
                             XToastUtils.error(getString(R.string.request_failed) + e.message)
                             e.printStackTrace()
@@ -144,7 +142,6 @@ class ContactAddFragment : BaseFragment<FragmentClientContactAddBinding?>(), Vie
                     }
 
                     override fun onSuccess(response: String) {
-                        Log.i(TAG, response)
                         try {
                             var json = response
                             if (HttpServerUtils.clientSafetyMeasures == 2) {

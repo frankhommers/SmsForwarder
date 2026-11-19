@@ -113,7 +113,7 @@ class RuleLine(line: String, lineNum: Int, beforeRuleLine: RuleLine?) {
             SURE_NOT -> mixChecked = !mixChecked
             else -> mixChecked = false
         }
-        logg("rule:$this checkMsg:$msg checked:$mixChecked")
+        logg("rule line checked:$mixChecked")
         return mixChecked
     }
 
@@ -159,7 +159,7 @@ class RuleLine(line: String, lineNum: Int, beforeRuleLine: RuleLine?) {
             evaluateCondition(value)
         }
 
-        logg("checkValue $msgValue $check $value checked:$checked")
+        logg("checkValue $check checked:$checked")
         return checked
     }
 
@@ -253,7 +253,7 @@ class RuleLine(line: String, lineNum: Int, beforeRuleLine: RuleLine?) {
                 //Caught Spaces
                 if (" " == w) {
                     buildMiddleWord = if (buildMiddleWord.isEmpty()) {
-                        throw Exception(lineNum.toString() + "line: consecutive spaces are not allowed！")
+                        throw Exception(cn.ppps.forwarder.App.context.getString(R.string.copy_rule_spaces, lineNum))
                     } else {
                         //Generated an intermediate.
                         middleList.add(buildMiddleWord.toString())
@@ -273,7 +273,7 @@ class RuleLine(line: String, lineNum: Int, beforeRuleLine: RuleLine?) {
         }
         logg("isDealValue done valueBuilder:$valueBuilder")
         if (middleList.size != 4) {
-            throw Exception(lineNum.toString() + "Line Configuration Error: Every line must have4tokens, for example: and mobile is equals ")
+            throw Exception(cn.ppps.forwarder.App.context.getString(R.string.copy_rule_tokens, lineNum))
         }
 
 
@@ -329,16 +329,16 @@ class RuleLine(line: String, lineNum: Int, beforeRuleLine: RuleLine?) {
         check = middleList[3]
         value = valueBuilder.toString()
         if (!CONJUNCTION_LIST.contains(conjunction)) {
-            throw Exception(lineNum.toString() + "Line configuration error: connection word only supported：" + CONJUNCTION_LIST + " but received" + conjunction)
+            throw Exception(cn.ppps.forwarder.App.context.getString(R.string.copy_rule_token_invalid, lineNum, CONJUNCTION_LIST.toString(), conjunction))
         }
         if (!FILED_LIST.contains(field)) {
-            throw Exception(lineNum.toString() + "Line Configuration Error: Fields only support：" + FILED_LIST + " but received" + field)
+            throw Exception(cn.ppps.forwarder.App.context.getString(R.string.copy_rule_token_invalid, lineNum, FILED_LIST.toString(), field))
         }
         if (!SURE_LIST.contains(sure)) {
-            throw Exception(lineNum.toString() + "Line Configuration Error " + sure + " supported confirmation tokens：" + SURE_LIST + " but received" + sure)
+            throw Exception(cn.ppps.forwarder.App.context.getString(R.string.copy_rule_token_invalid, lineNum, SURE_LIST.toString(), sure))
         }
         if (!CHECK_LIST.contains(check)) {
-            throw Exception(lineNum.toString() + "Line Configuration Error: Compare word only supported：" + CHECK_LIST + " but received" + check)
+            throw Exception(cn.ppps.forwarder.App.context.getString(R.string.copy_rule_token_invalid, lineNum, CHECK_LIST.toString(), check))
         }
         logg("----------$lineNum==$this")
     }

@@ -28,7 +28,7 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 import java.util.Date
 
 @Page(name = "Cleaner")
@@ -76,10 +76,8 @@ class CleanerFragment : BaseFragment<FragmentTasksActionCleanerBinding?>(), View
         })
 
         var settingVo = CleanerSetting(getString(R.string.task_cleaner_tips), 0)
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             settingVo = Gson().fromJson(eventData, CleanerSetting::class.java)
-            Log.d(TAG, "initViews settingVo:$settingVo")
         }
         binding!!.xsbDays.setDefaultValue(settingVo.days)
     }
@@ -89,6 +87,15 @@ class CleanerFragment : BaseFragment<FragmentTasksActionCleanerBinding?>(), View
         binding!!.btnTest.setOnClickListener(this)
         binding!!.btnDel.setOnClickListener(this)
         binding!!.btnSave.setOnClickListener(this)
+        // Visible value readout (no setOnSeekBarListener on this slider); display only. 0 = delete all logs.
+        binding!!.xsbDays.addOnChangeListener { _, _, _ -> syncDaysReadout() }
+        syncDaysReadout()
+    }
+
+    private fun syncDaysReadout() {
+        val b = binding ?: return
+        b.actionFormDaysValue.text = if (b.xsbDays.selectedNumber == 0) getString(R.string.action_form_days_all) else getString(R.string.action_form_days_value, b.xsbDays.selectedNumber)
+        b.actionFormDaysValue.visibility = b.xsbDays.visibility
     }
 
     @SingleClick
@@ -99,7 +106,6 @@ class CleanerFragment : BaseFragment<FragmentTasksActionCleanerBinding?>(), View
                     mCountDownHelper?.start()
                     try {
                         val settingVo = checkSetting()
-                        Log.d(TAG, settingVo.toString())
                         val taskAction = TaskSetting(TASK_ACTION_CLEANER, getString(R.string.task_cleaner), settingVo.description, Gson().toJson(settingVo), requestCode)
                         val taskActionsJson = Gson().toJson(arrayListOf(taskAction))
                         val msgInfo = MsgInfo("task", getString(R.string.task_cleaner), settingVo.description, Date(), getString(R.string.task_cleaner))

@@ -32,7 +32,7 @@ class LocationWorker(context: Context, params: WorkerParameters) : CoroutineWork
             val conditionType = inputData.getInt(TaskWorker.CONDITION_TYPE, -1)
             val locationJsonOld = inputData.getString("locationJsonOld")
             val locationJsonNew = inputData.getString("locationJsonNew")
-            Log.d(TAG, "conditionType = $conditionType, locationJsonOld = $locationJsonOld, locationJsonNew = $locationJsonNew")
+            Log.d(TAG, "Sensitive event details omitted")
 
             if (locationJsonOld == null || locationJsonNew == null) {
                 Log.d(TAG, "locationInfoOld or locationInfoNew is null")
@@ -78,7 +78,7 @@ class LocationWorker(context: Context, params: WorkerParameters) : CoroutineWork
                             "distance" -> {
                                 val distanceOld = calculateDistance(locationOld.latitude, locationOld.longitude, locationSetting.latitude, locationSetting.longitude)
                                 val distanceNew = calculateDistance(locationNew.latitude, locationNew.longitude, locationSetting.latitude, locationSetting.longitude)
-                                Log.d(TAG, "TASK-${task.id}：distanceOld = $distanceOld, distanceNew = $distanceNew")
+                                Log.d(TAG, "Local event processed")
                                 description += String.format(getString(R.string.current_distance_from_center), String.format("%.2f", distanceNew))
                                 distanceOld > locationSetting.distance && distanceNew <= locationSetting.distance
                             }
@@ -141,7 +141,7 @@ class LocationWorker(context: Context, params: WorkerParameters) : CoroutineWork
                             "distance" -> {
                                 val distanceOld = calculateDistance(locationOld.latitude, locationOld.longitude, locationSetting.latitude, locationSetting.longitude)
                                 val distanceNew = calculateDistance(locationNew.latitude, locationNew.longitude, locationSetting.latitude, locationSetting.longitude)
-                                Log.d(TAG, "TASK-${task.id}：distanceOld = $distanceOld, distanceNew = $distanceNew")
+                                Log.d(TAG, "Local event processed")
                                 description += String.format(getString(R.string.current_distance_from_center), String.format("%.2f", distanceNew))
                                 distanceOld <= locationSetting.distance && distanceNew > locationSetting.distance
                             }

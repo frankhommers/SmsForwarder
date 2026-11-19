@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Email encryption policy: fallback toggle and per-recipient delivery-log outcomes (EmailEncryption.kt). -->
+<resources>
+    <string name="target_form_email_fallback">Send unencrypted if encryption fails</string>
+    <string name="target_form_email_fallback_off">Off: a recipient whose email cannot be encrypted gets nothing.</string>
+    <string name="target_form_email_fallback_on">Warning: recipients whose encryption fails get a readable email.</string>
+    <string name="target_form_email_fallback_na">Only used with S/MIME, OpenPGP or OpenKeychain; your choice is kept.</string>
+    <string name="target_form_email_fallback_dialog">Applies to S/MIME, OpenPGP and OpenKeychain. Encryption fails when a recipient has no key, the key cannot be read or used, or encrypting goes wrong. Off (recommended): that recipient gets no email and the log says why; the other recipients still get theirs. On: that recipient gets a normal, readable email instead, and the log marks it as unencrypted. A mail server error never leads to an unencrypted copy.</string>
+    <string name="email_outcome_encrypted">%1$s: sent encrypted (%2$s).</string>
+    <string name="email_outcome_encrypted_signed">%1$s: sent encrypted and signed (%2$s).</string>
+    <string name="email_outcome_unencrypted">%1$s: sent UNENCRYPTED (fallback is on): %2$s.</string>
+    <string name="email_outcome_unencrypted_signed">%1$s: sent UNENCRYPTED, signed (fallback is on): %2$s.</string>
+    <string name="email_outcome_failed">%1$s: not sent: %2$s.</string>
+    <string name="email_reason_no_key">no key for this recipient</string>
+    <string name="email_reason_bad_key">the recipient key could not be read</string>
+    <string name="email_reason_unusable_key">the recipient key cannot be used for encryption</string>
+    <string name="email_reason_encryption_failed">encryption failed (%1$s)</string>
+    <string name="email_reason_signing_failed">your signing key or its password could not be used</string>
+    <string name="email_reason_signing_password">your signing key needs its password</string>
+    <string name="email_reason_prepare_failed">the email could not be prepared (%1$s)</string>
+    <string name="email_reason_smtp">mail server error: %1$s</string>
+</resources>

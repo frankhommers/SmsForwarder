@@ -1,235 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/xui_config_color_background"
-    android:orientation="vertical"
-    tools:ignore="Overdraw">
-
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:background="?attr/xui_config_color_background" android:orientation="vertical" tools:ignore="Overdraw">
     <androidx.core.widget.NestedScrollView style="@style/ScrollViewStyle">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:paddingTop="10dp"
-            android:paddingBottom="5dp">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="240dp"
-                android:layout_height="120dp"
-                android:contentDescription="@string/logo"
-                android:scaleType="fitCenter"
-                app:srcCompat="@drawable/ic_splash_app_logo"
-                tools:ignore="ImageContrastCheck" />
-
-            <TextView
-                android:id="@+id/tv_slogan"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@string/notification_content"
-                android:textAlignment="center"
-                android:textColor="@color/xui_config_color_gray_6"
-                android:textStyle="bold" />
-
-            <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
-                android:id="@+id/menu_join_preview_program"
-                style="@style/InfoItem.AboutWithBtn"
-                android:layout_marginTop="10dp"
-                app:sLeftTextString="@string/join_preview_program">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="10dp"
-                    android:layout_toStartOf="@id/sRightImgId"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <com.xuexiang.xui.widget.button.switchbutton.SwitchButton
-                        android:id="@+id/sb_join_preview_program"
-                        style="@style/SwitchButtonStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:ignore="DuplicateSpeakableTextCheck,TouchTargetSizeCheck" />
-
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:orientation="vertical" android:paddingTop="10dp" android:paddingBottom="5dp">
+            <androidx.appcompat.widget.AppCompatImageView android:layout_width="240dp" android:layout_height="120dp" android:contentDescription="@string/logo" android:scaleType="fitCenter" app:srcCompat="@drawable/ic_splash_app_logo" tools:ignore="ImageContrastCheck" />
+            <TextView android:id="@+id/tv_slogan" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/notification_content" android:textAlignment="center" android:textColor="?attr/colorOnSurfaceVariant" android:textAppearance="@style/TextAppearance.Material3.BodyMedium" android:paddingStart="16dp" android:paddingEnd="16dp" />
+            <cn.ppps.forwarder.widget.material.TargetInfoRow android:id="@+id/menu_join_preview_program" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" app:sLeftTextString="@string/join_preview_program">
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginEnd="10dp" android:layout_toStartOf="@id/sRightImgId" android:gravity="center_vertical" android:orientation="horizontal">
+                    <cn.ppps.forwarder.widget.material.TargetSwitch android:id="@+id/sb_join_preview_program" style="@style/SwitchButtonStyle" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:ignore="DuplicateSpeakableTextCheck,TouchTargetSizeCheck" android:layout_gravity="top" android:minHeight="48dp" />
                 </LinearLayout>
-
-            </com.xuexiang.xui.widget.textview.supertextview.SuperTextView>
-
-            <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
-                android:id="@+id/menu_version"
-                style="@style/InfoItem.AboutWithBtn"
-                app:sLeftTextString="@string/about_app_version">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="10dp"
-                    android:layout_toStartOf="@id/sRightImgId"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <com.xuexiang.xui.widget.button.SmoothCheckBox
-                        android:id="@+id/scb_auto_check_update"
-                        android:layout_width="15dp"
-                        android:layout_height="15dp"
-                        android:layout_marginStart="5dp"
-                        app:scb_color_checked="@color/colorPrimary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/auto_check"
-                        android:textSize="@dimen/text_size_mini"
-                        tools:ignore="SmallSp" />
-
-                    <com.xuexiang.xui.widget.button.CountDownButton
-                        android:id="@+id/btn_update"
-                        style="@style/Button.Blue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:minWidth="30dp"
-                        android:minHeight="0dp"
-                        android:padding="5dp"
-                        android:text="@string/check_update"
-                        android:textSize="@dimen/text_size_small"
-                        app:cdbt_countDown="3000"
-                        app:cdbt_enableCountDown="true" />
-
+            </cn.ppps.forwarder.widget.material.TargetInfoRow>
+            <cn.ppps.forwarder.widget.material.TargetInfoRow android:id="@+id/menu_version" android:layout_width="match_parent" android:layout_height="wrap_content" app:sLeftTextString="@string/about_app_version">
+                <!-- Updates (form pattern: Title Small heading, Body Medium supporting lines, square checkbox row). -->
+                <LinearLayout android:id="@+id/layout_updates" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:gravity="center_vertical|start" android:orientation="vertical">
+                    <TextView android:id="@+id/tv_updates_title" style="@style/Form.SectionTitle" android:text="@string/updater_title" />
+                    <TextView android:id="@+id/tv_update_source" style="@style/Form.Supporting" android:text="@string/updater_source" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal" android:gravity="center_vertical">
+                        <cn.ppps.forwarder.widget.material.TargetCheckBox android:id="@+id/scb_auto_check_update" style="@style/Form.CheckRow" android:layout_width="match_parent" android:text="@string/updater_auto_check" />
+                    </LinearLayout>
+                    <TextView android:id="@+id/tv_update_last_check" style="@style/Form.Supporting" android:layout_marginTop="8dp" android:text="@string/updater_never_checked" />
+                    <TextView android:id="@+id/tv_update_status" style="@style/Form.Supporting" android:textColor="?attr/colorOnSurface" android:accessibilityLiveRegion="polite" />
+                    <com.google.android.material.progressindicator.LinearProgressIndicator android:id="@+id/progress_update" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:visibility="gone" app:trackCornerRadius="2dp" />
+                    <TextView android:id="@+id/tv_update_progress" style="@style/Form.Supporting" android:visibility="gone" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_update" style="@style/Widget.Material3.Button.TonalButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:minHeight="48dp" android:text="@string/updater_check_now" app:cdbt_countDown="3000" app:cdbt_enableCountDown="true" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_update_install" style="@style/Widget.Material3.Button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="48dp" android:text="@string/updater_install_now" android:visibility="gone" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_update_permission" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="48dp" android:text="@string/updater_allow_install" android:visibility="gone" />
                 </LinearLayout>
-
-            </com.xuexiang.xui.widget.textview.supertextview.SuperTextView>
-
-            <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
-                android:id="@+id/menu_cache"
-                style="@style/InfoItem.AboutWithBtn"
-                app:sLeftTextString="@string/about_cache_size">
-
-                <com.xuexiang.xui.widget.button.CountDownButton
-                    android:id="@+id/btn_cache"
-                    style="@style/Button.Blue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="10dp"
-                    android:layout_toStartOf="@id/sRightImgId"
-                    android:minWidth="30dp"
-                    android:minHeight="0dp"
-                    android:padding="5dp"
-                    android:text="@string/clear_cache"
-                    android:textSize="@dimen/text_size_small"
-                    app:cdbt_countDown="1000"
-                    app:cdbt_enableCountDown="true" />
-
-            </com.xuexiang.xui.widget.textview.supertextview.SuperTextView>
-
-            <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
-                android:id="@+id/menu_frpc"
-                style="@style/InfoItem.AboutWithBtn"
-                android:visibility="gone"
-                app:sLeftTextString="@string/about_frpc_version">
-
-                <com.xuexiang.xui.widget.button.CountDownButton
-                    android:id="@+id/btn_frpc"
-                    style="@style/Button.Blue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="10dp"
-                    android:layout_toStartOf="@id/sRightImgId"
-                    android:minWidth="30dp"
-                    android:minHeight="0dp"
-                    android:padding="5dp"
-                    android:text="@string/delete_frpc"
-                    android:textSize="@dimen/text_size_small"
-                    app:cdbt_countDown="1000"
-                    app:cdbt_enableCountDown="true" />
-
-            </com.xuexiang.xui.widget.textview.supertextview.SuperTextView>
-
-            <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
-                android:id="@+id/menu_wechat_miniprogram"
-                style="@style/InfoItem.About"
-                app:sLeftTextString="@string/about_item_wechat_miniprogram" />
-
-            <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
-                style="@style/InfoItem.AboutWithBtn"
-                android:layout_marginTop="10dp"
-                app:sLeftTextString="@string/about_item_open_source">
-
-                <com.xuexiang.xui.widget.button.CountDownButton
-                    android:id="@+id/btn_github"
-                    style="@style/Button.Blue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="10dp"
-                    android:layout_toStartOf="@id/btn_gitee"
-                    android:minWidth="30dp"
-                    android:minHeight="0dp"
-                    android:padding="5dp"
-                    android:text="@string/about_item_github"
-                    android:textSize="@dimen/text_size_small"
-                    app:cdbt_countDown="500"
-                    app:cdbt_enableCountDown="true" />
-
-                <com.xuexiang.xui.widget.button.CountDownButton
-                    android:id="@+id/btn_gitee"
-                    style="@style/Button.Blue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="10dp"
-                    android:layout_toStartOf="@id/sRightImgId"
-                    android:minWidth="30dp"
-                    android:minHeight="0dp"
-                    android:padding="5dp"
-                    android:text="@string/about_item_gitee"
-                    android:textSize="@dimen/text_size_small"
-                    app:cdbt_countDown="500"
-                    app:cdbt_enableCountDown="true" />
-
-            </com.xuexiang.xui.widget.textview.supertextview.SuperTextView>
-
-            <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
-                android:id="@+id/menu_donation"
-                style="@style/InfoItem.About"
-                app:sLeftTextString="@string/about_item_donation_link" />
-
-            <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
-                android:id="@+id/menu_user_protocol"
-                style="@style/InfoItem.About"
-                app:sLeftTextString="@string/title_user_protocol" />
-
-            <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
-                android:id="@+id/menu_privacy_protocol"
-                style="@style/InfoItem.About"
-                app:sLeftTextString="@string/title_privacy_protocol" />
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
-            <TextView
-                android:id="@+id/copyright"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="5dp"
-                android:gravity="center_horizontal"
-                android:textColor="@color/xui_config_color_gray_7" />
-
+            </cn.ppps.forwarder.widget.material.TargetInfoRow>
+            <cn.ppps.forwarder.widget.material.TargetInfoRow android:id="@+id/menu_cache" android:layout_width="match_parent" android:layout_height="wrap_content" app:sLeftTextString="@string/about_cache_size">
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_cache" style="@style/Widget.Material3.Button.TonalButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginEnd="10dp" android:layout_toStartOf="@id/sRightImgId" android:text="@string/clear_cache" android:textAppearance="@style/TextAppearance.Material3.LabelLarge" app:cdbt_countDown="1000" app:cdbt_enableCountDown="true" />
+            </cn.ppps.forwarder.widget.material.TargetInfoRow>
+            <cn.ppps.forwarder.widget.material.TargetInfoRow android:id="@+id/menu_frpc" android:layout_width="match_parent" android:layout_height="wrap_content" android:visibility="gone" app:sLeftTextString="@string/about_frpc_version">
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_frpc" style="@style/Widget.Material3.Button.TonalButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginEnd="10dp" android:layout_toStartOf="@id/sRightImgId" android:text="@string/delete_frpc" android:textAppearance="@style/TextAppearance.Material3.LabelLarge" app:cdbt_countDown="1000" app:cdbt_enableCountDown="true" />
+            </cn.ppps.forwarder.widget.material.TargetInfoRow>
+            <cn.ppps.forwarder.widget.material.TargetInfoRow android:id="@+id/menu_wechat_miniprogram" android:layout_width="match_parent" android:layout_height="wrap_content" app:sLeftTextString="@string/about_item_wechat_miniprogram" />
+            <cn.ppps.forwarder.widget.material.TargetInfoRow android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" app:sLeftTextString="@string/about_item_open_source">
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_github" style="@style/Widget.Material3.Button.TonalButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginEnd="10dp" android:layout_toStartOf="@id/btn_gitee" android:text="@string/infra_form_about_upstream" android:textAppearance="@style/TextAppearance.Material3.LabelLarge" app:cdbt_countDown="500" app:cdbt_enableCountDown="true" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_gitee" style="@style/Widget.Material3.Button.TonalButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginEnd="10dp" android:layout_toStartOf="@id/sRightImgId" android:text="@string/infra_form_about_fork" android:textAppearance="@style/TextAppearance.Material3.LabelLarge" app:cdbt_countDown="500" app:cdbt_enableCountDown="true" />
+            </cn.ppps.forwarder.widget.material.TargetInfoRow>
+            <cn.ppps.forwarder.widget.material.TargetInfoRow android:id="@+id/menu_donation" android:layout_width="match_parent" android:layout_height="wrap_content" app:sLeftTextString="@string/about_item_donation_link" />
+            <cn.ppps.forwarder.widget.material.TargetInfoRow android:id="@+id/menu_user_protocol" android:layout_width="match_parent" android:layout_height="wrap_content" app:sLeftTextString="@string/title_user_protocol" />
+            <cn.ppps.forwarder.widget.material.TargetInfoRow android:id="@+id/menu_privacy_protocol" android:layout_width="match_parent" android:layout_height="wrap_content" app:sLeftTextString="@string/title_privacy_protocol" />
+            <Space android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+            <TextView android:id="@+id/copyright" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="15dp" android:layout_marginBottom="5dp" android:gravity="center_horizontal" android:textColor="?attr/colorOnSurfaceVariant" />
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
-
 </LinearLayout>

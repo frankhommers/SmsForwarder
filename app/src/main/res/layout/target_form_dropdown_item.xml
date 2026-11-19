@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Popup row for target editor dropdowns (TargetForm.wrapDropdown): wraps long choices instead of clipping them. -->
+<cn.ppps.forwarder.widget.material.WrappingDropdownTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical|start"
+    android:singleLine="false"
+    android:scrollHorizontally="false"
+    android:maxLines="6"
+    android:minHeight="48dp"
+    android:paddingStart="16dp"
+    android:paddingTop="12dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="12dp"
+    android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+    android:textColor="@color/m3_on_surface" />

@@ -1,241 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/xui_config_color_background"
-    android:orientation="vertical">
+<!-- Clone configuration / Backup and restore (Form pattern). Ordinary M3 buttons replace the stretched navy ellipse drawables.
+     Ids and view types unchanged: tabBar, layout_network, layout_offline, btn_push/pull/export/import (MaterialButton),
+     tv_send/tv_receive/tv_export/tv_import/tv_backup_path (TextView). btn_storage_permission is new. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:background="?attr/xui_config_color_background" android:orientation="vertical">
+    <cn.ppps.forwarder.widget.material.TargetTabs android:id="@+id/tabBar" android:layout_width="match_parent" android:layout_height="wrap_content" app:tabMode="fixed" app:tabGravity="fill" />
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:overScrollMode="never">
+        <LinearLayout style="@style/Form.Content">
 
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:overScrollMode="never">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <com.xuexiang.xui.widget.tabbar.EasyIndicator
-                android:id="@+id/tabBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                app:indicator_height="42dp"
-                app:indicator_line_height="2dp"
-                app:indicator_line_show="true"
-                app:indicator_textSize="@dimen/text_size_medium"
-                app:indicator_width="0dp" />
-
-            <LinearLayout
-                android:id="@+id/layout_network"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="30dp"
-                    android:gravity="center_vertical|center_horizontal"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
-                        <Button
-                            android:id="@+id/btn_push"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:background="@drawable/send_btn"
-                            android:text="@string/push"
-                            android:textColor="@android:color/white"
-                            android:textSize="30sp"
-                            tools:ignore="TextContrastCheck" />
-
-                        <TextView
-                            android:id="@+id/tv_send"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/old_mobile_phone" />
-
-                    </LinearLayout>
-
-                    <androidx.appcompat.widget.AppCompatImageView
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginTop="-15dp"
-                        android:layout_marginEnd="10dp"
-                        android:contentDescription="@string/api_clone"
-                        app:srcCompat="@drawable/ic_swap_horiz" />
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
-                        <Button
-                            android:id="@+id/btn_pull"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:background="@drawable/receive_btn"
-                            android:text="@string/pull"
-                            android:textColor="@android:color/white"
-                            android:textSize="30sp" />
-
-                        <TextView
-                            android:id="@+id/tv_receive"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/new_mobile_phone" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="start"
-                    android:orientation="vertical"
-                    android:padding="10dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:text="@string/operating_instruction"
-                        android:textSize="@dimen/text_size_mini"
-                        tools:ignore="SmallSp" />
-
-                </LinearLayout>
-
+            <!-- Network: push to / pull from the server phone -->
+            <LinearLayout android:id="@+id/layout_network" style="@style/Form.Section.First">
+                <TextView style="@style/Form.SectionTitle" android:text="@string/push" />
+                <TextView android:id="@+id/tv_send" style="@style/Form.Supporting" android:text="@string/old_mobile_phone" />
+                <TextView style="@style/Form.Supporting" android:text="@string/infra_form_clone_push_help" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_push" style="@style/InfraForm.Button" android:text="@string/push" />
+                <TextView style="@style/Form.SectionTitle" android:layout_marginTop="24dp" android:text="@string/pull" />
+                <TextView android:id="@+id/tv_receive" style="@style/Form.Supporting" android:text="@string/new_mobile_phone" />
+                <TextView style="@style/Form.Supporting" android:text="@string/infra_form_clone_pull_help" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_pull" style="@style/InfraForm.Button" android:text="@string/pull" />
+                <TextView style="@style/Form.Supporting" android:layout_marginTop="24dp" android:text="@string/operating_instruction" />
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/layout_offline"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="30dp"
-                    android:gravity="center_vertical|center_horizontal"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
-                        <Button
-                            android:id="@+id/btn_export"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:background="@drawable/send_btn"
-                            android:text="@string/export"
-                            android:textColor="@android:color/white"
-                            android:textSize="30sp" />
-
-                        <TextView
-                            android:id="@+id/tv_export"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/old_mobile_phone" />
-
-                    </LinearLayout>
-
-                    <androidx.appcompat.widget.AppCompatImageView
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginTop="-15dp"
-                        android:layout_marginEnd="10dp"
-                        android:contentDescription="@string/api_clone"
-                        app:srcCompat="@drawable/ic_swap_horiz" />
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
-                        <Button
-                            android:id="@+id/btn_import"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:background="@drawable/receive_btn"
-                            android:text="@string/imports"
-                            android:textColor="@android:color/white"
-                            android:textSize="30sp" />
-
-                        <TextView
-                            android:id="@+id/tv_import"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/new_mobile_phone" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="start"
-                    android:orientation="vertical"
-                    android:padding="10dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:text="@string/tips_backup_path"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tv_backup_path"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="@dimen/text_size_small"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:text="@string/operating_instruction_offline"
-                        android:textSize="@dimen/text_size_mini"
-                        tools:ignore="SmallSp" />
-
-                </LinearLayout>
-
+            <!-- Offline: export to / import from a file in Download -->
+            <LinearLayout android:id="@+id/layout_offline" style="@style/Form.Section.First" android:visibility="gone">
+                <TextView style="@style/Form.SectionTitle" android:text="@string/tips_backup_path" />
+                <TextView android:id="@+id/tv_backup_path" style="@style/Form.Supporting" android:textIsSelectable="true" android:text="@string/storage_permission_tips" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_storage_permission" style="@style/InfraForm.Button.Outlined" android:text="@string/infra_form_storage_grant" android:visibility="gone" />
+                <TextView style="@style/Form.SectionTitle" android:layout_marginTop="24dp" android:text="@string/export" />
+                <TextView android:id="@+id/tv_export" style="@style/Form.Supporting" android:text="@string/old_mobile_phone" />
+                <TextView style="@style/Form.Supporting" android:text="@string/infra_form_clone_export_help" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_export" style="@style/InfraForm.Button" android:text="@string/export" />
+                <TextView style="@style/Form.SectionTitle" android:layout_marginTop="24dp" android:text="@string/imports" />
+                <TextView android:id="@+id/tv_import" style="@style/Form.Supporting" android:text="@string/new_mobile_phone" />
+                <TextView style="@style/Form.Supporting" android:text="@string/infra_form_clone_import_help" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_import" style="@style/InfraForm.Button" android:text="@string/imports" />
+                <TextView style="@style/Form.Supporting" android:layout_marginTop="24dp" android:text="@string/operating_instruction_offline" />
             </LinearLayout>
-
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
-
 </LinearLayout>

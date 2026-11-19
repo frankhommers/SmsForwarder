@@ -38,7 +38,7 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 import com.xuexiang.xutil.resource.ResUtils.getDrawable
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -103,16 +103,13 @@ class RuleFragment : BaseFragment<FragmentTasksActionRuleBinding?>(), View.OnCli
             }
         })
 
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             val settingVo = Gson().fromJson(eventData, RuleSetting::class.java)
             binding!!.rgStatus.check(if (settingVo.status == 1) R.id.rb_status_enable else R.id.rb_status_disable)
-            Log.d(TAG, settingVo.ruleList.toString())
             settingVo.ruleList.forEach {
                 ruleId = it.id
                 ruleListSelected.add(it)
             }
-            Log.d(TAG, "initViews settingVo:$settingVo")
         }
 
         //Initiation Transfer Rule Drop-Box
@@ -139,7 +136,6 @@ class RuleFragment : BaseFragment<FragmentTasksActionRuleBinding?>(), View.OnCli
                     mCountDownHelper?.start()
                     try {
                         val settingVo = checkSetting()
-                        Log.d(TAG, settingVo.toString())
                         val taskAction = TaskSetting(TASK_ACTION_RULE, getString(R.string.task_rule), settingVo.description, Gson().toJson(settingVo), requestCode)
                         val taskActionsJson = Gson().toJson(arrayListOf(taskAction))
                         val msgInfo = MsgInfo("task", getString(R.string.task_rule), settingVo.description, Date(), getString(R.string.task_rule))
@@ -225,7 +221,6 @@ class RuleFragment : BaseFragment<FragmentTasksActionRuleBinding?>(), View.OnCli
             override fun onDragFinished() {
                 ruleListSelected = ruleRecyclerAdapter.itemList
                 //ruleRecyclerAdapter.notifyDataSetChanged()
-                Log.d(TAG, "onDragFinished: $ruleListSelected")
             }
         })
         val ruleTouchHelper = ItemTouchHelper(ruleMoveCallback)
@@ -266,7 +261,7 @@ class RuleFragment : BaseFragment<FragmentTasksActionRuleBinding?>(), View.OnCli
                     }
                     ruleSpinnerList.add(RuleSpinnerItem(name, getDrawable(icon), rule.id, rule.status))
                 }
-                ruleSpinnerAdapter = RuleSpinnerAdapter(ruleSpinnerList).setIsFilterKey(true).setFilterColor("#EF5362").setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
+                ruleSpinnerAdapter = RuleSpinnerAdapter(ruleSpinnerList).setIsFilterKey(true).setFilterColor(String.format("#%06X", com.google.android.material.color.MaterialColors.getColor(binding!!.root, com.google.android.material.R.attr.colorPrimary) and 0xFFFFFF)).setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
                 binding!!.spRule.setAdapter(ruleSpinnerAdapter)
                 //ruleSpinnerAdapter.notifyDataSetChanged()
 

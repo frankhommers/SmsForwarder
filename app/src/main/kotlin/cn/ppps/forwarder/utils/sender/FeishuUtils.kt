@@ -101,12 +101,10 @@ class FeishuUtils private constructor() {
             }
 
             val requestUrl = setting.webhook
-            Log.i(TAG, "requestUrl:$requestUrl")
 
             val msgMap: MutableMap<String, Any> = mutableMapOf()
             val timestamp = System.currentTimeMillis() / 1000
             val stringToSign = "$timestamp\n" + setting.secret
-            Log.i(TAG, "stringToSign = $stringToSign")
 
             //UseHmacSHA256Algorithm calculates signature
             val mac = Mac.getInstance("HmacSHA256")
@@ -145,7 +143,6 @@ class FeishuUtils private constructor() {
                 msgMap["content"] = contentMap
                 requestMsg = Gson().toJson(msgMap)
             }
-            Log.i(TAG, "requestMsg:$requestMsg")
 
             XHttp.post(requestUrl)
                 .upJson(requestMsg)
@@ -165,7 +162,6 @@ class FeishuUtils private constructor() {
                     }
 
                     override fun onSuccess(response: String) {
-                        Log.i(TAG, response)
 
                         val resp = Gson().fromJson(response, FeishuResult::class.java)
                         val status = if (resp?.code == 0L) 2 else 0

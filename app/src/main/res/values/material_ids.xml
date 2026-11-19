@@ -1,0 +1,4 @@
+<resources>
+    <item name="item_rows_controller" type="id" />
+    <item name="navigation_labels_controller" type="id" />
+</resources>

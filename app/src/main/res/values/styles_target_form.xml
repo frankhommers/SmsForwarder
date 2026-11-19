@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Target editor additions to the Form pattern (privacy-verification/form-pattern/PATTERN.md).
+  Used only by the Bark, Email, Telegram, Gotify and URL Scheme target editors and item_add_recipient.
+  Additive: no existing Form.*, BarStyle, rg_* or SwitchButtonStyle style is changed.
+-->
+<resources>
+
+    <!-- Empty root so the dotted TargetForm.* names resolve. -->
+    <style name="TargetForm" />
+
+    <!-- Heading row with a 48dp icon at the end (help or add). The heading is centred on the icon. -->
+    <style name="TargetForm.TitleRow" parent="Form.HelpRow">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
+    <!--
+      48dp icon button at the end keyline; same geometry as Form.HelpIcon (glyph ends 12dp inside the keyline, like a
+      TextInputLayout end icon). Set android:src, app:tint and android:contentDescription on the view itself.
+    -->
+    <style name="TargetForm.IconAction">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_marginStart">4dp</item>
+        <item name="android:layout_marginEnd">-12dp</item>
+        <item name="android:scaleType">center</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+    </style>
+
+    <!-- Same icon button beside an outlined field: 4dp down so it is centred on the 56dp outline. -->
+    <style name="TargetForm.IconAction.Field">
+        <item name="android:layout_marginTop">4dp</item>
+    </style>
+
+    <!-- Show/hide toggle for a template tag grid, directly below its field, text at the keyline. -->
+    <style name="TargetForm.TagToggle" parent="Form.Disclosure">
+        <item name="android:layout_marginTop">4dp</item>
+    </style>
+
+    <!-- Template tag grid (filled by CommonUtils.createTagButtons). Hidden until its toggle opens it. -->
+    <style name="TargetForm.TagGrid">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:columnCount">2</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <!-- A read-only current value (for example the selected signing key): Body Large, onSurface. -->
+    <style name="TargetForm.Value">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.Material3.BodyLarge</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+</resources>

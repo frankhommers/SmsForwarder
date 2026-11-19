@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Additions to the shared Form.* recipe (styles_form.xml, unchanged) for the final small editors.
+  Used only by fragment_tasks_action_frpc.xml. No text here; every locale inherits it from base values/.
+-->
+<resources>
+
+    <!-- Empty root so the dotted EditorForm.* names resolve (implicit parent). -->
+    <style name="EditorForm" />
+
+    <!-- One-line notice that a feature cannot run in this build: Body Medium in the error colour, at the keyline. -->
+    <style name="EditorForm.Notice" parent="Form.Supporting">
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:textColor">?attr/colorError</item>
+    </style>
+
+</resources>

@@ -36,9 +36,9 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -65,6 +65,20 @@ class SmsFragment : BaseFragment<FragmentSendersSmsBinding?>(), View.OnClickList
     @JvmField
     @AutoWired(name = KEY_SENDER_CLONE)
     var isClone: Boolean = false
+
+    private val contactPicker = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            val uri = result.data?.data ?: return@registerForActivityResult
+            try {
+                requireContext().contentResolver.query(uri, arrayOf(android.provider.ContactsContract.CommonDataKinds.Phone.NUMBER), null, null, null)?.use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        val number = cursor.getString(0).replace(Regex("[\\s()-]"), "")
+                        (binding?.etMobiles?.getTag(R.id.item_rows_controller) as? cn.ppps.forwarder.utils.ItemRows)?.appendItem(number)
+                    }
+                }
+            } catch (_: Exception) { XToastUtils.error(R.string.copy_contact_unavailable) }
+        }
+    }
 
     override fun initArgs() {
         XRouter.getInstance().inject(this)
@@ -149,7 +163,6 @@ class SmsFragment : BaseFragment<FragmentSendersSmsBinding?>(), View.OnClickList
                 binding!!.etName.setText(sender.name)
                 binding!!.sbEnable.isChecked = sender.status == 1
                 val settingVo = Gson().fromJson(sender.jsonSetting, SmsSetting::class.java)
-                Log.d(TAG, settingVo.toString())
                 if (settingVo != null) {
                     binding!!.rgSimSlot.check(settingVo.getSmsSimSlotCheckId())
                     binding!!.etMobiles.setText(settingVo.mobiles)
@@ -161,6 +174,9 @@ class SmsFragment : BaseFragment<FragmentSendersSmsBinding?>(), View.OnClickList
 
     override fun initListeners() {
         binding!!.btInsertSender.setOnClickListener(this)
+        binding!!.btPickContact.setOnClickListener {
+            contactPicker.launch(android.content.Intent(android.content.Intent.ACTION_PICK, android.provider.ContactsContract.CommonDataKinds.Phone.CONTENT_URI))
+        }
         binding!!.btnTest.setOnClickListener(this)
         binding!!.btnDel.setOnClickListener(this)
         binding!!.btnSave.setOnClickListener(this)
@@ -169,10 +185,11 @@ class SmsFragment : BaseFragment<FragmentSendersSmsBinding?>(), View.OnClickList
 
     @SingleClick
     override fun onClick(v: View) {
+        if (v.id in listOf(R.id.btn_save, R.id.btn_test) && !cn.ppps.forwarder.utils.ItemRows.validateAll(binding!!.root)) return
         try {
             when (v.id) {
                 R.id.bt_insert_sender -> {
-                    CommonUtils.insertOrReplaceText2Cursor(binding!!.etMobiles, getString(R.string.tag_from))
+                    (binding!!.etMobiles.getTag(R.id.item_rows_controller) as? cn.ppps.forwarder.utils.ItemRows)?.appendItem(getString(R.string.tag_from))
                     return
                 }
 
@@ -181,7 +198,6 @@ class SmsFragment : BaseFragment<FragmentSendersSmsBinding?>(), View.OnClickList
                     Thread {
                         try {
                             val settingVo = checkSetting()
-                            Log.d(TAG, settingVo.toString())
                             val name = binding!!.etName.text.toString().trim().takeIf { it.isNotEmpty() } ?: getString(R.string.test_sender_name)
                             val msgInfo = MsgInfo("sms", getString(R.string.test_phone_num), String.format(getString(R.string.test_sender_sms), name), Date(), getString(R.string.test_sim_info))
                             SmsUtils.sendMsg(settingVo, msgInfo)
@@ -212,14 +228,14 @@ class SmsFragment : BaseFragment<FragmentSendersSmsBinding?>(), View.OnClickList
                 R.id.btn_save -> {
                     val name = binding!!.etName.text.toString().trim()
                     if (TextUtils.isEmpty(name)) {
-                        throw Exception(getString(R.string.invalid_name))
+                        cn.ppps.forwarder.widget.material.FormValidation.show(binding!!.etName, getString(R.string.invalid_name))
+                        return
                     }
 
                     val status = if (binding!!.sbEnable.isChecked) 1 else 0
                     val settingVo = checkSetting()
                     if (isClone) senderId = 0
                     val senderNew = Sender(senderId, senderType, name, Gson().toJson(settingVo), status)
-                    Log.d(TAG, senderNew.toString())
 
                     viewModel.insertOrUpdate(senderNew)
                     XToastUtils.success(R.string.tipSaveSuccess)

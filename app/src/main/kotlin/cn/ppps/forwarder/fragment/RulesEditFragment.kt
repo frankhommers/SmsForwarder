@@ -80,12 +80,12 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xrouter.utils.TextUtils
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
-import com.xuexiang.xui.widget.picker.widget.builder.OptionsPickerBuilder
-import com.xuexiang.xui.widget.picker.widget.listener.OnOptionsSelectListener
-import com.xuexiang.xui.widget.spinner.materialspinner.MaterialSpinner
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
+import cn.ppps.forwarder.widget.material.OptionsPickerBuilder
+import cn.ppps.forwarder.widget.material.OnOptionsSelectListener
+import cn.ppps.forwarder.widget.material.TargetDropdown as MaterialSpinner
 import com.xuexiang.xutil.XUtil
 import com.xuexiang.xutil.resource.ResUtils.getColors
 import com.xuexiang.xutil.resource.ResUtils.getDrawable
@@ -321,6 +321,9 @@ class RulesEditFragment : BaseFragment<FragmentRulesEditBinding?>(), View.OnClic
 
     @SingleClick
     override fun onClick(v: View) {
+        // Validate only actions that submit the draft; pickers must remain usable while editing.
+        if ((v.id == R.id.btn_save || v.id == R.id.btn_test) &&
+            !cn.ppps.forwarder.utils.ItemRows.validateAll(binding!!.root)) return
         try {
             when (v.id) {
                 R.id.btn_silent_period -> {
@@ -360,7 +363,6 @@ class RulesEditFragment : BaseFragment<FragmentRulesEditBinding?>(), View.OnClic
                 R.id.btn_save -> {
                     val ruleNew = checkForm()
                     if (isClone) ruleNew.id = 0
-                    Log.d(TAG, ruleNew.toString())
                     viewModel.insertOrUpdate(ruleNew)
                     XToastUtils.success(R.string.tipSaveSuccess)
                     popToBack()
@@ -433,7 +435,6 @@ class RulesEditFragment : BaseFragment<FragmentRulesEditBinding?>(), View.OnClic
             override fun onDragFinished() {
                 senderListSelected = senderRecyclerAdapter.itemList
                 //senderRecyclerAdapter.notifyDataSetChanged()
-                Log.d(TAG, "onDragFinished: $senderListSelected")
             }
         })
         val senderTouchHelper = ItemTouchHelper(senderMoveCallback)
@@ -463,11 +464,11 @@ class RulesEditFragment : BaseFragment<FragmentRulesEditBinding?>(), View.OnClic
 
                 senderSpinnerList.clear()
                 senderListAll = senderList as MutableList<Sender>
-                for (sender in senderList) {
+                for (sender in senderList.filter { cn.ppps.forwarder.utils.TargetCatalog.isAvailable(it.type) }) {
                     val name = if (sender.name.length > 20) sender.name.substring(0, 19) else sender.name
                     senderSpinnerList.add(SenderSpinnerItem(name, getDrawable(sender.imageId), sender.id, sender.status))
                 }
-                senderSpinnerAdapter = SenderSpinnerAdapter(senderSpinnerList).setIsFilterKey(true).setFilterColor("#EF5362").setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
+                senderSpinnerAdapter = SenderSpinnerAdapter(senderSpinnerList).setIsFilterKey(true).setFilterColor(String.format("#%06X", com.google.android.material.color.MaterialColors.getColor(binding!!.root, com.google.android.material.R.attr.colorPrimary) and 0xFFFFFF)).setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
                 binding!!.spSender.setAdapter(senderSpinnerAdapter)
                 //senderSpinnerAdapter.notifyDataSetChanged()
 
@@ -517,7 +518,7 @@ class RulesEditFragment : BaseFragment<FragmentRulesEditBinding?>(), View.OnClic
         //The list is empty and does not show drop-down frames
         if (appListSpinnerList.isEmpty()) return
 
-        appListSpinnerAdapter = AppListSpinnerAdapter(appListSpinnerList).setIsFilterKey(true).setFilterColor("#EF5362").setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
+        appListSpinnerAdapter = AppListSpinnerAdapter(appListSpinnerList).setIsFilterKey(true).setFilterColor(String.format("#%06X", com.google.android.material.color.MaterialColors.getColor(binding!!.root, com.google.android.material.R.attr.colorPrimary) and 0xFFFFFF)).setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
         binding!!.spApp.setAdapter(appListSpinnerAdapter)
         binding!!.spApp.setOnItemClickListener { _: AdapterView<*>, _: View, position: Int, _: Long ->
             try {
@@ -542,11 +543,9 @@ class RulesEditFragment : BaseFragment<FragmentRulesEditBinding?>(), View.OnClic
             }
 
             override fun onSuccess(rule: Rule) {
-                Log.d(TAG, rule.senderList.toString())
                 rule.senderList.forEach {
                     senderId = it.id
                     senderListSelected.add(it)
-                    Log.d(TAG, it.toString())
                 }
 
                 if (isClone) {
@@ -555,7 +554,6 @@ class RulesEditFragment : BaseFragment<FragmentRulesEditBinding?>(), View.OnClic
                 } else {
                     titleBar?.setSubTitle(getString(R.string.edit_rule))
                 }
-                Log.d(TAG, rule.toString())
 
                 checkSenderLogicShow()
                 binding!!.rgSenderLogic.check(rule.getSenderLogicCheckId())
@@ -721,7 +719,6 @@ class RulesEditFragment : BaseFragment<FragmentRulesEditBinding?>(), View.OnClic
         var lineNum = 1
         val lineArray = ruleStr?.split("\\n".toRegex())?.toTypedArray()
         for (line in lineArray!!) {
-            Log.d(TAG, line)
             if (!line.matches(regex)) return lineNum
             lineNum++
         }
@@ -813,7 +810,7 @@ class RulesEditFragment : BaseFragment<FragmentRulesEditBinding?>(), View.OnClic
             spCallType.selectedIndex = callTypeIndexTest
         }
 
-        MaterialDialog.Builder(requireContext()).iconRes(android.R.drawable.ic_dialog_email).title(R.string.rule_tester).customView(dialogTest, true).cancelable(false).autoDismiss(false).neutralText(R.string.action_back).neutralColor(getColors(R.color.darkGrey)).onNeutral { dialog: MaterialDialog?, _: DialogAction? ->
+        MaterialDialog.Builder(requireContext()).iconRes(android.R.drawable.ic_dialog_email).title(R.string.rule_tester).customView(dialogTest, true).cancelable(true).autoDismiss(false).neutralText(R.string.action_back).neutralColor(getColors(R.color.darkGrey)).onNeutral { dialog: MaterialDialog?, _: DialogAction? ->
             dialog?.dismiss()
         }.positiveText(R.string.action_test).onPositive { _: MaterialDialog?, _: DialogAction? ->
             try {

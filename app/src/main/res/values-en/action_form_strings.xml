@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Task-action editor labels (ActionForm). Display only; stored action settings are unchanged. -->
+<resources>
+    <string name="action_form_task_name">Task name</string>
+    <string name="action_form_task_enabled">Task enabled</string>
+    <string name="action_form_call_types">Call events to forward</string>
+    <string name="action_form_app_types">App types to load</string>
+    <string name="action_form_allowed_numbers">Allowed phone numbers</string>
+    <string name="action_form_dismiss_apps">Always dismiss notifications from these apps</string>
+    <string name="action_form_min_interval">Minimum interval (seconds)</string>
+    <string name="action_form_min_interval_help">Wait at least this long between location updates.</string>
+    <string name="action_form_min_distance">Minimum distance (meters)</string>
+    <string name="action_form_min_distance_help">Only update after moving this far. 0 updates on any movement.</string>
+    <string name="action_form_duplicate_value">Ignore duplicates within %1$d seconds</string>
+    <string name="action_form_duplicate_off">0 seconds: duplicate filter off</string>
+    <string name="action_form_set_status">Set the status to</string>
+    <string name="action_form_rules_pick">Rules to change</string>
+    <string name="action_form_targets_pick">Targets to change</string>
+    <string name="action_form_tasks_pick">Tasks to change</string>
+    <string name="action_form_volume_value">Alarm volume: %1$d%%</string>
+    <string name="action_form_play_times_value">Number of plays: %1$d</string>
+    <string name="action_form_play_times_infinite">Number of plays: until stopped (0)</string>
+    <string name="action_form_repeat_value">Repetitions: %1$d</string>
+    <string name="action_form_repeat_infinite">Repetitions: until stopped (0)</string>
+    <string name="action_form_music_file">Sound file</string>
+    <string name="action_form_music_help">Optional MP3, OGG or WAV. Empty plays the built-in alarm sound.</string>
+    <string name="action_form_pick_music">Choose a file from the Download folder</string>
+    <string name="action_form_vibration_pattern">Vibration pattern</string>
+    <string name="action_form_vibration_help">= strong, - weak, _ pause. Each symbol lasts 100 ms.</string>
+    <string name="action_form_insert_strong">= Strong</string>
+    <string name="action_form_insert_weak">- Weak</string>
+    <string name="action_form_insert_pause">_ Pause</string>
+    <string name="action_form_insert_strong_desc">Insert strong vibration (=)</string>
+    <string name="action_form_insert_weak_desc">Insert weak vibration (-)</string>
+    <string name="action_form_insert_pause_desc">Insert pause (_)</string>
+    <string name="action_form_flash_pattern">Light pattern</string>
+    <string name="action_form_flash_help">X or 1 = light on, O or 0 = off. Each symbol lasts 100 ms.</string>
+    <string name="action_form_insert_light_on">X Light on</string>
+    <string name="action_form_insert_light_off">O Light off</string>
+    <string name="action_form_insert_light_on_desc">Insert light on (X)</string>
+    <string name="action_form_insert_light_off_desc">Insert light off (O)</string>
+    <string name="action_form_days">Age of logs to delete</string>
+    <string name="action_form_days_value">Delete logs older than %1$d days</string>
+    <string name="action_form_days_all">0 days: delete all forwarding logs</string>
+    <string name="action_form_hours">Hours to look back</string>
+    <string name="action_form_hours_value">Look-back period in hours: %1$d</string>
+    <string name="action_form_hours_all">0 hours: all messages in the history</string>
+    <string name="action_form_original_result">Original result</string>
+    <string name="action_form_remote_features">Features allowed remotely</string>
+    <string name="action_form_mac_address">MAC address</string>
+    <string name="action_form_mac_help">Required, e.g. AA:BB:CC:DD:EE:FF</string>
+    <string name="action_form_broadcast_help">Optional, e.g. 192.168.1.255. Empty uses 255.255.255.255.</string>
+    <string name="action_form_port_help">Optional. Empty uses port 9; some devices need port 7.</string>
+    <string name="action_form_msg_help">Required. Up to 390 characters; long texts may cost several SMS.</string>
+</resources>

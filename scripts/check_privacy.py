@@ -20,6 +20,82 @@ def forbidden(data):
     return [x.decode() for x in DISALLOWED if x.lower() in data.lower()]
 
 
+UPDATE = CODE / 'utils/update'
+UPDATER_HOSTS = {'api.github.com', 'github.com'}
+
+
+def updater_sources():
+    return {p.name: p.read_text() for p in sorted(UPDATE.glob('*.kt'))}
+
+
+class UpdaterGateTests(unittest.TestCase):
+    """The in-app updater may only reach the fork's GitHub endpoints and must verify the signer."""
+
+    def test_updater_hosts_are_github_only(self):
+        sources = updater_sources()
+        self.assertTrue({'UpdatePolicy.kt', 'UpdateTransport.kt', 'UpdateManager.kt', 'UpdateInstaller.kt', 'UpdateScheduler.kt'} <= set(sources))
+        for name, text in sources.items():
+            for url in re.findall(r'https?://[^"\s)]*', text):
+                host = re.match(r'https?://([^/:?#"]+)', url).group(1).lower()
+                self.assertIn(host, UPDATER_HOSTS, f'{name}: {url}')
+                self.assertTrue(url.startswith('https://'), f'{name}: {url}')
+        policy = sources['UpdatePolicy.kt']
+        self.assertIn('const val OWNER = "frankhommers"', policy)
+        self.assertIn('const val REPO = "SmsForwarder"', policy)
+        self.assertIn('"https://api.github.com/repos/$OWNER/$REPO/releases?per_page=10"', policy)
+        self.assertIn('private val EXACT_HOSTS = setOf("api.github.com", "github.com")', policy)
+        self.assertIn('private const val ASSET_HOST_SUFFIX = ".githubusercontent.com"', policy)
+        self.assertNotIn('/releases/latest', policy)
+
+    def test_updater_transport_hygiene(self):
+        transport = updater_sources()['UpdateTransport.kt']
+        for needle in ('.followRedirects(false)', '.followSslRedirects(false)', 'UpdatePolicy.isAllowedUrl(url)',
+                       '.connectTimeout(15, TimeUnit.SECONDS)', '.readTimeout(30, TimeUnit.SECONDS)', 'UpdatePolicy.MAX_APK_BYTES'):
+            self.assertIn(needle, transport)
+        joined = ''.join(updater_sources().values())
+        for banned in ('ignoreHttpsCert', 'HostnameVerifier', 'checkServerTrusted', 'TrustAll', 'XHttp', 'addHeader(', 'User-Agent', 'Authorization', 'ANDROID_ID', 'getDeviceId'):
+            self.assertNotIn(banned, joined)
+        # The only request: a bare GET with no extra headers, no body, no cookies.
+        self.assertEqual(1, transport.count('Request.Builder()'))
+        self.assertIn('Request.Builder().url(UpdatePolicy.transportUrl(url, fixtureOrigin)).get().build()', transport)
+        # The fixture redirection is build-time only and refused by the release script.
+        self.assertIn('BuildConfig.UPDATER_FIXTURE_ORIGIN', transport)
+        release = (ROOT / 'scripts/release.py').read_text()
+        self.assertIn("String ' + field + r' = \"\";", release)
+        self.assertIn('546f8d56f4f13beec65be2ff882cef169e87f03a6c7a715bdef79d060aeec123', release)
+        gradle = (ROOT / 'app/build.gradle').read_text()
+        self.assertIn("project.findProperty('updaterFixtureOrigin') ?: ''", gradle)
+
+    def test_updater_verifies_certificate_against_running_app(self):
+        sources = updater_sources()
+        policy, manager = sources['UpdatePolicy.kt'], sources['UpdateManager.kt']
+        self.assertIn('Failure.CERT_MISMATCH', policy)
+        self.assertIn('f.apkCertSha256.map(::normalizeHex).toSet() != f.installedCertSha256.map(::normalizeHex).toSet()', policy)
+        self.assertIn('Failure.SHA256_MISMATCH', policy)
+        self.assertIn('Failure.WRONG_PACKAGE', policy)
+        self.assertIn('Failure.NOT_NEWER', policy)
+        self.assertIn('context.packageManager.getPackageInfo(context.packageName, flags())', manager)
+        self.assertIn('installedCertSha256 = installedCertificates(context)', manager)
+        self.assertIn('apkContentsSigners', manager)
+        self.assertNotIn('signingCertificateHistory', manager.split('// Compare the CURRENT signer')[1])
+        self.assertNotIn('installedCertSha256 = setOf(', manager)
+        self.assertNotIn('certSha256 = m.certSha256', manager)
+        self.assertIn('UpdatePolicy.verify(candidate.manifest, facts(context, file, size, sha))', manager)
+
+    def test_updater_off_switch(self):
+        scheduler = updater_sources()['UpdateScheduler.kt']
+        self.assertIn('if (!SettingUtils.autoCheckUpdate) return Result.success()', scheduler)
+        self.assertIn('wm.cancelUniqueWork(WORK_NAME)', scheduler)
+        self.assertIn('NetworkType.CONNECTED', scheduler)
+        about = (CODE / 'fragment/AboutFragment.kt').read_text()
+        self.assertIn('SettingUtils.autoCheckUpdate = checked', about)
+        self.assertIn('UpdateScheduler.apply(requireContext())', about)
+        layout = (MAIN / 'res/layout/fragment_about.xml').read_text()
+        self.assertIn('android:id="@+id/scb_auto_check_update"', layout)
+        readme = (ROOT / 'README_PRIVACY.md').read_text()
+        self.assertIn('api.github.com/repos/frankhommers/SmsForwarder/releases', readme)
+
+
 class PrivacySourceTests(unittest.TestCase):
     def test_no_analytics_or_upstream_probe_code(self):
         paths = list((MAIN / 'kotlin').rglob('*.kt')) + list(ROOT.glob('*.gradle'))
@@ -41,7 +117,8 @@ class PrivacySourceTests(unittest.TestCase):
         common = (CODE / 'utils/CommonUtils.kt').read_text()
         tips = (CODE / 'widget/GuideTipsDialog.kt').read_text()
         self.assertIn('context.assets.open(privacyUrl)', common)
-        self.assertIn('context.assets.open("tips.json")', tips)
+        self.assertIn('context.assets.open(if (context.resources.configuration.locale.language == "nl") "tips_nl.json" else "tips.json")', tips)
+        self.assertNotRegex((MAIN / 'assets/tips_nl.json').read_text(), r'https?://|<img')
         self.assertNotIn('XHttp', tips)
         markdown = (CODE / 'fragment/MarkdownFragment.kt').read_text()
         self.assertIn('settings.blockNetworkLoads = true', markdown)
@@ -113,7 +190,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--apk', type=Path)
     args = parser.parse_args()
-    result = unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(PrivacySourceTests))
+    suite = unittest.TestSuite([unittest.defaultTestLoader.loadTestsFromTestCase(c) for c in (PrivacySourceTests, UpdaterGateTests)])
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
     if not result.wasSuccessful():
         raise SystemExit(1)
     if args.apk:

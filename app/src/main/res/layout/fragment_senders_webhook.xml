@@ -1,432 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/xui_config_color_background"
-    android:orientation="vertical">
+<!-- Form pattern pilot (see privacy-verification/form-pattern/PATTERN.md): one 16dp keyline from Form.Content. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:background="?attr/xui_config_color_background" android:orientation="vertical">
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:overScrollMode="never" android:fillViewport="true">
+        <LinearLayout style="@style/Form.Content">
 
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:overScrollMode="never">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:orientation="vertical">
-
-            <LinearLayout
-                style="@style/BarStyle.Switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/sender_name_status"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_name"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="1"
-                    android:singleLine="true"
-                    app:met_clearButton="true"
-                    tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
-                <com.xuexiang.xui.widget.button.switchbutton.SwitchButton
-                    android:id="@+id/sb_enable"
-                    style="@style/SwitchButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    tools:ignore="TouchTargetSizeCheck" />
-
+            <!-- Name and status -->
+            <LinearLayout style="@style/Form.Section.First">
+                <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:hint="@string/m3_target_name">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_name" android:singleLine="true" app:met_clearButton="true" tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <cn.ppps.forwarder.widget.material.TargetSwitch android:id="@+id/sb_enable" style="@style/Form.SwitchRow" android:layout_marginTop="8dp" android:text="@string/status_param_option_enabled" android:checked="true" />
             </LinearLayout>
 
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/Method"
-                    android:textStyle="bold" />
-
-                <RadioGroup
-                    android:id="@+id/rg_method"
-                    style="@style/rg_style"
-                    android:layout_marginStart="5dp"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rb_method_post"
-                        style="@style/rg_rb_style"
-                        android:checked="true"
-                        android:text="@string/post"
-                        tools:ignore="TouchTargetSizeCheck" />
-
-                    <RadioButton
-                        android:id="@+id/rb_method_get"
-                        style="@style/rg_rb_style"
-                        android:text="@string/get"
-                        tools:ignore="TouchTargetSizeCheck" />
-
-                    <RadioButton
-                        android:id="@+id/rb_method_put"
-                        style="@style/rg_rb_style"
-                        android:text="@string/put"
-                        tools:ignore="TouchTargetSizeCheck" />
-
-                    <RadioButton
-                        android:id="@+id/rb_method_patch"
-                        style="@style/rg_rb_style"
-                        android:text="@string/patch"
-                        tools:ignore="TouchTargetSizeCheck" />
-
+            <!-- Method -->
+            <LinearLayout style="@style/Form.Section">
+                <TextView style="@style/Form.SectionTitle" android:text="@string/Method" />
+                <RadioGroup android:id="@+id/rg_method" style="@style/Form.OptionGroup">
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_method_post" style="@style/Form.Option" android:checked="true" android:text="@string/post" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_method_get" style="@style/Form.Option" android:text="@string/get" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_method_put" style="@style/Form.Option" android:text="@string/put" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_method_patch" style="@style/Form.Option" android:text="@string/patch" />
                 </RadioGroup>
-
             </LinearLayout>
 
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+            <!-- URL -->
+            <LinearLayout style="@style/Form.Section">
+                <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:hint="@string/webhook_server">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_webServer" android:inputType="textUri" android:singleLine="true" app:met_clearButton="true" tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/webhook_server"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:text="@string/webhook_server_tips"
-                        android:textSize="@dimen/text_size_mini"
-                        tools:ignore="SmallSp" />
-
+            <!-- Request data: parameter rows (ItemRows, inserted after payload_text_container) or a JSON body -->
+            <LinearLayout style="@style/Form.Section">
+                <LinearLayout style="@style/Form.HelpRow.Heading">
+                    <TextView style="@style/Form.SectionTitle" android:layout_width="0dp" android:layout_weight="1" android:text="@string/webhook_params" />
+                    <androidx.appcompat.widget.AppCompatImageButton android:id="@+id/btn_help_params" style="@style/Form.HelpIcon" />
                 </LinearLayout>
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_webServer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textUri"
-                    android:singleLine="true"
-                    app:met_clearButton="true"
-                    tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text='@string/webhook_params'
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/webhook_params_tips"
-                    android:textSize="@dimen/text_size_mini"
-                    tools:ignore="SmallSp" />
-
-                <com.xuexiang.xui.widget.edittext.ClearEditText
-                    android:id="@+id/et_webParams"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:autofillHints=""
-                    android:gravity="left|top"
-                    android:hint="@string/optional"
-                    android:inputType="textMultiLine"
-                    android:minLines="3"
-                    android:text=""
-                    tools:ignore="RtlHardcoded,SpeakableTextPresentCheck" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/webhook_secret"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_Secret"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/optional"
-                    android:singleLine="true"
-                    app:met_passWordButton="true"
-                    tools:ignore="TextContrastCheck,TouchTargetSizeCheck" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/webhook_response"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_Response"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/optional"
-                    android:singleLine="true"
-                    app:met_clearButton="true"
-                    tools:ignore="TextContrastCheck,TouchTargetSizeCheck" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_Headers"
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    tools:ignore="UseCompoundDrawables">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/headers"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:id="@+id/btn_add_header"
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:layout_marginStart="@dimen/config_margin_5dp"
-                        android:src="@drawable/ic_add"
-                        app:tint="#299EE3"
-                        tools:ignore="ContentDescription,ImageContrastCheck" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/proxy_settings"
-                    android:textStyle="bold" />
-
-                <RadioGroup
-                    android:id="@+id/rg_proxyType"
-                    style="@style/rg_style"
-                    android:layout_marginStart="5dp"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rb_proxyNone"
-                        style="@style/rg_rb_style"
-                        android:checked="true"
-                        android:text="@string/proxy_none" />
-
-                    <RadioButton
-                        android:id="@+id/rb_proxyHttp"
-                        style="@style/rg_rb_style"
-                        android:text="@string/proxy_http" />
-
-                    <RadioButton
-                        android:id="@+id/rb_proxySocks"
-                        style="@style/rg_rb_style"
-                        android:text="@string/proxy_socks" />
-
+                <RadioGroup android:id="@+id/rg_payload_mode" style="@style/Form.OptionGroup">
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_payload_parameters" style="@style/Form.Option" android:text="@string/webhook_mode_parameters" android:checked="true" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_payload_json" style="@style/Form.Option" android:text="@string/webhook_mode_json" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_payload_legacy" style="@style/Form.Option" android:text="@string/webhook_mode_legacy" android:visibility="gone" />
                 </RadioGroup>
-
+                <TextView android:id="@+id/payload_help" style="@style/Form.Supporting" android:layout_marginTop="8dp" android:paddingBottom="8dp" android:text="@string/webhook_form_help" />
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/payload_text_container" style="@style/Form.Field" android:layout_marginTop="8dp" android:hint="@string/form_body_label">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_webParams" android:layout_width="match_parent" android:layout_height="wrap_content" android:autofillHints="" android:gravity="start|top" android:inputType="textMultiLine" android:minLines="3" android:text="" tools:ignore="SpeakableTextPresentCheck" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <!-- Insert data / Preview (TemplatePicker.installWebhook); ItemRows' parameter rows are inserted above it. -->
+                <GridLayout android:id="@+id/gl_webhook_params" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal" android:columnCount="1" />
+                <TextView style="@style/Form.Supporting" android:layout_marginTop="8dp" android:text="@string/webhook_substitution" />
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/layoutProxyHost"
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone">
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_advanced" style="@style/Form.Disclosure" android:layout_marginTop="24dp" android:text="@string/webhook_advanced_show" />
+            <LinearLayout android:id="@+id/layout_advanced" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/hostname" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_proxyHost"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="1"
-                    android:singleLine="true"
-                    app:met_clearButton="true" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layoutProxyPort"
-                style="@style/BarStyle.Switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/port" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_proxyPort"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="1"
-                    android:digits="0123456789"
-                    android:inputType="number"
-                    android:maxLength="5"
-                    android:singleLine="true"
-                    app:met_clearButton="true" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:text="@string/proxy_authenticator" />
-
-                <com.xuexiang.xui.widget.button.switchbutton.SwitchButton
-                    android:id="@+id/sb_proxyAuthenticator"
-                    style="@style/SwitchButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layoutProxyAuthenticator"
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/username" />
-
-                    <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                        android:id="@+id/et_proxyUsername"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_weight="1"
-                        android:singleLine="true"
-                        app:met_clearButton="true" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:text="@string/password" />
-
-                    <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                        android:id="@+id/et_proxyPassword"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_weight="1"
-                        android:singleLine="true"
-                        app:met_passWordButton="true" />
-
+                <!-- Signing -->
+                <LinearLayout style="@style/Form.Section">
+                    <LinearLayout style="@style/Form.HelpRow">
+                        <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:layout_width="0dp" android:layout_weight="1" android:hint="@string/form_secret_label" app:endIconMode="password_toggle">
+                            <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_Secret" android:singleLine="true" app:met_passWordButton="true" tools:ignore="TextContrastCheck,TouchTargetSizeCheck" android:inputType="textPassword" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                        <androidx.appcompat.widget.AppCompatImageButton android:id="@+id/btn_help_secret" style="@style/Form.HelpIcon" android:layout_marginTop="8dp" />
+                    </LinearLayout>
+                    <TextView style="@style/Form.Supporting" android:text="@string/webhook_sign_help" />
                 </LinearLayout>
 
+                <!-- Response check -->
+                <LinearLayout style="@style/Form.Section">
+                    <LinearLayout style="@style/Form.HelpRow">
+                        <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:layout_width="0dp" android:layout_weight="1" android:hint="@string/form_response_label" app:endIconMode="clear_text">
+                            <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_Response" android:singleLine="true" app:met_clearButton="true" tools:ignore="TextContrastCheck,TouchTargetSizeCheck" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                        <androidx.appcompat.widget.AppCompatImageButton android:id="@+id/btn_help_response" style="@style/Form.HelpIcon" android:layout_marginTop="8dp" />
+                    </LinearLayout>
+                    <TextView style="@style/Form.Supporting" android:text="@string/webhook_response_help" />
+                </LinearLayout>
+
+                <!-- Headers: rows (item_add_header) are appended to this layout by WebhookFragment -->
+                <LinearLayout android:id="@+id/layout_Headers" style="@style/Form.Section">
+                    <LinearLayout style="@style/Form.HelpRow.Heading">
+                        <TextView style="@style/Form.SectionTitle" android:layout_width="0dp" android:layout_weight="1" android:text="@string/headers" />
+                        <androidx.appcompat.widget.AppCompatImageButton android:id="@+id/btn_help_headers" style="@style/Form.HelpIcon" />
+                    </LinearLayout>
+                    <TextView style="@style/Form.Supporting" android:text="@string/webhook_headers_help" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_add_header" style="@style/Form.Action" android:text="@string/webhook_add_header" />
+                </LinearLayout>
+
+                <!-- Proxy -->
+                <LinearLayout style="@style/Form.Section">
+                    <TextView style="@style/Form.SectionTitle" android:text="@string/proxy_settings" />
+                    <RadioGroup android:id="@+id/rg_proxyType" style="@style/Form.OptionGroup">
+                        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_proxyNone" style="@style/Form.Option" android:checked="true" android:text="@string/proxy_none" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_proxyHttp" style="@style/Form.Option" android:text="@string/proxy_http" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_proxySocks" style="@style/Form.Option" android:text="@string/proxy_socks" />
+                    </RadioGroup>
+                    <LinearLayout android:id="@+id/layoutProxyHost" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                        <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field.Next" android:hint="@string/hostname">
+                            <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_proxyHost" android:singleLine="true" app:met_clearButton="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/layoutProxyPort" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                        <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field.Next" android:hint="@string/port">
+                            <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_proxyPort" android:digits="0123456789" android:inputType="number" android:maxLength="5" android:singleLine="true" app:met_clearButton="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                        <cn.ppps.forwarder.widget.material.TargetSwitch android:id="@+id/sb_proxyAuthenticator" style="@style/Form.SwitchRow" android:layout_marginTop="8dp" android:text="@string/proxy_authenticator" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/layoutProxyAuthenticator" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                        <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field.Next" android:hint="@string/username">
+                            <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_proxyUsername" android:singleLine="true" app:met_clearButton="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                        <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field.Next" android:hint="@string/password">
+                            <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_proxyPassword" android:singleLine="true" app:met_passWordButton="true" android:inputType="textPassword" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
 
+            <TextView style="@style/Form.Supporting" android:layout_marginTop="24dp" android:text="@string/webhook_test_help" />
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="10dp">
-
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
-            android:id="@+id/btn_del"
-            style="@style/SuperButton.Gray.Icon.Spacing"
-            android:drawableStart="@drawable/ic_delete"
-            android:text="@string/del"
-            tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
-
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
-            android:id="@+id/btn_save"
-            style="@style/SuperButton.Blue.Icon.Spacing"
-            android:drawableStart="@drawable/ic_save"
-            android:text="@string/save"
-            tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
-
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
-            android:id="@+id/btn_test"
-            style="@style/SuperButton.Green.Icon.Spacing"
-            android:drawableStart="@drawable/ic_test"
-            android:text="@string/test"
-            tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
-
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="horizontal" android:padding="10dp">
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_del" style="@style/MaterialActionButton.Secondary" android:text="@string/del" tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" android:textSize="14sp" android:singleLine="false" android:minHeight="48dp" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_save" style="@style/MaterialActionButton" android:text="@string/save" tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" android:textSize="14sp" android:singleLine="false" android:minHeight="48dp" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_test" style="@style/MaterialActionButton.Secondary" android:text="@string/test" tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" android:textSize="14sp" android:singleLine="false" android:minHeight="48dp" />
     </LinearLayout>
-
 </LinearLayout>

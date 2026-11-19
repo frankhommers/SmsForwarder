@@ -34,10 +34,12 @@ import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
 import com.xuexiang.xui.utils.CountDownButtonHelper.OnCountDownListener
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
-import com.xuexiang.xui.widget.spinner.materialspinner.MaterialSpinner
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.FormHelp
+import cn.ppps.forwarder.widget.material.TargetForm
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
+import cn.ppps.forwarder.widget.material.TargetDropdown as MaterialSpinner
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -116,16 +118,29 @@ class BarkFragment : BaseFragment<FragmentSendersBarkBinding?>(), View.OnClickLi
             BARK_ENCRYPTION_ALGORITHM_MAP.forEach {
                 if (it.value == item) transformation = it.key
             }
+            updateEncryptionFields()
         }
         binding!!.spEncryptionAlgorithm.setOnNothingSelectedListener {
             binding!!.spEncryptionAlgorithm.selectedIndex = 0
             transformation = "none"
+            updateEncryptionFields()
         }
         binding!!.spEncryptionAlgorithm.selectedIndex = 0
+        updateEncryptionFields()
 
         //Create Tab Button
         CommonUtils.createTagButtons(requireContext(), binding!!.glTitleTemplate, binding!!.etTitleTemplate)
         CommonUtils.createTagButtons(requireContext(), binding!!.glAutoCopyTemplate, binding!!.etAutoCopyTemplate)
+
+        //Display only (TargetForm): help dialogs, tag grids behind a toggle, dropdowns that show the whole choice
+        FormHelp.install(binding!!.btnHelpServer, R.string.bark_server, R.string.target_form_bark_server_dialog)
+        FormHelp.install(binding!!.btnHelpNotification, R.string.target_form_section_notification, R.string.target_form_bark_notification_dialog)
+        FormHelp.install(binding!!.btnHelpTemplates, R.string.target_form_section_templates, R.string.target_form_bark_templates_dialog)
+        FormHelp.install(binding!!.btnHelpEncryption, R.string.target_form_section_encryption, R.string.target_form_bark_encryption_dialog)
+        TargetForm.installTagToggle(binding!!.btnTagsTitleTemplate, binding!!.glTitleTemplate)
+        TargetForm.installTagToggle(binding!!.btnTagsAutoCopyTemplate, binding!!.glAutoCopyTemplate)
+        TargetForm.wrapDropdown(binding!!.spLevel)
+        TargetForm.wrapDropdown(binding!!.spEncryptionAlgorithm)
 
         //Add
         if (senderId <= 0) {
@@ -154,7 +169,6 @@ class BarkFragment : BaseFragment<FragmentSendersBarkBinding?>(), View.OnClickLi
                 binding!!.etName.setText(sender.name)
                 binding!!.sbEnable.isChecked = sender.status == 1
                 val settingVo = Gson().fromJson(sender.jsonSetting, BarkSetting::class.java)
-                Log.d(TAG, settingVo.toString())
                 if (settingVo != null) {
                     binding!!.etServer.setText(settingVo.server)
                     binding!!.etGroup.setText(settingVo.group)
@@ -168,18 +182,29 @@ class BarkFragment : BaseFragment<FragmentSendersBarkBinding?>(), View.OnClickLi
                     }
                     binding!!.etTitleTemplate.setText(settingVo.title)
                     BARK_ENCRYPTION_ALGORITHM_MAP.forEach {
-                        if (it.value == settingVo.transformation) {
-                            transformation = it.value
+                        if (it.key == settingVo.transformation) {
+                            transformation = it.key
                             binding!!.spEncryptionAlgorithm.setSelectedItem(it.value)
                         }
                     }
                     binding!!.etEncryptionKey.setText(settingVo.key)
                     binding!!.etEncryptionIv.setText(settingVo.iv)
+                    updateEncryptionFields()
                     binding!!.etAutoCopyTemplate.setText(settingVo.autoCopy)
                 }
             }
         })
 
+    }
+
+    private fun updateEncryptionFields() {
+        val enabled = transformation != "none"
+        listOf(binding!!.etEncryptionKey, binding!!.etEncryptionIv).forEach { input ->
+            val box = generateSequence(input.parent) { it.parent }
+                .filterIsInstance<com.google.android.material.textfield.TextInputLayout>().firstOrNull()
+            box?.isEnabled = enabled
+            input.isEnabled = enabled
+        }
     }
 
     override fun initListeners() {
@@ -199,7 +224,6 @@ class BarkFragment : BaseFragment<FragmentSendersBarkBinding?>(), View.OnClickLi
                     Thread {
                         try {
                             val settingVo = checkSetting()
-                            Log.d(TAG, settingVo.toString())
                             val name = binding!!.etName.text.toString().trim().takeIf { it.isNotEmpty() } ?: getString(R.string.test_sender_name)
                             val msgInfo = MsgInfo("sms", getString(R.string.test_phone_num), String.format(getString(R.string.test_sender_sms), name), Date(), getString(R.string.test_sim_info))
                             BarkUtils.sendMsg(settingVo, msgInfo)
@@ -230,14 +254,14 @@ class BarkFragment : BaseFragment<FragmentSendersBarkBinding?>(), View.OnClickLi
                 R.id.btn_save -> {
                     val name = binding!!.etName.text.toString().trim()
                     if (TextUtils.isEmpty(name)) {
-                        throw Exception(getString(R.string.invalid_name))
+                        cn.ppps.forwarder.widget.material.FormValidation.show(binding!!.etName, getString(R.string.invalid_name))
+                        return
                     }
 
                     val status = if (binding!!.sbEnable.isChecked) 1 else 0
                     val settingVo = checkSetting()
                     if (isClone) senderId = 0
                     val senderNew = Sender(senderId, senderType, name, Gson().toJson(settingVo), status)
-                    Log.d(TAG, senderNew.toString())
 
                     viewModel.insertOrUpdate(senderNew)
                     XToastUtils.success(R.string.tipSaveSuccess)

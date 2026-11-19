@@ -54,7 +54,7 @@ class WebhookUtils {
             }
 
             var requestUrl: String = setting.webServer //Send Address
-            Log.i(TAG, "requestUrl:$requestUrl")
+
 
             val timestamp = System.currentTimeMillis()
             val orgContent: String = msgInfo.content
@@ -85,10 +85,10 @@ class WebhookUtils {
             val regex = "^(https?://)([^:]+):([^@]+)@(.+)"
             val matches = Regex(regex, RegexOption.IGNORE_CASE).findAll(requestUrl).toList()
                 .flatMap(MatchResult::groupValues)
-            Log.i(TAG, "matches = $matches")
+
             if (matches.isNotEmpty()) {
                 requestUrl = matches[1] + matches[4]
-                Log.i(TAG, "requestUrl:$requestUrl")
+
             }
 
             //via`Content-Type=applicaton/json`Specifies the request body as`json`Format
@@ -110,16 +110,7 @@ class WebhookUtils {
             }
 
             val request = if (setting.method == "GET" && TextUtils.isEmpty(webParams)) {
-                setting.webServer += (if (setting.webServer.contains("?")) "&" else "?") + "from=" + URLEncoder.encode(
-                    from,
-                    "UTF-8"
-                )
-                requestUrl += "&content=" + URLEncoder.encode(content, "UTF-8")
-                if (!TextUtils.isEmpty(sign)) {
-                    requestUrl += "&timestamp=$timestamp"
-                    requestUrl += "&sign=$sign"
-                }
-                Log.d(TAG, "method = GET, Url = $requestUrl")
+                requestUrl = cn.ppps.forwarder.utils.WebhookEditorModel.defaultGetUrl(requestUrl, from, content, timestamp, sign)
                 XHttp.get(requestUrl).keepJson(true)
             } else if (setting.method == "GET" && !TextUtils.isEmpty(webParams)) {
                 webParams = msgInfo.replaceTemplate(webParams, "", "URLEncoder", rule?.title ?: "")
@@ -145,7 +136,7 @@ class WebhookUtils {
                 } else {
                     (if (requestUrl.contains("?")) "&" else "?") + webParams
                 }
-                Log.d(TAG, "method = GET, Url = $requestUrl")
+
                 XHttp.get(requestUrl).keepJson(true)
             } else if (webParams.isNotEmpty() && (isJson || isText || webParams.startsWith("{"))) {
                 webParams = msgInfo.replaceTemplate(webParams, "", "Gson", rule?.title ?: "")
@@ -163,7 +154,7 @@ class WebhookUtils {
                     }
                     .replace("[timestamp]", timestamp.toString())
                     .replace("[sign]", sign)
-                Log.d(TAG, "method = ${setting.method}, Url = $requestUrl, bodyMsg = $bodyMsg")
+
                 if (isText) {
                     when (setting.method) {
                         "PUT" -> XHttp.put(requestUrl).keepJson(true).upString(bodyMsg, mediaType)
@@ -182,7 +173,7 @@ class WebhookUtils {
                     webParams = "from=[from]&content=[content]&timestamp=[timestamp]"
                     if (!TextUtils.isEmpty(sign)) webParams += "&sign=[sign]"
                 }
-                Log.d(TAG, "method = ${setting.method}, Url = $requestUrl")
+
                 val postRequest = when (setting.method) {
                     "PUT" -> XHttp.put(requestUrl).keepJson(true)
                     "PATCH" -> XHttp.patch(requestUrl).keepJson(true)
@@ -233,13 +224,12 @@ class WebhookUtils {
                 val proxyPort = setting.proxyPort.toIntOrNull()
                     ?: throw IllegalArgumentException("Invalid proxy port")
 
-                Log.d(TAG, "proxyHost = ${setting.proxyHost}, proxyPort = $proxyPort")
                 request.okproxy(Proxy(setting.proxyType, InetSocketAddress(setting.proxyHost, proxyPort)))
 
                 //Proxy authentication credentials
                 if (setting.proxyAuthenticator && (!TextUtils.isEmpty(setting.proxyUsername) || !TextUtils.isEmpty(setting.proxyPassword))
                 ) {
-                    Log.i(TAG, "proxyUsername = ${setting.proxyUsername}, proxyPassword = ${setting.proxyPassword}")
+
 
                     if (setting.proxyType == Proxy.Type.HTTP) {
                         request.okproxyAuthenticator { _: Route?, response: Response ->
@@ -259,27 +249,31 @@ class WebhookUtils {
                 }
             }
 
-            request.ignoreHttpsCert() //IgnorehttpsCertificate
-                .retryCount(SettingUtils.requestRetryTimes) //Number of overtime retrys
+            // HTTP 204/205 arrive in onError (null body); they are evaluated there as an empty response body.
+            val noContent = java.util.concurrent.atomic.AtomicBoolean(false)
+            request.retryCount(SettingUtils.requestRetryTimes) //Number of overtime retrys
                 .retryDelay(SettingUtils.requestDelayTime * 1000) //Timeout retry delay
                 .retryIncreaseDelay(SettingUtils.requestDelayTime * 1000) //Incremental timeout retry backoff
                 .timeStamp(true) //urlAutomatically add a time stamp to avoid cache
-                .addInterceptor(LoggingInterceptor(logId)) //Add onelogInterceptor., Record Request Log
-                .addInterceptor(NoContentInterceptor(logId)) //Intercept. HTTP 204 Response
+                // No request/header/body logging: URLs and responses can contain credentials.
+                .addInterceptor(NoContentInterceptor { noContent.set(true) }) //Detect HTTP 204/205 (empty body)
                 .execute(object : SimpleCallBack<String>() {
 
                     override fun onError(e: ApiException) {
                         //e.printStackTrace()
-                        Log.e(TAG, e.detailMessage)
-                        val status = if (setting.response.isNotEmpty() && e.detailMessage.contains(setting.response)) 2 else 0
-                        SendUtils.updateLogs(logId, status, e.displayMessage)
+
+                        val status = if (noContent.get()) {
+                            // Empty body: success only when no response text is required.
+                            if (setting.response.isEmpty()) 2 else 0
+                        } else if (setting.response.isNotEmpty() && e.detailMessage.contains(setting.response)) 2 else 0
+                        SendUtils.updateLogs(logId, status, com.xuexiang.xutil.resource.ResUtils.getString(if (status == 2) cn.ppps.forwarder.R.string.webhook_result_success else cn.ppps.forwarder.R.string.webhook_result_failed))
                         SendUtils.senderLogic(status, msgInfo, rule, senderIndex, msgId)
                     }
 
                     override fun onSuccess(response: String) {
-                        Log.i(TAG, response)
+
                         val status = if (setting.response.isNotEmpty() && !response.contains(setting.response)) 0 else 2
-                        SendUtils.updateLogs(logId, status, response)
+                        SendUtils.updateLogs(logId, status, com.xuexiang.xutil.resource.ResUtils.getString(if (status == 2) cn.ppps.forwarder.R.string.webhook_result_success else cn.ppps.forwarder.R.string.webhook_result_failed))
                         SendUtils.senderLogic(status, msgInfo, rule, senderIndex, msgId)
                     }
 

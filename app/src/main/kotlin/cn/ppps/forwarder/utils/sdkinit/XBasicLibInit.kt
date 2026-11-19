@@ -61,9 +61,7 @@ class XBasicLibInit private constructor() {
             //Initialize the network request framework, which must be implemented first
             XHttpSDK.init(application)
             //Do it when debugging is required
-            if (App.isDebug) {
-                XHttpSDK.debug()
-            }
+            // HTTP payload logging can expose authentication and message contents.
             //Set the global base address requested for the network
             XHttpSDK.setBaseUrl("http://127.0.0.1/")
             //Sets a custom log print intercepter
@@ -73,8 +71,7 @@ class XBasicLibInit private constructor() {
             //Request invalidating interceptor.
             //XHttpSDK.addInterceptor(CustomExpiredInterceptor())
             //Set global timeout
-            XHttp.getInstance()
-                .debug(App.isDebug)
+            HttpTransportSecurity.apply(XHttp.getInstance())
                 .setCacheMode(CacheMode.NO_CACHE)
                 .setTimeout(SettingUtils.requestTimeout * 1000L) //Single timeout
             //.setRetryCount(SettingUtils.requestRetryTimes) //Number of overtime retrys

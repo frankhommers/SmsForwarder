@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Infrastructure screens: Server, Client, Clone/backup, Help, setup tips, About links. -->
+<resources>
+    <string name="infra_form_time_tolerance_value">%1$d seconden</string>
+    <string name="infra_form_clone_requires_encryption">Alleen beschikbaar met RSA- of SM4-versleuteling bij Beveiliging.</string>
+    <string name="infra_form_storage_title">Toegang tot bestanden toestaan</string>
+    <string name="infra_form_storage_clone_message">Deze back-upfunctie gebruikt “Toegang tot alle bestanden” voor SmsForwarder.json in Download. Dit geeft brede toegang tot gedeelde opslag. Open de Android-instellingen, geef deze app toegang en keer terug.</string>
+    <string name="infra_form_storage_server_message">Deze webclientfunctie gebruikt “Toegang tot alle bestanden” om een map in Download te lezen. Dit geeft brede toegang tot gedeelde opslag. Open de Android-instellingen, geef deze app toegang en keer terug.</string>
+    <string name="infra_form_storage_continue">Instellingen</string>
+    <string name="infra_form_storage_grant">Toegang tot bestanden toestaan</string>
+    <string name="infra_form_clone_push_help">Verstuurt de configuratie van deze telefoon naar de servertelefoon en vervangt daar de configuratie.</string>
+    <string name="infra_form_clone_pull_help">Haalt de configuratie van de servertelefoon op en vervangt de configuratie van deze telefoon.</string>
+    <string name="infra_form_clone_export_help">Slaat de configuratie van deze telefoon op in een bestand.</string>
+    <string name="infra_form_clone_import_help">Vervangt de configuratie van deze telefoon door die uit het bestand.</string>
+    <string name="infra_form_tip_page">Tip %1$d van %2$d</string>
+    <string name="infra_form_help_online">Online documentatie openen</string>
+    <string name="infra_form_help_online_note">De hulp hierboven werkt offline. De knop opent de projectpagina op GitHub, die uw IP-adres ziet.</string>
+    <string name="infra_form_about_upstream">Oorspronkelijk project</string>
+    <string name="infra_form_about_fork">Deze versie</string>
+    <string name="infra_form_url_project_fork" translatable="false">https://github.com/frankhommers/SmsForwarder</string>
+</resources>

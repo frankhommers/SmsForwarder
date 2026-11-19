@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_extras">Extra\'s</string>
+    <string name="settings_extras_intro">Geavanceerde hulpmiddelen voor automatisering en bediening op afstand.</string>
+    <string name="extras_tasks_summary">Acties automatisch uitvoeren als aan voorwaarden is voldaan</string>
+    <string name="extras_server_summary">Een ander apparaat deze telefoon laten bedienen via HTTP</string>
+    <string name="extras_client_summary">Een andere telefoon bedienen waarop de server draait</string>
+    <string name="extras_tunnel_summary">Niet beschikbaar in deze privacyversie</string>
+    <string name="extras_apps_summary">Geïnstalleerde apps en hun pakketnamen</string>
+    <string name="settings_help_info">Hulp en info</string>
+    <string name="settings_guide_summary">Uitleg over de app, ook offline</string>
+    <string name="settings_about_updates">Info en updates</string>
+    <string name="settings_about_summary">Versie, updates en privacybeleid</string>
+</resources>

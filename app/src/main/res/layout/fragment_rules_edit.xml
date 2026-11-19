@@ -1,699 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/xui_config_color_background"
-    android:orientation="vertical">
+<!-- Form pattern pilot (see privacy-verification/form-pattern/PATTERN.md). Serves SMS, call and app rules;
+     RulesEditFragment shows/hides rows per rule type and per selected 'Veld' option. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:background="?attr/xui_config_color_background" android:orientation="vertical">
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:overScrollMode="never">
+        <LinearLayout style="@style/Form.Content">
 
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:overScrollMode="never">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:orientation="vertical">
-
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/rule_title"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_title"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="1"
-                    android:hint="@string/rule_title_tips"
-                    android:singleLine="true"
-                    app:met_clearButton="true" />
-
+            <!-- Name and targets -->
+            <LinearLayout style="@style/Form.Section.First">
+                <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:hint="@string/rule_title" app:helperText="@string/rule_title_tips">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_title" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <cn.ppps.forwarder.widget.material.TargetEditDropdown android:id="@+id/sp_sender" style="@style/Form.Dropdown.Next" android:theme="@style/ThemeOverlay.Material3.AutoCompleteTextView.OutlinedBox" app:es_hint="@string/select_sender" app:helperText="@string/choose_sender" app:es_maxLength="20" app:es_maxLine="1" />
+                <androidx.recyclerview.widget.RecyclerView android:id="@+id/recycler_senders" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+                <LinearLayout android:id="@+id/layout_sender_logic" style="@style/Form.Subsection" android:visibility="gone">
+                    <TextView style="@style/Form.GroupTitle" android:text="@string/sender_logic" />
+                    <RadioGroup android:id="@+id/rg_sender_logic" style="@style/Form.OptionGroup">
+                        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_sender_logic_all" style="@style/Form.Option" android:checked="true" android:text="@string/sender_logic_all" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_sender_logic_until_fail" style="@style/Form.Option" android:text="@string/sender_logic_until_fail" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_sender_logic_until_success" style="@style/Form.Option" android:text="@string/sender_logic_until_success" />
+                    </RadioGroup>
+                </LinearLayout>
             </LinearLayout>
 
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+            <!-- SIM slot (hidden for app rules) -->
+            <LinearLayout android:id="@+id/layout_sim_slot" style="@style/Form.Section">
+                <TextView style="@style/Form.SectionTitle" android:text="@string/match_sim_slot" />
+                <RadioGroup android:id="@+id/rg_sim_slot" style="@style/Form.OptionGroup">
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_sim_slot_all" style="@style/Form.Option" android:checked="true" android:text="@string/sim_any" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_sim_slot_1" style="@style/Form.Option" android:text="@string/sim_1" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_sim_slot_2" style="@style/Form.Option" android:text="@string/sim_2" />
+                </RadioGroup>
+            </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingBottom="5dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/select_sender"
-                        android:textStyle="bold" />
-
-                    <com.xuexiang.xui.widget.spinner.editspinner.EditSpinner
-                        android:id="@+id/sp_sender"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_weight="1"
-                        app:es_hint="@string/choose_sender"
-                        app:es_maxLength="20"
-                        app:es_maxLine="1" />
-
+            <!-- Condition: field, match type, value -->
+            <LinearLayout style="@style/Form.Section">
+                <TextView style="@style/Form.SectionTitle" android:text="@string/match_field" />
+                <RadioGroup android:id="@+id/rg_filed" style="@style/Form.OptionGroup">
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_transpond_all" style="@style/Form.Option" android:checked="true" android:text="@string/all" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_phone" style="@style/Form.Option" android:text="@string/phone_number" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_call_type" style="@style/Form.Option" android:text="@string/call_type" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_content" style="@style/Form.Option" android:text="@string/sms_content" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_package_name" style="@style/Form.Option" android:text="@string/package_name" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_uid" style="@style/Form.Option" android:text="@string/uid" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_inform_content" style="@style/Form.Option" android:text="@string/inform_content" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_multi_match" style="@style/Form.Option" android:text="@string/multiple_matches" />
+                </RadioGroup>
+                <LinearLayout android:id="@+id/layout_match_type" style="@style/Form.Subsection" android:visibility="gone">
+                    <TextView style="@style/Form.GroupTitle" android:text="@string/match_type" />
+                    <!-- Two RadioGroups that RulesEditFragment keeps mutually exclusive; stacked so they read as one list. -->
+                    <RadioGroup android:id="@+id/rg_check" style="@style/Form.OptionGroup">
+                        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_is" style="@style/Form.Option" android:checked="true" android:text="@string/btn_is" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_contain" style="@style/Form.Option" android:text="@string/btn_contain" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_not_contain" style="@style/Form.Option" android:text="@string/btn_not_contain" />
+                    </RadioGroup>
+                    <RadioGroup android:id="@+id/rg_check2" style="@style/Form.OptionGroup" android:layout_marginTop="0dp">
+                        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_start_with" style="@style/Form.Option" android:text="@string/btn_start_with" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_end_with" style="@style/Form.Option" android:text="@string/btn_end_with" />
+                        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_regex" style="@style/Form.Option" android:text="@string/btn_regex" />
+                    </RadioGroup>
                 </LinearLayout>
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recycler_senders"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-                <LinearLayout
-                    android:id="@+id/layout_sender_logic"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone">
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="?attr/xui_config_color_separator_light" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/sender_logic"
-                            android:textStyle="bold" />
-
-                        <RadioGroup
-                            android:id="@+id/rg_sender_logic"
-                            style="@style/rg_style"
-                            android:layout_marginStart="5dp"
-                            android:orientation="horizontal">
-
-                            <RadioButton
-                                android:id="@+id/rb_sender_logic_all"
-                                style="@style/rg_rb_style"
-                                android:checked="true"
-                                android:text="@string/sender_logic_all" />
-
-                            <RadioButton
-                                android:id="@+id/rb_sender_logic_until_fail"
-                                style="@style/rg_rb_style"
-                                android:text="@string/sender_logic_until_fail" />
-
-                            <RadioButton
-                                android:id="@+id/rb_sender_logic_until_success"
-                                style="@style/rg_rb_style"
-                                android:text="@string/sender_logic_until_success" />
-
-                        </RadioGroup>
-
+                <LinearLayout android:id="@+id/layout_match_value" style="@style/Form.Subsection" android:visibility="gone">
+                    <!-- FormFieldLayout hides its outline whenever Kotlin/ItemRows hide et_value (call type, multiple conditions). -->
+                    <cn.ppps.forwarder.widget.material.FormFieldLayout style="@style/Form.Field" android:hint="@string/match_value" app:helperText="@string/match_value_tips">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_value" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textMultiLine" app:met_clearButton="true" />
+                    </cn.ppps.forwarder.widget.material.FormFieldLayout>
+                    <cn.ppps.forwarder.widget.material.TargetDropdown android:id="@+id/sp_call_type" style="@style/Form.Dropdown" android:theme="@style/ThemeOverlay.Material3.AutoCompleteTextView.OutlinedBox" android:hint="@string/call_type" android:visibility="gone" />
+                    <LinearLayout android:id="@+id/layout_app_list" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:orientation="vertical" android:visibility="gone">
+                        <cn.ppps.forwarder.widget.material.TargetEditDropdown android:id="@+id/sp_app" style="@style/Form.Dropdown" android:theme="@style/ThemeOverlay.Material3.AutoCompleteTextView.OutlinedBox" app:es_hint="@string/choose_app" app:helperText="@string/choose_app_hint" app:es_maxLength="20" app:es_maxLine="1" />
                     </LinearLayout>
-
+                    <TextView android:id="@+id/tv_mu_rule_tips" style="@style/Form.Supporting" android:layout_marginTop="8dp" android:text="@string/mu_rule_sms_tips" android:visibility="gone" />
                 </LinearLayout>
-
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/layout_sim_slot"
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/match_sim_slot"
-                    android:textStyle="bold" />
-
-                <RadioGroup
-                    android:id="@+id/rg_sim_slot"
-                    style="@style/rg_style"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rb_sim_slot_all"
-                        style="@style/rg_rb_style"
-                        android:checked="true"
-                        android:text="@string/sim_any" />
-
-                    <RadioButton
-                        android:id="@+id/rb_sim_slot_1"
-                        style="@style/rg_rb_style"
-                        android:text="@string/sim_1" />
-
-                    <RadioButton
-                        android:id="@+id/rb_sim_slot_2"
-                        style="@style/rg_rb_style"
-                        android:text="@string/sim_2" />
-
-                </RadioGroup>
-
-            </LinearLayout>
-
-            <LinearLayout
-                style="@style/BarStyle.Switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/match_field"
-                    android:textStyle="bold" />
-
-                <RadioGroup
-                    android:id="@+id/rg_filed"
-                    style="@style/rg_style"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rb_transpond_all"
-                        style="@style/rg_rb_style_wrap"
-                        android:checked="true"
-                        android:text="@string/all" />
-
-                    <RadioButton
-                        android:id="@+id/rb_phone"
-                        style="@style/rg_rb_style_wrap"
-                        android:text="@string/phone_number" />
-
-                    <RadioButton
-                        android:id="@+id/rb_call_type"
-                        style="@style/rg_rb_style_wrap"
-                        android:text="@string/call_type" />
-
-                    <RadioButton
-                        android:id="@+id/rb_content"
-                        style="@style/rg_rb_style_wrap"
-                        android:text="@string/sms_content" />
-
-                    <RadioButton
-                        android:id="@+id/rb_package_name"
-                        style="@style/rg_rb_style_wrap"
-                        android:text="@string/package_name" />
-
-                    <RadioButton
-                        android:id="@+id/rb_uid"
-                        style="@style/rg_rb_style_wrap"
-                        android:text="@string/uid" />
-
-                    <RadioButton
-                        android:id="@+id/rb_inform_content"
-                        style="@style/rg_rb_style_wrap"
-                        android:text="@string/inform_content" />
-
-                    <RadioButton
-                        android:id="@+id/rb_multi_match"
-                        style="@style/rg_rb_style_wrap"
-                        android:text="@string/multiple_matches" />
-
-                </RadioGroup>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_match_type"
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:text="@string/match_type"
-                    android:textStyle="bold" />
-
-                <RadioGroup
-                    android:id="@+id/rg_check"
-                    style="@style/rg_style"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rb_is"
-                        style="@style/rg_rb_style"
-                        android:checked="true"
-                        android:text="@string/btn_is" />
-
-                    <RadioButton
-                        android:id="@+id/rb_contain"
-                        style="@style/rg_rb_style"
-                        android:text="@string/btn_contain" />
-
-                    <RadioButton
-                        android:id="@+id/rb_not_contain"
-                        style="@style/rg_rb_style"
-                        android:text="@string/btn_not_contain" />
-                </RadioGroup>
-
-                <RadioGroup
-                    android:id="@+id/rg_check2"
-                    style="@style/rg_style"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rb_start_with"
-                        style="@style/rg_rb_style"
-                        android:text="@string/btn_start_with" />
-
-                    <RadioButton
-                        android:id="@+id/rb_end_with"
-                        style="@style/rg_rb_style"
-                        android:text="@string/btn_end_with" />
-
-                    <RadioButton
-                        android:id="@+id/rb_regex"
-                        style="@style/rg_rb_style"
-                        android:text="@string/btn_regex" />
-
-                </RadioGroup>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_match_value"
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/match_value"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_value"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/match_value_tips"
-                    android:inputType="textMultiLine"
-                    app:met_clearButton="true" />
-
-                <com.xuexiang.xui.widget.spinner.materialspinner.MaterialSpinner
-                    android:id="@+id/sp_call_type"
-                    style="@style/Material.SpinnerStyle"
-                    android:layout_marginTop="@dimen/config_margin_4dp"
-                    android:visibility="gone" />
-
-                <LinearLayout
-                    android:id="@+id/layout_app_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/choose_app"
-                        android:textSize="@dimen/text_size_small"
-                        android:textStyle="bold" />
-
-                    <com.xuexiang.xui.widget.spinner.editspinner.EditSpinner
-                        android:id="@+id/sp_app"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_weight="1"
-                        app:es_hint="@string/choose_app_hint"
-                        app:es_maxLength="20"
-                        app:es_maxLine="1" />
-
+            <!-- Message handling -->
+            <LinearLayout style="@style/Form.Section">
+                <cn.ppps.forwarder.widget.material.TargetSwitch android:id="@+id/sb_sms_template" style="@style/Form.SwitchRow" android:text="@string/enable_custom_templates" />
+                <LinearLayout android:id="@+id/layout_sms_template" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="vertical" android:visibility="gone">
+                    <TextView style="@style/Form.Supporting" android:layout_marginTop="0dp" android:text="@string/enable_custom_templates_tips" />
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field.Next" android:hint="@string/custom_template">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_sms_template" android:inputType="textMultiLine" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <GridLayout android:id="@+id/gl_sms_template" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:columnCount="4" android:orientation="horizontal" />
                 </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tv_mu_rule_tips"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/mu_rule_sms_tips"
-                    android:visibility="gone" />
-
+                <cn.ppps.forwarder.widget.material.TargetSwitch android:id="@+id/sb_regex_replace" style="@style/Form.SwitchRow" android:layout_marginTop="16dp" android:text="@string/enable_regex_replace" />
+                <LinearLayout android:id="@+id/layout_regex_replace" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="vertical" android:visibility="gone">
+                    <TextView style="@style/Form.Supporting" android:layout_marginTop="0dp" android:text="@string/enable_regex_replace_tips" />
+                    <!-- Hidden backing field: ItemRows (followVisibility) mirrors it into per-item rows right after it. -->
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_regex_replace" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textMultiLine" app:met_clearButton="true" />
+                </LinearLayout>
             </LinearLayout>
 
-            <LinearLayout
-                style="@style/BarStyle.Switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="3"
-                    android:text="@string/enable_custom_templates"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.button.switchbutton.SwitchButton
-                    android:id="@+id/sb_sms_template"
-                    style="@style/SwitchButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_sms_template"
-                style="@style/BarStyle.NoMT"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/enable_custom_templates_tips"
-                    android:textSize="@dimen/text_size_small" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_sms_template"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textMultiLine"
-                    app:met_clearButton="true" />
-
-                <GridLayout
-                    android:id="@+id/gl_sms_template"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:columnCount="4"
-                    android:orientation="horizontal" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                style="@style/BarStyle.Switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="3"
-                    android:text="@string/enable_regex_replace"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.button.switchbutton.SwitchButton
-                    android:id="@+id/sb_regex_replace"
-                    style="@style/SwitchButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_regex_replace"
-                style="@style/BarStyle.NoMT"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/enable_regex_replace_tips"
-                    android:textSize="@dimen/text_size_small" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_regex_replace"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textMultiLine"
-                    app:met_clearButton="true" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                style="@style/BarStyle.Switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="3"
-                    android:text="@string/switch_rule_status"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.button.switchbutton.SwitchButton
-                    android:id="@+id/sb_status"
-                    style="@style/SwitchButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_silent_period"
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                tools:ignore="RtlSymmetry">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    tools:ignore="RtlSymmetry">
-
-                    <LinearLayout
-                        android:layout_width="180dp"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/silent_time_period"
-                            android:textStyle="bold"
-                            tools:ignore="RelativeOverlap" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/silent_time_period_tips"
-                            android:textSize="@dimen/text_size_mini"
-                            tools:ignore="SmallSp,TooManyViews" />
-
+            <!-- Status and quiet hours -->
+            <LinearLayout style="@style/Form.Section">
+                <cn.ppps.forwarder.widget.material.TargetSwitch android:id="@+id/sb_status" style="@style/Form.SwitchRow" android:checked="true" android:text="@string/switch_rule_status" />
+                <LinearLayout android:id="@+id/layout_silent_period" style="@style/Form.Subsection" android:layout_marginTop="24dp" tools:ignore="RtlSymmetry">
+                    <TextView style="@style/Form.SectionTitle" android:text="@string/silent_time_period" />
+                    <TextView style="@style/Form.Supporting" android:text="@string/silent_time_period_tips" tools:ignore="TooManyViews" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center_vertical" android:minHeight="48dp" android:orientation="horizontal">
+                        <TextView android:id="@+id/tv_silent_period" android:layout_width="wrap_content" android:layout_height="wrap_content" android:ellipsize="none" android:gravity="center_vertical|start" android:maxLines="1" android:singleLine="true" android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
+                        <Space android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
+                        <com.google.android.material.button.MaterialButton android:id="@+id/btn_silent_period" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:minHeight="48dp" android:text="@string/select" />
                     </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/tv_silent_period"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_weight="1"
-                        android:gravity="center" />
-
-                    <com.xuexiang.xui.widget.button.shadowbutton.RippleShadowShadowButton
-                        android:id="@+id/btn_silent_period"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:gravity="center"
-                        android:padding="5dp"
-                        android:text="@string/select"
-                        android:textColor="@color/white"
-                        android:textSize="@dimen/text_size_mini"
-                        app:sb_color_unpressed="@color/colorPrimary"
-                        app:sb_ripple_color="@color/white"
-                        app:sb_ripple_duration="500"
-                        app:sb_shape_type="rectangle"
-                        tools:ignore="SmallSp" />
-
-                </LinearLayout>
-
-                <HorizontalScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <com.xuexiang.xui.widget.button.SmoothCheckBox
-                            android:id="@+id/mon"
-                            android:layout_width="15dp"
-                            android:layout_height="15dp"
-                            app:scb_color_checked="@color/colorPrimary"
-                            tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:singleLine="true"
-                            android:text="@string/mon"
-                            android:textSize="@dimen/text_size_small"
-                            tools:ignore="SmallSp" />
-
-                        <com.xuexiang.xui.widget.button.SmoothCheckBox
-                            android:id="@+id/tue"
-                            android:layout_width="15dp"
-                            android:layout_height="15dp"
-                            android:layout_marginStart="5dp"
-                            app:scb_color_checked="@color/colorPrimary"
-                            tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:singleLine="true"
-                            android:text="@string/tue"
-                            android:textSize="@dimen/text_size_small"
-                            tools:ignore="SmallSp" />
-
-                        <com.xuexiang.xui.widget.button.SmoothCheckBox
-                            android:id="@+id/wed"
-                            android:layout_width="15dp"
-                            android:layout_height="15dp"
-                            android:layout_marginStart="5dp"
-                            app:scb_color_checked="@color/colorPrimary"
-                            tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:singleLine="true"
-                            android:text="@string/wed"
-                            android:textSize="@dimen/text_size_small"
-                            tools:ignore="SmallSp" />
-
-                        <com.xuexiang.xui.widget.button.SmoothCheckBox
-                            android:id="@+id/thu"
-                            android:layout_width="15dp"
-                            android:layout_height="15dp"
-                            android:layout_marginStart="5dp"
-                            app:scb_color_checked="@color/colorPrimary"
-                            tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:singleLine="true"
-                            android:text="@string/thu"
-                            android:textSize="@dimen/text_size_small"
-                            tools:ignore="SmallSp" />
-
-                        <com.xuexiang.xui.widget.button.SmoothCheckBox
-                            android:id="@+id/fri"
-                            android:layout_width="15dp"
-                            android:layout_height="15dp"
-                            android:layout_marginStart="5dp"
-                            app:scb_color_checked="@color/colorPrimary"
-                            tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:singleLine="true"
-                            android:text="@string/fri"
-                            android:textSize="@dimen/text_size_small"
-                            tools:ignore="SmallSp" />
-
-                        <com.xuexiang.xui.widget.button.SmoothCheckBox
-                            android:id="@+id/sat"
-                            android:layout_width="15dp"
-                            android:layout_height="15dp"
-                            android:layout_marginStart="5dp"
-                            app:scb_color_checked="@color/colorPrimary"
-                            tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:singleLine="true"
-                            android:text="@string/sat"
-                            android:textSize="@dimen/text_size_small"
-                            tools:ignore="SmallSp" />
-
-                        <com.xuexiang.xui.widget.button.SmoothCheckBox
-                            android:id="@+id/sun"
-                            android:layout_width="15dp"
-                            android:layout_height="15dp"
-                            android:layout_marginStart="5dp"
-                            app:scb_color_checked="@color/colorPrimary"
-                            tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:singleLine="true"
-                            android:text="@string/sun"
-                            android:textSize="@dimen/text_size_small"
-                            tools:ignore="SmallSp" />
+                    <TextView style="@style/Form.GroupTitle" android:layout_marginTop="16dp" android:text="@string/form_quiet_days" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="vertical">
+                        <cn.ppps.forwarder.widget.material.TargetCheckBox android:id="@+id/mon" style="@style/Form.CheckRow" android:text="@string/mon" />
+                        <cn.ppps.forwarder.widget.material.TargetCheckBox android:id="@+id/tue" style="@style/Form.CheckRow" android:text="@string/tue" />
+                        <cn.ppps.forwarder.widget.material.TargetCheckBox android:id="@+id/wed" style="@style/Form.CheckRow" android:text="@string/wed" />
+                        <cn.ppps.forwarder.widget.material.TargetCheckBox android:id="@+id/thu" style="@style/Form.CheckRow" android:text="@string/thu" />
+                        <cn.ppps.forwarder.widget.material.TargetCheckBox android:id="@+id/fri" style="@style/Form.CheckRow" android:text="@string/fri" />
+                        <cn.ppps.forwarder.widget.material.TargetCheckBox android:id="@+id/sat" style="@style/Form.CheckRow" android:text="@string/sat" />
+                        <cn.ppps.forwarder.widget.material.TargetCheckBox android:id="@+id/sun" style="@style/Form.CheckRow" android:text="@string/sun" />
                     </LinearLayout>
-                </HorizontalScrollView>
-
+                </LinearLayout>
             </LinearLayout>
-
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="10dp">
-
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
-            android:id="@+id/btn_del"
-            style="@style/SuperButton.Gray.Icon.Spacing"
-            android:drawableStart="@drawable/ic_delete"
-            android:text="@string/del"
-            tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
-
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
-            android:id="@+id/btn_save"
-            style="@style/SuperButton.Blue.Icon.Spacing"
-            android:drawableStart="@drawable/ic_save"
-            android:text="@string/save"
-            tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
-
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
-            android:id="@+id/btn_test"
-            style="@style/SuperButton.Green.Icon.Spacing"
-            android:drawableStart="@drawable/ic_test"
-            android:text="@string/test"
-            tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
-
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="horizontal" android:padding="10dp">
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_del" style="@style/MaterialActionButton.Secondary" android:drawableStart="@drawable/ic_delete" android:text="@string/del" tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_save" style="@style/MaterialActionButton" android:drawableStart="@drawable/ic_save" android:text="@string/save" tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_test" style="@style/MaterialActionButton.Secondary" android:drawableStart="@drawable/ic_test" android:text="@string/test" tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
     </LinearLayout>
-
 </LinearLayout>

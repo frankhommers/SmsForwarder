@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_forwarding">Forwarding</string>
+    <string name="settings_sms">SMS</string>
+    <string name="settings_calls">Calls</string>
+    <string name="settings_notifications">App notifications</string>
+    <string name="settings_filtering">Filtering &amp; schedule</string>
+    <string name="settings_duplicates">Duplicate protection</string>
+    <string name="settings_quiet">Quiet hours</string>
+    <string name="settings_filters">Notification filters</string>
+    <string name="settings_automation">Device &amp; automation</string>
+    <string name="settings_bluetooth">Bluetooth discovery</string>
+    <string name="settings_location">Location</string>
+    <string name="settings_apps">Installed apps</string>
+    <string name="settings_background">Background operation</string>
+    <string name="settings_keepalive">Keep-alive</string>
+    <string name="settings_delivery">Delivery</string>
+    <string name="settings_retry">Retry &amp; timeout</string>
+    <string name="settings_identity">Identity &amp; messages</string>
+    <string name="settings_sim">SIM labels</string>
+    <string name="settings_app">App &amp; maintenance</string>
+    <string name="settings_startup">Startup destination</string>
+    <string name="settings_diagnostics">Diagnostics</string>
+    <string name="settings_backup">Backup &amp; restore</string>
+    <string name="settings_setup">Setup help</string>
+    <string name="settings_backup_help">Export, import or transfer your configuration</string>
+    <string name="settings_setup_help">Permissions and background operation</string>
+    <string name="settings_on">On</string>
+    <string name="settings_off">Off</string>
+    <string name="settings_not_set">Not set</string>
+    <string name="settings_unavailable">Not available on this device</string>
+    <string name="settings_no_events">No events selected</string>
+    <string name="settings_item_count">%1$d items saved</string>
+    <string name="settings_retry_summary">%1$d retries · %2$d s interval · %3$d s timeout</string>
+    <string name="settings_autosave">Changes are saved automatically</string>
+    <string name="settings_call_events">Events to forward</string>
+    <string name="settings_main_screen">Main screen</string>
+    <string name="settings_system_settings">Open Android settings</string>
+    <string name="settings_accessibility_help">Manage accessibility services in Android settings. Opening this page does not enable a service.</string>
+    <string name="settings_accessibility">Accessibility</string>
+    <string name="settings_recents">Recent apps</string>
+    <string name="settings_proximity">Screen behavior</string>
+    <string name="settings_saved_events">Saved selection: %1$s</string>
+    <string name="settings_duplicate_interval">Suppress repeats within %1$d s</string>
+    <string name="settings_calls_none_selected">Select call events below to forward them.</string>
+</resources>

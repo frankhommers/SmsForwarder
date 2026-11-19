@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Extras primary tab: intro plus one navigation row per tool (rows are added by ExtrasFragment). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:background="?attr/colorSurface">
+  <androidx.core.widget.NestedScrollView android:id="@+id/extras_scroll" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+    <LinearLayout android:id="@+id/extras_list" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+      <com.google.android.material.textview.MaterialTextView android:id="@+id/extras_intro" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingBottom="8dp" android:text="@string/settings_extras_intro" android:textAppearance="@style/TextAppearance.Material3.BodyMedium" android:textColor="?attr/colorOnSurfaceVariant" />
+    </LinearLayout>
+  </androidx.core.widget.NestedScrollView>
+</LinearLayout>

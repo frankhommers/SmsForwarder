@@ -171,11 +171,9 @@ data class MsgInfo(
         val tagRegex = "\\{\\{${tagName}###(.+?)===(.*?)\\}\\}".toRegex()
         tagRegex.findAll(result).forEach {
             try {
-                Log.d("MsgInfo", "tagRegex: ${it.value}, ${it.groupValues}")
                 val regex = it.groupValues[1]
                 val replacement = it.groupValues[2]
                 val temp = info.replace(regex.toRegex(), replacement)
-                Log.d("MsgInfo", "tagRegex: regex=$regex, replacement=$replacement, temp=$temp")
                 result = when (encoderName) {
                     "Gson" -> this.replace(it.value, toJsonStr(temp), ignoreCase)
                     "URLEncoder" -> this.replace(it.value, URLEncoder.encode(temp, "UTF-8"), ignoreCase)

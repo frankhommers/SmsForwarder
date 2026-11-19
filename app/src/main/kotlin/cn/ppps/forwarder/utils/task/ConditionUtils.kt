@@ -93,23 +93,23 @@ class ConditionUtils private constructor() {
                             val distanceOld = calculateDistance(locationOld.latitude, locationOld.longitude, locationSetting.latitude, locationSetting.longitude)
                             val distanceNew = calculateDistance(locationNew.latitude, locationNew.longitude, locationSetting.latitude, locationSetting.longitude)
                             if (locationSetting.type == "to" && distanceOld > locationSetting.distance && distanceNew <= locationSetting.distance) {
-                                Log.d(TAG, "TASK-$taskId：TO_ADDRESS distanceOld = $distanceOld, distanceNew = $distanceNew, locationSetting = $locationSetting")
+                                Log.d(TAG, "Local event processed")
                                 continue
                             } else if (locationSetting.type == "leave" && distanceOld <= locationSetting.distance && distanceNew > locationSetting.distance) {
-                                Log.d(TAG, "TASK-$taskId：LEAVE_ADDRESS distanceOld = $distanceOld, distanceNew = $distanceNew, locationSetting = $locationSetting")
+                                Log.d(TAG, "Local event processed")
                                 continue
                             }
                         } else if (locationSetting.calcType == "address") {
                             if (locationSetting.type == "to" && !locationOld.address.contains(locationSetting.address) && locationNew.address.contains(locationSetting.address)) {
-                                Log.d(TAG, "TASK-$taskId：TO_ADDRESS locationOld = $locationOld, locationNew = $locationNew, locationSetting = $locationSetting")
+                                Log.d(TAG, "Sensitive event details omitted")
                                 continue
                             } else if (locationSetting.type == "leave" && locationOld.address.contains(locationSetting.address) && !locationNew.address.contains(locationSetting.address)) {
-                                Log.d(TAG, "TASK-$taskId：LEAVE_ADDRESS locationOld = $locationOld, locationNew = $locationNew, locationSetting = $locationSetting")
+                                Log.d(TAG, "Sensitive event details omitted")
                                 continue
                             }
                         }
 
-                        Log.d(TAG, "TASK-$taskId：location is not match, locationOld = $locationOld, locationNew = $locationNew, locationSetting = $locationSetting")
+                        Log.d(TAG, "Sensitive event details omitted")
                         return false
                     }
 

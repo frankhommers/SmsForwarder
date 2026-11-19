@@ -3,7 +3,9 @@ package cn.ppps.forwarder.core.http.loader
 import android.content.Context
 import com.xuexiang.xhttp2.subsciber.impl.IProgressLoader
 import com.xuexiang.xhttp2.subsciber.impl.OnProgressCancelListener
-import com.xuexiang.xui.widget.dialog.MiniLoadingDialog
+import androidx.appcompat.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.progressindicator.CircularProgressIndicator
 
 /**
  * Default Progress Loading
@@ -18,7 +20,7 @@ class MiniLoadingDialogLoader @JvmOverloads constructor(
     /**
      * ProgressloadingDialog
      */
-    private val mDialog: MiniLoadingDialog?
+    private val mDialog: AlertDialog?
 
     /**
      * Progress-dialog cancellation listener
@@ -29,7 +31,7 @@ class MiniLoadingDialogLoader @JvmOverloads constructor(
     }
 
     override fun updateMessage(msg: String) {
-        mDialog?.updateMessage(msg)
+        mDialog?.setMessage(msg)
     }
 
     override fun showLoading() {
@@ -60,6 +62,10 @@ class MiniLoadingDialogLoader @JvmOverloads constructor(
     }
 
     init {
-        mDialog = MiniLoadingDialog(context, msg)
+        mDialog = context?.let {
+            MaterialAlertDialogBuilder(it).setMessage(msg)
+                .setView(CircularProgressIndicator(it).apply { isIndeterminate = true })
+                .create()
+        }
     }
 }

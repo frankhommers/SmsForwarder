@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Form pattern (pilot): one 16dp keyline, labels inside outlined fields, stacked headings and option rows.
+  Recipe: privacy-verification/form-pattern/PATTERN.md. These styles are only used by the pilot screens
+  (fragment_senders_webhook, fragment_rules_edit, item_add_header). Do not change BarStyle/rg_*/SwitchButtonStyle.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Empty root so the dotted Form.* names resolve (implicit parent). -->
+    <style name="Form" />
+
+    <!-- Scrolling form body: the only place that defines the 16dp start/end keyline. -->
+    <style name="Form.Content">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingBottom">24dp</item>
+    </style>
+
+    <!-- A group of related controls. 24dp above every section except the first child of Form.Content. -->
+    <style name="Form.Section">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:layout_marginTop">24dp</item>
+    </style>
+
+    <!-- A block that Kotlin shows/hides inside a section (dependent rows): 16dp above. -->
+    <style name="Form.Subsection" parent="Form.Section">
+        <item name="android:layout_marginTop">16dp</item>
+    </style>
+
+    <style name="Form.Section.First">
+        <item name="android:layout_marginTop">0dp</item>
+    </style>
+
+    <!-- Section heading: Title Small (14sp medium), primary colour, like the approved Settings overview. -->
+    <style name="Form.SectionTitle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">@style/TextAppearance.Material3.TitleSmall</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="android:accessibilityHeading" tools:targetApi="p">true</item>
+    </style>
+
+    <!-- Heading of an option group inside a section that already has a title. -->
+    <style name="Form.GroupTitle" parent="Form.SectionTitle">
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+    <!-- Explanation below a heading or below a control: Body Medium, onSurfaceVariant. -->
+    <style name="Form.Supporting">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.Material3.BodyMedium</item>
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+    </style>
+
+    <!-- Outlined text field, label inside (android:hint on the TextInputLayout). First field in a section. -->
+    <style name="Form.Field" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <!-- Every following field in the same section: 16dp above. -->
+    <style name="Form.Field.Next">
+        <item name="android:layout_marginTop">16dp</item>
+    </style>
+
+    <!--
+      Exposed dropdown, same outline as Form.Field. Also set
+      android:theme="@style/ThemeOverlay.Material3.AutoCompleteTextView.OutlinedBox" on TargetDropdown /
+      TargetEditDropdown: they create their input from the constructor context, so only a view theme reaches it.
+    -->
+    <style name="Form.Dropdown" parent="Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="Form.Dropdown.Next">
+        <item name="android:layout_marginTop">16dp</item>
+    </style>
+
+    <!-- RadioGroup of stacked option rows, 8dp below its heading. -->
+    <style name="Form.OptionGroup">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:layout_marginTop">8dp</item>
+    </style>
+
+    <!-- One option per full-width row, at least 48dp high (extends the existing rg_rb_style_row). -->
+    <style name="Form.Option" parent="rg_rb_style_row">
+        <item name="android:textAppearance">@style/TextAppearance.Material3.BodyLarge</item>
+    </style>
+
+    <!-- Checkbox row: same shape as Form.Option, square indicator. -->
+    <style name="Form.CheckRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:gravity">center_vertical|start</item>
+        <item name="android:textAppearance">@style/TextAppearance.Material3.BodyLarge</item>
+    </style>
+
+    <!-- Switch row: label at the start (android:text), switch at the end, full width, at least 48dp. -->
+    <style name="Form.SwitchRow" parent="Widget.Material3.CompoundButton.MaterialSwitch">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.Material3.BodyLarge</item>
+    </style>
+
+    <!-- Secondary in-form action (add row, show advanced): full-width outlined button at the keyline. -->
+    <style name="Form.Action" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:layout_marginTop">8dp</item>
+    </style>
+
+    <!-- Show/hide toggle for an optional block: a full-width text row at the keyline (not a pill), may wrap. -->
+    <style name="Form.Disclosure" parent="Widget.Material3.Button.TextButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.Material3.LabelLarge</item>
+    </style>
+
+    <!--
+      Help row: a heading or a field with a question-mark button at the end keyline. The label says what the
+      field does, at most one line sits below it, and the full plain-language explanation opens from the
+      question mark (FormHelp.install). Use the same composition everywhere so the icons line up.
+    -->
+    <style name="Form.HelpRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">top</item>
+    </style>
+
+    <!-- Heading with a help button: the heading is centred on the 48dp button. -->
+    <style name="Form.HelpRow.Heading">
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <!--
+      48dp question-mark button ending at the end keyline (its 24dp glyph sits 12dp inside it). Next to an outlined
+      field add android:layout_marginTop="8dp" so it is centred on the 56dp outline below the floating label.
+    -->
+    <style name="Form.HelpIcon">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_marginStart">4dp</item>
+        <item name="android:scaleType">center</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="srcCompat">@drawable/ic_form_help</item>
+        <item name="tint">?attr/colorOnSurfaceVariant</item>
+    </style>
+
+</resources>

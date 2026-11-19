@@ -1,186 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/xui_config_color_background"
-    android:orientation="vertical">
+<!-- Form pattern (privacy-verification/form-pattern/PATTERN.md + TargetForm.* in styles_target_form.xml): one 16dp keyline from Form.Content. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:background="?attr/xui_config_color_background" android:orientation="vertical">
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:overScrollMode="never" android:fillViewport="true">
+        <LinearLayout style="@style/Form.Content">
 
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:overScrollMode="never">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:orientation="vertical">
-
-            <LinearLayout
-                style="@style/BarStyle.Switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/sender_name_status"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_name"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="1"
-                    android:singleLine="true"
-                    app:met_clearButton="true" />
-
-                <com.xuexiang.xui.widget.button.switchbutton.SwitchButton
-                    android:id="@+id/sb_enable"
-                    style="@style/SwitchButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true" />
-
+            <!-- Name and status -->
+            <LinearLayout style="@style/Form.Section.First">
+                <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:hint="@string/m3_target_name">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_name" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <cn.ppps.forwarder.widget.material.TargetSwitch android:id="@+id/sb_enable" style="@style/Form.SwitchRow" android:layout_marginTop="8dp" android:checked="true" android:text="@string/status_param_option_enabled" />
             </LinearLayout>
 
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/GotifyWebServer"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/GotifyWebServerTips"
-                    android:textSize="@dimen/text_size_mini"
-                    tools:ignore="SmallSp" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_webServer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:met_passWordButton="true" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_custom_template"
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/title_template"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:text="@string/custom_template_tips"
-                        android:textSize="@dimen/text_size_mini"
-                        tools:ignore="SmallSp" />
-
+            <!-- Server address -->
+            <LinearLayout style="@style/Form.Section">
+                <LinearLayout style="@style/Form.HelpRow">
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:layout_width="0dp" android:layout_weight="1" android:hint="@string/GotifyWebServer" app:helperText="@string/GotifyWebServerTips">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_webServer" android:inputType="textUri" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <androidx.appcompat.widget.AppCompatImageButton android:id="@+id/btn_help_server" style="@style/Form.HelpIcon" android:layout_marginTop="4dp" />
                 </LinearLayout>
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_title_template"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:singleLine="true"
-                    app:met_clearButton="true" />
-
-                <GridLayout
-                    android:id="@+id/gl_title_template"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:columnCount="4"
-                    android:orientation="horizontal" />
-
             </LinearLayout>
 
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/priority"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_priority"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="1"
-                    android:digits="123456789"
-                    android:inputType="number"
-                    android:maxLength="1"
-                    android:singleLine="true"
-                    android:text="@string/_1"
-                    app:met_clearButton="true" />
-
+            <!-- Message -->
+            <LinearLayout style="@style/Form.Section">
+                <TextView style="@style/Form.SectionTitle" android:text="@string/target_form_section_message" />
+                <LinearLayout android:id="@+id/layout_custom_template" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="vertical">
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:hint="@string/title_template" app:helperText="@string/target_form_template_default_sender">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_title_template" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_tags_title_template" style="@style/TargetForm.TagToggle" android:text="@string/target_form_tags_show" />
+                    <GridLayout android:id="@+id/gl_title_template" style="@style/TargetForm.TagGrid" />
+                </LinearLayout>
+                <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field.Next" android:hint="@string/priority">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_priority" android:digits="123456789" android:inputType="number" android:maxLength="1" android:singleLine="true" android:text="@string/_1" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
-
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="10dp">
-
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
-            android:id="@+id/btn_del"
-            style="@style/SuperButton.Gray.Icon.Spacing"
-            android:drawableStart="@drawable/ic_delete"
-            android:text="@string/del"
-            tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
-
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
-            android:id="@+id/btn_save"
-            style="@style/SuperButton.Blue.Icon.Spacing"
-            android:drawableStart="@drawable/ic_save"
-            android:text="@string/save"
-            tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
-
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
-            android:id="@+id/btn_test"
-            style="@style/SuperButton.Green.Icon.Spacing"
-            android:drawableStart="@drawable/ic_test"
-            android:text="@string/test"
-            tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
-
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="horizontal" android:padding="10dp">
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_del" style="@style/MaterialActionButton.Secondary" android:drawableStart="@drawable/ic_delete" android:text="@string/del" tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_save" style="@style/MaterialActionButton" android:drawableStart="@drawable/ic_save" android:text="@string/save" tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_test" style="@style/MaterialActionButton.Secondary" android:drawableStart="@drawable/ic_test" android:text="@string/test" tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
     </LinearLayout>
-
 </LinearLayout>

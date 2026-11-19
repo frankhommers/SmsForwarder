@@ -8,7 +8,7 @@ import cn.ppps.forwarder.databinding.FragmentMarkdownBinding
 import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 
 @Page(name = "Markdown")
 class MarkdownFragment : BaseFragment<FragmentMarkdownBinding?>() {
@@ -52,7 +52,7 @@ class MarkdownFragment : BaseFragment<FragmentMarkdownBinding?>() {
         // No remote markdown, fonts, images or scripts, even if this legacy page is routed to.
         binding!!.markdownView.settings.blockNetworkLoads = true
         binding!!.markdownView.addStyleSheet(Github())
-        binding!!.markdownView.loadMarkdown("Remote markdown is disabled in this privacy fork.")
+        binding!!.markdownView.loadMarkdown(getString(cn.ppps.forwarder.R.string.copy_markdown_disabled))
     }
 
 }

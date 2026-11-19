@@ -9,7 +9,7 @@ import com.xuexiang.xaop.annotation.MemoryCache
 import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 import com.xuexiang.xutil.resource.ResourceUtils
 
 /**
@@ -57,12 +57,12 @@ class ServiceProtocolFragment : BaseFragment<FragmentServiceProtocolBinding?>() 
 
     @get:MemoryCache("account_protocol")
     private val accountProtocol: String
-        private get() = ResourceUtils.readStringFromAssert(ACCOUNT_PROTOCOL_ASSET_PATH) + "\n\n" +
+        private get() = ResourceUtils.readStringFromAssert(if (resources.configuration.locale.language == "nl") "protocol/fork_terms_nl.txt" else ACCOUNT_PROTOCOL_ASSET_PATH) + "\n\n" +
             ResourceUtils.readStringFromAssert("protocol/upstream_license.txt")
 
     @get:MemoryCache("privacy_protocol")
     private val privacyProtocol: String
-        private get() = ResourceUtils.readStringFromAssert(PRIVACY_PROTOCOL_ASSET_PATH)
+        private get() = ResourceUtils.readStringFromAssert(if (resources.configuration.locale.language == "nl") "protocol/privacy_protocol_nl.txt" else PRIVACY_PROTOCOL_ASSET_PATH)
 
     companion object {
         const val KEY_PROTOCOL_TITLE = "key_protocol_title"

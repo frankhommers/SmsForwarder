@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import cn.ppps.forwarder.R
 import cn.ppps.forwarder.utils.Log
 import cn.ppps.forwarder.utils.XToastUtils
-import com.xuexiang.xui.widget.dialog.DialogLoader
+import cn.ppps.forwarder.widget.material.DialogLoader
 import com.xuexiang.xutil.XUtil
 import com.xuexiang.xutil.app.ActivityUtils
 import java.net.URISyntaxException

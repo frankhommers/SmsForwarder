@@ -72,14 +72,14 @@ import com.jeremyliao.liveeventbus.LiveEventBus
 import com.xuexiang.xaop.annotation.SingleClick
 import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xpage.core.PageOption
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.button.SmoothCheckBox
-import com.xuexiang.xui.widget.button.switchbutton.SwitchButton
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
-import com.xuexiang.xui.widget.picker.XSeekBar
-import com.xuexiang.xui.widget.picker.widget.builder.OptionsPickerBuilder
-import com.xuexiang.xui.widget.picker.widget.listener.OnOptionsSelectListener
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.TargetCheckBox as SmoothCheckBox
+import cn.ppps.forwarder.widget.material.TargetSwitch as SwitchButton
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
+import cn.ppps.forwarder.widget.material.TargetSlider as XSeekBar
+import cn.ppps.forwarder.widget.material.OptionsPickerBuilder
+import cn.ppps.forwarder.widget.material.OnOptionsSelectListener
 import com.xuexiang.xutil.XUtil
 import com.xuexiang.xutil.XUtil.getPackageManager
 import com.xuexiang.xutil.file.FileUtils
@@ -93,6 +93,28 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
     private var titleBar: TitleBar? = null
     private val mTimeOption = DataProvider.timePeriodOption
     private var initViewsFinished = false
+    internal var settingsNavigation: SettingsNavigation? = null
+        private set
+
+    private var restoredDetail: String? = null
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        super.onCreate(savedInstanceState)
+        restoredDetail = savedInstanceState?.getString("settings.detail")
+    }
+    override fun onSaveInstanceState(outState: android.os.Bundle) {
+        outState.putString("settings.detail", settingsNavigation?.current)
+        super.onSaveInstanceState(outState)
+    }
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        settingsNavigation?.updateBackOwnership()
+    }
+    override fun consumeNavigationBack(): Boolean = settingsNavigation?.consumeBack() == true || super.consumeNavigationBack()
+
+    internal fun openBackup() {
+        PageOption.to(CloneFragment::class.java).putInt(KEY_DEFAULT_SELECTION, 1)
+            .setNewActivity(true).open(this)
+    }
 
     //InstalledAppInfo List
     private val appListSpinnerList = ArrayList<AppListAdapterItem>()
@@ -111,29 +133,12 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
 
     override fun initTitle(): TitleBar? {
         titleBar = super.initTitle()!!.setImmersive(false)
-        titleBar!!.setLeftImageResource(R.drawable.ic_action_menu)
+        // Root tab: the bottom bar is the only primary navigation, so no hamburger or fake Back.
+        titleBar!!.disableLeftView()
         titleBar!!.setTitle(R.string.menu_settings)
-        titleBar!!.setLeftClickListener { getContainer()?.openMenu() }
-        titleBar!!.addAction(object : TitleBar.ImageAction(R.drawable.ic_menu_notifications_white) {
-            @SingleClick
-            override fun performAction(view: View) {
-                GuideTipsDialog.showTipsForce(requireContext())
-            }
-        })
-        titleBar!!.addAction(object : TitleBar.ImageAction(R.drawable.ic_restore) {
-            @SingleClick
-            override fun performAction(view: View) {
-                PageOption.to(CloneFragment::class.java)
-                    .putInt(KEY_DEFAULT_SELECTION, 1) //Default Offline Mode
-                    .setNewActivity(true)
-                    .open(this@SettingsFragment)
-            }
-        })
+        titleBar!!.addOverflowAction(R.string.settings_setup) { GuideTipsDialog.showTipsForce(requireContext()) }
+        titleBar!!.addOverflowAction(R.string.settings_backup) { openBackup() }
         return titleBar
-    }
-
-    private fun getContainer(): MainActivity? {
-        return activity as MainActivity?
     }
 
     @SuppressLint("NewApi", "SetTextI18n")
@@ -168,7 +173,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
         //Do not disturb(Disable forwarding)Period
         binding!!.tvSilentPeriod.text = mTimeOption[SettingUtils.silentPeriodStart] + " ~ " + mTimeOption[SettingUtils.silentPeriodEnd]
         binding!!.scbSilentPeriodLogs.isChecked = SettingUtils.enableSilentPeriodLogs
-        binding!!.scbSilentPeriodLogs.setOnCheckedChangeListener { _: SmoothCheckBox, isChecked: Boolean ->
+        binding!!.scbSilentPeriodLogs.setOnCheckedChangeListener { _: android.widget.CompoundButton, isChecked: Boolean ->
             SettingUtils.enableSilentPeriodLogs = isChecked
         }
 
@@ -215,12 +220,17 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
         switchLanguage(binding!!.rgMainLanguages)
 
         initViewsFinished = true
+        settingsNavigation = SettingsNavigation(this, binding!!, titleBar!!)
+        // Only preference routes are details now; a stale "extras" key from the former Settings panel shows the overview.
+        restoredDetail?.takeIf { key -> settingsNavigation!!.entries.any { it.key == key } }?.let { settingsNavigation?.open(it) }
+        restoredDetail = null
     }
 
     override fun onResume() {
         super.onResume()
         //InitializeAPPDrawdown List
         initAppSpinner()
+        settingsNavigation?.refresh()
     }
 
     override fun initListeners() {
@@ -266,7 +276,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
                     )
                     return
                 }
-                Log.d(TAG, App.SimInfoList.toString())
+                Log.d(TAG, "SIM inventory refreshed; details omitted")
                 if (!App.SimInfoList.containsKey(0)) {
                     XToastUtils.error(
                         String.format(
@@ -290,7 +300,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
                     )
                     return
                 }
-                Log.d(TAG, App.SimInfoList.toString())
+                Log.d(TAG, "SIM inventory refreshed; details omitted")
                 if (!App.SimInfoList.containsKey(1)) {
                     XToastUtils.error(
                         String.format(
@@ -387,6 +397,9 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
         sbEnableSms.isChecked = SettingUtils.enableSms
     }
 
+    private fun noCallEventSelected() = !SettingUtils.enableCallType1 && !SettingUtils.enableCallType2 && !SettingUtils.enableCallType3 &&
+        !SettingUtils.enableCallType4 && !SettingUtils.enableCallType5 && !SettingUtils.enableCallType6
+
     //Forward call events
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private fun switchEnablePhone(sbEnablePhone: SwitchButton, scbCallType1: SmoothCheckBox, scbCallType2: SmoothCheckBox, scbCallType3: SmoothCheckBox, scbCallType4: SmoothCheckBox, scbCallType5: SmoothCheckBox, scbCallType6: SmoothCheckBox) {
@@ -396,15 +409,12 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
         scbCallType4.isChecked = SettingUtils.enableCallType4
         scbCallType5.isChecked = SettingUtils.enableCallType5
         scbCallType6.isChecked = SettingUtils.enableCallType6
+        var restored = false
         sbEnablePhone.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            if (isChecked && !SettingUtils.enableCallType1 && !SettingUtils.enableCallType2 && !SettingUtils.enableCallType3 && !SettingUtils.enableCallType4 && !SettingUtils.enableCallType5 && !SettingUtils.enableCallType6) {
-                XToastUtils.info(R.string.enable_phone_fw_tips)
-                SettingUtils.enablePhone = false
-                sbEnablePhone.isChecked = false
-                return@setOnCheckedChangeListener
-            }
+            // The master switch always turns on; with no event selected nothing is forwarded (CallReceiver checks each type).
             SettingUtils.enablePhone = isChecked
             if (isChecked) {
+                if (restored && noCallEventSelected()) XToastUtils.info(R.string.settings_calls_none_selected)
                 XXPermissions.with(this)
                     // Read Phone Status
                     .permission(PermissionLists.getReadPhoneStatePermission())
@@ -435,53 +445,36 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
             }
         }
         sbEnablePhone.isChecked = SettingUtils.enablePhone
-        scbCallType1.setOnCheckedChangeListener { _: SmoothCheckBox, isChecked: Boolean ->
+        restored = true
+        scbCallType1.setOnCheckedChangeListener { _: android.widget.CompoundButton, isChecked: Boolean ->
             SettingUtils.enableCallType1 = isChecked
-            if (!isChecked && !SettingUtils.enableCallType1 && !SettingUtils.enableCallType2 && !SettingUtils.enableCallType3 && !SettingUtils.enableCallType4 && !SettingUtils.enableCallType5 && !SettingUtils.enableCallType6) {
-                XToastUtils.info(R.string.enable_phone_fw_tips)
-                SettingUtils.enablePhone = false
-                sbEnablePhone.isChecked = false
-            }
+            // Unchecking the last event keeps the master on and the boxes usable; it only explains the effect.
+            if (!isChecked && SettingUtils.enablePhone && noCallEventSelected()) XToastUtils.info(R.string.settings_calls_none_selected)
         }
-        scbCallType2.setOnCheckedChangeListener { _: SmoothCheckBox, isChecked: Boolean ->
+        scbCallType2.setOnCheckedChangeListener { _: android.widget.CompoundButton, isChecked: Boolean ->
             SettingUtils.enableCallType2 = isChecked
-            if (!isChecked && !SettingUtils.enableCallType1 && !SettingUtils.enableCallType2 && !SettingUtils.enableCallType3 && !SettingUtils.enableCallType4 && !SettingUtils.enableCallType5 && !SettingUtils.enableCallType6) {
-                XToastUtils.info(R.string.enable_phone_fw_tips)
-                SettingUtils.enablePhone = false
-                sbEnablePhone.isChecked = false
-            }
+            // Unchecking the last event keeps the master on and the boxes usable; it only explains the effect.
+            if (!isChecked && SettingUtils.enablePhone && noCallEventSelected()) XToastUtils.info(R.string.settings_calls_none_selected)
         }
-        scbCallType3.setOnCheckedChangeListener { _: SmoothCheckBox, isChecked: Boolean ->
+        scbCallType3.setOnCheckedChangeListener { _: android.widget.CompoundButton, isChecked: Boolean ->
             SettingUtils.enableCallType3 = isChecked
-            if (!isChecked && !SettingUtils.enableCallType1 && !SettingUtils.enableCallType2 && !SettingUtils.enableCallType3 && !SettingUtils.enableCallType4 && !SettingUtils.enableCallType5 && !SettingUtils.enableCallType6) {
-                XToastUtils.info(R.string.enable_phone_fw_tips)
-                SettingUtils.enablePhone = false
-                sbEnablePhone.isChecked = false
-            }
+            // Unchecking the last event keeps the master on and the boxes usable; it only explains the effect.
+            if (!isChecked && SettingUtils.enablePhone && noCallEventSelected()) XToastUtils.info(R.string.settings_calls_none_selected)
         }
-        scbCallType4.setOnCheckedChangeListener { _: SmoothCheckBox, isChecked: Boolean ->
+        scbCallType4.setOnCheckedChangeListener { _: android.widget.CompoundButton, isChecked: Boolean ->
             SettingUtils.enableCallType4 = isChecked
-            if (!isChecked && !SettingUtils.enableCallType1 && !SettingUtils.enableCallType2 && !SettingUtils.enableCallType3 && !SettingUtils.enableCallType4 && !SettingUtils.enableCallType5 && !SettingUtils.enableCallType6) {
-                XToastUtils.info(R.string.enable_phone_fw_tips)
-                SettingUtils.enablePhone = false
-                sbEnablePhone.isChecked = false
-            }
+            // Unchecking the last event keeps the master on and the boxes usable; it only explains the effect.
+            if (!isChecked && SettingUtils.enablePhone && noCallEventSelected()) XToastUtils.info(R.string.settings_calls_none_selected)
         }
-        scbCallType5.setOnCheckedChangeListener { _: SmoothCheckBox, isChecked: Boolean ->
+        scbCallType5.setOnCheckedChangeListener { _: android.widget.CompoundButton, isChecked: Boolean ->
             SettingUtils.enableCallType5 = isChecked
-            if (!isChecked && !SettingUtils.enableCallType1 && !SettingUtils.enableCallType2 && !SettingUtils.enableCallType3 && !SettingUtils.enableCallType4 && !SettingUtils.enableCallType5 && !SettingUtils.enableCallType6) {
-                XToastUtils.info(R.string.enable_phone_fw_tips)
-                SettingUtils.enablePhone = false
-                sbEnablePhone.isChecked = false
-            }
+            // Unchecking the last event keeps the master on and the boxes usable; it only explains the effect.
+            if (!isChecked && SettingUtils.enablePhone && noCallEventSelected()) XToastUtils.info(R.string.settings_calls_none_selected)
         }
-        scbCallType6.setOnCheckedChangeListener { _: SmoothCheckBox, isChecked: Boolean ->
+        scbCallType6.setOnCheckedChangeListener { _: android.widget.CompoundButton, isChecked: Boolean ->
             SettingUtils.enableCallType6 = isChecked
-            if (!isChecked && !SettingUtils.enableCallType1 && !SettingUtils.enableCallType2 && !SettingUtils.enableCallType3 && !SettingUtils.enableCallType4 && !SettingUtils.enableCallType5 && !SettingUtils.enableCallType6) {
-                XToastUtils.info(R.string.enable_phone_fw_tips)
-                SettingUtils.enablePhone = false
-                sbEnablePhone.isChecked = false
-            }
+            // Unchecking the last event keeps the master on and the boxes usable; it only explains the effect.
+            if (!isChecked && SettingUtils.enablePhone && noCallEventSelected()) XToastUtils.info(R.string.settings_calls_none_selected)
         }
     }
 
@@ -489,7 +482,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private fun switchEnableAppNotify(sbEnableAppNotify: SwitchButton, scbCancelAppNotify: SmoothCheckBox, scbNotUserPresent: SmoothCheckBox) {
         sbEnableAppNotify.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            binding!!.layoutOptionalAction.visibility = if (isChecked) View.VISIBLE else View.GONE
+            binding!!.layoutOptionalAction.visibility = View.VISIBLE
             SettingUtils.enableAppNotify = isChecked
             if (isChecked) {
                 XXPermissions.with(this)
@@ -518,14 +511,14 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
         }
         val isEnable = SettingUtils.enableAppNotify
         sbEnableAppNotify.isChecked = isEnable
-        binding!!.layoutOptionalAction.visibility = if (isEnable) View.VISIBLE else View.GONE
+        binding!!.layoutOptionalAction.visibility = View.VISIBLE
 
         scbCancelAppNotify.isChecked = SettingUtils.enableCancelAppNotify
-        scbCancelAppNotify.setOnCheckedChangeListener { _: SmoothCheckBox, isChecked: Boolean ->
+        scbCancelAppNotify.setOnCheckedChangeListener { _: android.widget.CompoundButton, isChecked: Boolean ->
             SettingUtils.enableCancelAppNotify = isChecked
         }
         scbNotUserPresent.isChecked = SettingUtils.enableNotUserPresent
-        scbNotUserPresent.setOnCheckedChangeListener { _: SmoothCheckBox, isChecked: Boolean ->
+        scbNotUserPresent.setOnCheckedChangeListener { _: android.widget.CompoundButton, isChecked: Boolean ->
             SettingUtils.enableNotUserPresent = isChecked
         }
     }
@@ -534,7 +527,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
     private fun switchEnableBluetooth(@SuppressLint("UseSwitchCompatOrMaterialCode") sbEnableBluetooth: SwitchButton, layoutBluetoothSetting: LinearLayout, xsbScanInterval: XSeekBar, scbIgnoreAnonymous: SmoothCheckBox) {
         sbEnableBluetooth.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
             SettingUtils.enableBluetooth = isChecked
-            layoutBluetoothSetting.visibility = if (isChecked) View.VISIBLE else View.GONE
+            layoutBluetoothSetting.visibility = View.VISIBLE
             if (isChecked) {
                 XXPermissions.with(this)
                     .permission(PermissionLists.getBluetoothScanPermission())
@@ -567,7 +560,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
         }
         val isEnable = SettingUtils.enableBluetooth
         sbEnableBluetooth.isChecked = isEnable
-        layoutBluetoothSetting.visibility = if (isEnable) View.VISIBLE else View.GONE
+        layoutBluetoothSetting.visibility = View.VISIBLE
 
         //Scan Bluetooth device interval
         xsbScanInterval.setDefaultValue((SettingUtils.bluetoothScanInterval / 1000).toInt())
@@ -580,7 +573,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
 
         //Whether to ignore anonymous devices
         scbIgnoreAnonymous.isChecked = SettingUtils.bluetoothIgnoreAnonymous
-        scbIgnoreAnonymous.setOnCheckedChangeListener { _: SmoothCheckBox, isChecked: Boolean ->
+        scbIgnoreAnonymous.setOnCheckedChangeListener { _: android.widget.CompoundButton, isChecked: Boolean ->
             SettingUtils.bluetoothIgnoreAnonymous = isChecked
             restartBluetoothService()
         }
@@ -590,6 +583,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
     //Restart Bluetooth Scan Service
     private fun restartBluetoothService(action: String = ACTION_RESTART) {
         if (!initViewsFinished) return
+        if (!SettingUtils.enableBluetooth && action == ACTION_RESTART) return
         Log.d(TAG, "restartBluetoothService, action: $action")
         val serviceIntent = Intent(requireContext(), BluetoothScanService::class.java)
         //If Bluetooth is enabled, but the system bluetooth is not available, turn it off.
@@ -609,7 +603,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
     private fun switchEnableLocation(@SuppressLint("UseSwitchCompatOrMaterialCode") sbEnableLocation: SwitchButton, layoutLocationSetting: LinearLayout, rgAccuracy: RadioGroup, rgPowerRequirement: RadioGroup, xsbMinInterval: XSeekBar, xsbMinDistance: XSeekBar) {
         sbEnableLocation.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
             SettingUtils.enableLocation = isChecked
-            layoutLocationSetting.visibility = if (isChecked) View.VISIBLE else View.GONE
+            layoutLocationSetting.visibility = View.VISIBLE
             if (isChecked) {
                 XXPermissions.with(this)
                     .permission(PermissionLists.getAccessCoarseLocationPermission())
@@ -641,7 +635,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
         }
         val isEnable = SettingUtils.enableLocation
         sbEnableLocation.isChecked = isEnable
-        layoutLocationSetting.visibility = if (isEnable) View.VISIBLE else View.GONE
+        layoutLocationSetting.visibility = View.VISIBLE
 
         //Set position accuracy: high precision (default)）
         rgAccuracy.check(
@@ -705,6 +699,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
     //Restart location service
     private fun restartLocationService(action: String = ACTION_RESTART) {
         if (!initViewsFinished) return
+        if (!SettingUtils.enableLocation && action == ACTION_RESTART) return
         Log.d(TAG, "restartLocationService, action: $action")
         val serviceIntent = Intent(requireContext(), LocationService::class.java)
         //If the locator function is enabled, but the system locator function is not available, turn it off.
@@ -725,7 +720,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
     private fun switchEnableSmsCommand(sbEnableSmsCommand: SwitchButton, etSafePhone: EditText) {
         sbEnableSmsCommand.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
             SettingUtils.enableSmsCommand = isChecked
-            etSafePhone.visibility = if (isChecked) View.VISIBLE else View.GONE
+            etSafePhone.visibility = View.VISIBLE
             if (isChecked) {
                 XXPermissions.with(this)
                     // System Settings
@@ -758,7 +753,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
         }
         val isEnable = SettingUtils.enableSmsCommand
         sbEnableSmsCommand.isChecked = isEnable
-        etSafePhone.visibility = if (isEnable) View.VISIBLE else View.GONE
+        etSafePhone.visibility = View.VISIBLE
 
         etSafePhone.setText(SettingUtils.smsCommandSafePhone)
         etSafePhone.addTextChangedListener(object : TextWatcher {
@@ -818,26 +813,21 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
         sbEnableLoadAppList.isChecked = isEnable
 
         sbEnableLoadAppList.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            if (isChecked && !SettingUtils.enableLoadUserAppList && !SettingUtils.enableLoadSystemAppList) {
-                sbEnableLoadAppList.isChecked = false
-                SettingUtils.enableLoadAppList = false
-                XToastUtils.error(getString(R.string.load_app_list_toast))
-                return@setOnCheckedChangeListener
-            }
+            // The master switch always turns on; with no app type selected nothing is loaded.
             SettingUtils.enableLoadAppList = isChecked
-            if (isChecked) {
+            if (isChecked && !SettingUtils.enableLoadUserAppList && !SettingUtils.enableLoadSystemAppList) {
+                XToastUtils.info(getString(R.string.load_app_list_toast))
+            } else if (isChecked) {
                 XToastUtils.info(getString(R.string.loading_app_list))
                 val request = OneTimeWorkRequestBuilder<LoadAppListWorker>().build()
                 WorkManager.getInstance(XUtil.getContext()).enqueue(request)
             }
         }
         scbLoadUserApp.isChecked = SettingUtils.enableLoadUserAppList
-        scbLoadUserApp.setOnCheckedChangeListener { _: SmoothCheckBox, isChecked: Boolean ->
+        scbLoadUserApp.setOnCheckedChangeListener { _: android.widget.CompoundButton, isChecked: Boolean ->
             SettingUtils.enableLoadUserAppList = isChecked
-            if (SettingUtils.enableLoadAppList && !SettingUtils.enableLoadUserAppList && !SettingUtils.enableLoadSystemAppList) {
-                sbEnableLoadAppList.isChecked = false
-                SettingUtils.enableLoadAppList = false
-                XToastUtils.error(getString(R.string.load_app_list_toast))
+            if (!isChecked && SettingUtils.enableLoadAppList && !SettingUtils.enableLoadUserAppList && !SettingUtils.enableLoadSystemAppList) {
+                XToastUtils.info(getString(R.string.load_app_list_toast))
             }
             if (isChecked && SettingUtils.enableLoadAppList && App.UserAppList.isEmpty()) {
                 XToastUtils.info(getString(R.string.loading_app_list))
@@ -846,12 +836,10 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
             }
         }
         scbLoadSystemApp.isChecked = SettingUtils.enableLoadSystemAppList
-        scbLoadSystemApp.setOnCheckedChangeListener { _: SmoothCheckBox, isChecked: Boolean ->
+        scbLoadSystemApp.setOnCheckedChangeListener { _: android.widget.CompoundButton, isChecked: Boolean ->
             SettingUtils.enableLoadSystemAppList = isChecked
-            if (SettingUtils.enableLoadAppList && !SettingUtils.enableLoadUserAppList && !SettingUtils.enableLoadSystemAppList) {
-                sbEnableLoadAppList.isChecked = false
-                SettingUtils.enableLoadAppList = false
-                XToastUtils.error(getString(R.string.load_app_list_toast))
+            if (!isChecked && SettingUtils.enableLoadAppList && !SettingUtils.enableLoadUserAppList && !SettingUtils.enableLoadSystemAppList) {
+                XToastUtils.info(getString(R.string.load_app_list_toast))
             }
             if (isChecked && SettingUtils.enableLoadAppList && App.SystemAppList.isEmpty()) {
                 XToastUtils.info(getString(R.string.loading_app_list))
@@ -939,20 +927,20 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
         val layoutCactusOptional: LinearLayout = binding!!.layoutCactusOptional
         val isEnable: Boolean = SettingUtils.enableCactus
         sbEnableCactus.isChecked = isEnable
-        layoutCactusOptional.visibility = if (isEnable) View.VISIBLE else View.GONE
-        layoutMusicInterval.visibility = if (isEnable && SettingUtils.enablePlaySilenceMusic) View.VISIBLE else View.GONE
+        layoutCactusOptional.visibility = View.VISIBLE
+        layoutMusicInterval.visibility = View.VISIBLE
 
         sbEnableCactus.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            layoutCactusOptional.visibility = if (isChecked) View.VISIBLE else View.GONE
-            layoutMusicInterval.visibility = if (isChecked && SettingUtils.enablePlaySilenceMusic) View.VISIBLE else View.GONE
+            layoutCactusOptional.visibility = View.VISIBLE
+            layoutMusicInterval.visibility = View.VISIBLE
             SettingUtils.enableCactus = isChecked
             XToastUtils.warning(getString(R.string.need_to_restart))
         }
 
         scbPlaySilenceMusic.isChecked = SettingUtils.enablePlaySilenceMusic
-        scbPlaySilenceMusic.setOnCheckedChangeListener { _: SmoothCheckBox, isChecked: Boolean ->
+        scbPlaySilenceMusic.setOnCheckedChangeListener { _: android.widget.CompoundButton, isChecked: Boolean ->
             SettingUtils.enablePlaySilenceMusic = isChecked
-            layoutMusicInterval.visibility = if (isChecked) View.VISIBLE else View.GONE
+            layoutMusicInterval.visibility = View.VISIBLE
             XToastUtils.warning(getString(R.string.need_to_restart))
         }
 
@@ -960,7 +948,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
             binding!!.layoutOnePixelActivity.visibility = View.VISIBLE
         }
         scbOnePixelActivity.isChecked = SettingUtils.enableOnePixelActivity
-        scbOnePixelActivity.setOnCheckedChangeListener { _: SmoothCheckBox, isChecked: Boolean ->
+        scbOnePixelActivity.setOnCheckedChangeListener { _: android.widget.CompoundButton, isChecked: Boolean ->
             SettingUtils.enableOnePixelActivity = isChecked
             XToastUtils.warning(getString(R.string.need_to_restart))
         }
@@ -979,7 +967,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
         xsbRetryTimes.setDefaultValue(SettingUtils.requestRetryTimes)
         xsbRetryTimes.setOnSeekBarListener { _: XSeekBar?, newValue: Int ->
             SettingUtils.requestRetryTimes = newValue
-            binding!!.layoutDelayTime.visibility = if (newValue > 0) View.VISIBLE else View.GONE
+            binding!!.layoutDelayTime.visibility = View.VISIBLE
         }
         xsbDelayTime.setDefaultValue(SettingUtils.requestDelayTime)
         xsbDelayTime.setOnSeekBarListener { _: XSeekBar?, newValue: Int ->
@@ -1012,7 +1000,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
             override fun afterTextChanged(s: Editable) {
                 val v = etSubidSim1.text.toString()
                 SettingUtils.subidSim1 = if (!TextUtils.isEmpty(v)) {
-                    v.toInt()
+                    v.toIntOrNull() ?: return
                 } else {
                     1
                 }
@@ -1029,7 +1017,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
             override fun afterTextChanged(s: Editable) {
                 val v = etSubidSim2.text.toString()
                 SettingUtils.subidSim2 = if (!TextUtils.isEmpty(v)) {
-                    v.toInt()
+                    v.toIntOrNull() ?: return
                 } else {
                     2
                 }
@@ -1387,11 +1375,18 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
         }
     }
 
+    override fun onDestroyView() {
+        LiveEventBus.get(EVENT_LOAD_APP_LIST, String::class.java).removeObserver(appListObserver)
+        settingsNavigation = null
+        initViewsFinished = false
+        super.onDestroyView()
+    }
+
     //InitializeAPPDrawdown List
     private fun initAppSpinner() {
 
         //When asynchronous installed-app loading is disabledAppdo not show installed apps when information loading is disabledAPPdropdown
-        if (!SettingUtils.enableLoadAppList) return
+        if (!SettingUtils.enableLoadAppList || (!SettingUtils.enableLoadUserAppList && !SettingUtils.enableLoadSystemAppList)) return
 
         if (App.UserAppList.isEmpty() && App.SystemAppList.isEmpty()) {
             //XToastUtils.info(getString(R.string.loading_app_list))
@@ -1417,7 +1412,7 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding?>(), View.OnClickL
         //The list is empty and does not show drop-down frames
         if (appListSpinnerList.isEmpty()) return
 
-        appListSpinnerAdapter = AppListSpinnerAdapter(appListSpinnerList).setIsFilterKey(true).setFilterColor("#EF5362").setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
+        appListSpinnerAdapter = AppListSpinnerAdapter(appListSpinnerList).setIsFilterKey(true).setFilterColor(String.format("#%06X", com.google.android.material.color.MaterialColors.getColor(binding!!.root, com.google.android.material.R.attr.colorPrimary) and 0xFFFFFF)).setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
         binding!!.spApp.setAdapter(appListSpinnerAdapter)
         binding!!.spApp.setOnItemClickListener { _: AdapterView<*>, _: View, position: Int, _: Long ->
             try {

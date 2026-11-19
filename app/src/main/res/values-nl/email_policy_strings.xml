@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Email encryption policy: fallback toggle and per-recipient delivery-log outcomes (EmailEncryption.kt). -->
+<resources>
+    <string name="target_form_email_fallback">Onversleuteld verzenden als versleutelen mislukt</string>
+    <string name="target_form_email_fallback_off">Uit: een ontvanger bij wie versleutelen mislukt, krijgt niets.</string>
+    <string name="target_form_email_fallback_on">Let op: ontvangers bij wie versleutelen mislukt, krijgen een leesbare e-mail.</string>
+    <string name="target_form_email_fallback_na">Alleen voor S/MIME, OpenPGP of OpenKeychain; uw keuze blijft bewaard.</string>
+    <string name="target_form_email_fallback_dialog">Geldt voor S/MIME, OpenPGP en OpenKeychain. Versleutelen mislukt als een ontvanger geen bruikbare sleutel heeft of het versleutelen fout gaat. Uit (aanbevolen): die ontvanger krijgt niets en het logboek zegt waarom; de anderen krijgen hun e-mail wel. Aan: die ontvanger krijgt een gewone, leesbare e-mail, in het logboek gemarkeerd als onversleuteld. Een mailserverfout geeft nooit een onversleutelde kopie.</string>
+    <string name="email_outcome_encrypted">%1$s: versleuteld verzonden (%2$s).</string>
+    <string name="email_outcome_encrypted_signed">%1$s: versleuteld en ondertekend verzonden (%2$s).</string>
+    <string name="email_outcome_unencrypted">%1$s: ONVERSLEUTELD verzonden (terugval staat aan): %2$s.</string>
+    <string name="email_outcome_unencrypted_signed">%1$s: ONVERSLEUTELD verzonden, ondertekend (terugval staat aan): %2$s.</string>
+    <string name="email_outcome_failed">%1$s: niet verzonden: %2$s.</string>
+    <string name="email_reason_no_key">geen sleutel voor deze ontvanger</string>
+    <string name="email_reason_bad_key">de sleutel van de ontvanger is niet te lezen</string>
+    <string name="email_reason_unusable_key">de sleutel van de ontvanger is niet bruikbaar voor versleuteling</string>
+    <string name="email_reason_encryption_failed">versleutelen mislukt (%1$s)</string>
+    <string name="email_reason_signing_failed">uw ondertekeningssleutel of het wachtwoord daarvan is niet bruikbaar</string>
+    <string name="email_reason_signing_password">uw ondertekeningssleutel heeft het wachtwoord nodig</string>
+    <string name="email_reason_prepare_failed">de e-mail kon niet worden opgesteld (%1$s)</string>
+    <string name="email_reason_smtp">fout bij de mailserver: %1$s</string>
+</resources>

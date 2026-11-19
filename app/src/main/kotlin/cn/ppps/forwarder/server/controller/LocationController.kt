@@ -25,7 +25,7 @@ class LocationController {
     @CrossOrigin(methods = [RequestMethod.POST])
     @PostMapping("/query")
     fun query(@RequestBody bean: BaseRequest<EmptyData>): LocationInfo {
-        Log.d(TAG, bean.data.toString())
+        Log.d(TAG, "Sensitive event details omitted")
         return HttpServerUtils.apiLocationCache
     }
 

@@ -1,370 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/xui_config_color_background"
-    android:orientation="vertical">
+<!-- Form pattern (privacy-verification/form-pattern/PATTERN.md + TargetForm.* in styles_target_form.xml): one 16dp keyline from Form.Content. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:background="?attr/xui_config_color_background" android:orientation="vertical">
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:overScrollMode="never" android:fillViewport="true">
+        <LinearLayout style="@style/Form.Content">
 
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:overScrollMode="never">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:orientation="vertical">
-
-            <LinearLayout
-                style="@style/BarStyle.Switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/sender_name_status"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_name"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="1"
-                    android:singleLine="true"
-                    app:met_clearButton="true" />
-
-                <com.xuexiang.xui.widget.button.switchbutton.SwitchButton
-                    android:id="@+id/sb_enable"
-                    style="@style/SwitchButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true" />
-
+            <!-- Name and status -->
+            <LinearLayout style="@style/Form.Section.First">
+                <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:hint="@string/m3_target_name">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_name" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <cn.ppps.forwarder.widget.material.TargetSwitch android:id="@+id/sb_enable" style="@style/Form.SwitchRow" android:layout_marginTop="8dp" android:checked="true" android:text="@string/status_param_option_enabled" />
             </LinearLayout>
 
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/TelegramApiToken"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_apiToken"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:met_passWordButton="true" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/Method"
-                    android:textStyle="bold" />
-
-                <RadioGroup
-                    android:id="@+id/rg_method"
-                    style="@style/rg_style"
-                    android:layout_marginStart="5dp"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rb_method_post"
-                        style="@style/rg_rb_style"
-                        android:checked="true"
-                        android:text="@string/post" />
-
-                    <RadioButton
-                        android:id="@+id/rb_method_get"
-                        style="@style/rg_rb_style"
-                        android:text="@string/get" />
-
-                </RadioGroup>
-
-            </LinearLayout>
-
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/parse_mode"
-                    android:textStyle="bold" />
-
-                <RadioGroup
-                    android:id="@+id/rg_parse_mode"
-                    style="@style/rg_style"
-                    android:layout_marginStart="5dp"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rb_parse_mode_text"
-                        style="@style/rg_rb_style"
-                        android:text="@string/parse_mode_text" />
-
-                    <RadioButton
-                        android:id="@+id/rb_parse_mode_html"
-                        style="@style/rg_rb_style"
-                        android:checked="true"
-                        android:text="@string/parse_mode_html" />
-
-                    <RadioButton
-                        android:id="@+id/rb_parse_mode_markdown"
-                        style="@style/rg_rb_style"
-                        android:text="@string/parse_mode_markdown" />
-
-                </RadioGroup>
-
-            </LinearLayout>
-
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/TelegramChatId"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_chatId"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:hint="@string/TelegramChatIdTips"
-                    android:singleLine="true"
-                    app:met_clearButton="true" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/TelegramMessageThreadId"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_messageThreadId"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:hint="@string/TelegramMessageThreadIdTips"
-                    android:singleLine="true"
-                    app:met_clearButton="true" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/proxy_settings"
-                    android:textStyle="bold" />
-
-                <RadioGroup
-                    android:id="@+id/rg_proxyType"
-                    style="@style/rg_style"
-                    android:layout_marginStart="5dp"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rb_proxyNone"
-                        style="@style/rg_rb_style"
-                        android:checked="true"
-                        android:text="@string/proxy_none" />
-
-                    <RadioButton
-                        android:id="@+id/rb_proxyHttp"
-                        style="@style/rg_rb_style"
-                        android:text="@string/proxy_http" />
-
-                    <RadioButton
-                        android:id="@+id/rb_proxySocks"
-                        style="@style/rg_rb_style"
-                        android:text="@string/proxy_socks" />
-
-                </RadioGroup>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layoutProxyHost"
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/hostname" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_proxyHost"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="1"
-                    android:singleLine="true"
-                    app:met_clearButton="true" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layoutProxyPort"
-                style="@style/BarStyle.Switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/port" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_proxyPort"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="1"
-                    android:digits="0123456789"
-                    android:inputType="number"
-                    android:maxLength="5"
-                    android:singleLine="true"
-                    app:met_clearButton="true" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:text="@string/proxy_authenticator" />
-
-                <com.xuexiang.xui.widget.button.switchbutton.SwitchButton
-                    android:id="@+id/sb_proxyAuthenticator"
-                    style="@style/SwitchButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layoutProxyAuthenticator"
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/username" />
-
-                    <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                        android:id="@+id/et_proxyUsername"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_weight="1"
-                        android:singleLine="true"
-                        app:met_clearButton="true" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:text="@string/password" />
-
-                    <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                        android:id="@+id/et_proxyPassword"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_weight="1"
-                        android:singleLine="true"
-                        app:met_passWordButton="true" />
-
+            <!-- Bot and chat -->
+            <LinearLayout style="@style/Form.Section">
+                <LinearLayout style="@style/Form.HelpRow">
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:layout_width="0dp" android:layout_weight="1" android:hint="@string/target_form_telegram_token" app:helperText="@string/target_form_telegram_token_helper">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_apiToken" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <androidx.appcompat.widget.AppCompatImageButton android:id="@+id/btn_help_token" style="@style/Form.HelpIcon" android:layout_marginTop="4dp" />
                 </LinearLayout>
-
+                <LinearLayout style="@style/Form.HelpRow" android:layout_marginTop="16dp">
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:layout_width="0dp" android:layout_weight="1" android:hint="@string/TelegramChatId">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_chatId" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <androidx.appcompat.widget.AppCompatImageButton android:id="@+id/btn_help_chat" style="@style/Form.HelpIcon" android:layout_marginTop="4dp" />
+                </LinearLayout>
+                <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field.Next" android:hint="@string/TelegramMessageThreadId" app:helperText="@string/target_form_telegram_topic_helper">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_messageThreadId" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
+            <!-- Message formatting -->
+            <LinearLayout style="@style/Form.Section">
+                <LinearLayout style="@style/TargetForm.TitleRow">
+                    <TextView style="@style/Form.SectionTitle" android:layout_width="0dp" android:layout_weight="1" android:text="@string/parse_mode" />
+                    <androidx.appcompat.widget.AppCompatImageButton android:id="@+id/btn_help_parse_mode" style="@style/Form.HelpIcon" />
+                </LinearLayout>
+                <RadioGroup android:id="@+id/rg_parse_mode" style="@style/Form.OptionGroup">
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_parse_mode_text" style="@style/Form.Option" android:text="@string/parse_mode_text" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_parse_mode_html" style="@style/Form.Option" android:checked="true" android:text="@string/parse_mode_html" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_parse_mode_markdown" style="@style/Form.Option" android:text="@string/parse_mode_markdown" />
+                </RadioGroup>
+            </LinearLayout>
+
+            <!-- Method -->
+            <LinearLayout style="@style/Form.Section">
+                <TextView style="@style/Form.SectionTitle" android:text="@string/Method" />
+                <RadioGroup android:id="@+id/rg_method" style="@style/Form.OptionGroup">
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_method_post" style="@style/Form.Option" android:checked="true" android:text="@string/post" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_method_get" style="@style/Form.Option" android:text="@string/get" />
+                </RadioGroup>
+            </LinearLayout>
+
+            <!-- Proxy (same composition as the Webhook editor) -->
+            <LinearLayout style="@style/Form.Section">
+                <TextView style="@style/Form.SectionTitle" android:text="@string/proxy_settings" />
+                <RadioGroup android:id="@+id/rg_proxyType" style="@style/Form.OptionGroup">
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_proxyNone" style="@style/Form.Option" android:checked="true" android:text="@string/proxy_none" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_proxyHttp" style="@style/Form.Option" android:text="@string/proxy_http" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_proxySocks" style="@style/Form.Option" android:text="@string/proxy_socks" />
+                </RadioGroup>
+                <LinearLayout android:id="@+id/layoutProxyHost" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field.Next" android:hint="@string/hostname">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_proxyHost" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+                <LinearLayout android:id="@+id/layoutProxyPort" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field.Next" android:hint="@string/port">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_proxyPort" android:digits="0123456789" android:inputType="number" android:maxLength="5" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+                <!-- Always visible, as before: TelegramFragment drives layoutProxyAuthenticator from this switch alone. -->
+                <cn.ppps.forwarder.widget.material.TargetSwitch android:id="@+id/sb_proxyAuthenticator" style="@style/Form.SwitchRow" android:layout_marginTop="8dp" android:text="@string/proxy_authenticator" />
+                <LinearLayout android:id="@+id/layoutProxyAuthenticator" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field.Next" android:hint="@string/username">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_proxyUsername" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field.Next" android:hint="@string/password" app:endIconMode="password_toggle">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_proxyPassword" android:inputType="textPassword" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="10dp">
-
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
-            android:id="@+id/btn_del"
-            style="@style/SuperButton.Gray.Icon.Spacing"
-            android:drawableStart="@drawable/ic_delete"
-            android:text="@string/del"
-            tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
-
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
-            android:id="@+id/btn_save"
-            style="@style/SuperButton.Blue.Icon.Spacing"
-            android:drawableStart="@drawable/ic_save"
-            android:text="@string/save"
-            tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
-
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
-            android:id="@+id/btn_test"
-            style="@style/SuperButton.Green.Icon.Spacing"
-            android:drawableStart="@drawable/ic_test"
-            android:text="@string/test"
-            tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
-
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="horizontal" android:padding="10dp">
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_del" style="@style/MaterialActionButton.Secondary" android:drawableStart="@drawable/ic_delete" android:text="@string/del" tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_save" style="@style/MaterialActionButton" android:drawableStart="@drawable/ic_save" android:text="@string/save" tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_test" style="@style/MaterialActionButton.Secondary" android:drawableStart="@drawable/ic_test" android:text="@string/test" tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
     </LinearLayout>
-
 </LinearLayout>

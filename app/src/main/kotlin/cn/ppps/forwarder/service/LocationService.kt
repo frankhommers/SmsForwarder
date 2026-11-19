@@ -101,7 +101,7 @@ class LocationService : Service() {
                 App.LocationClient.setOnLocationListener(object : OnLocationListener() {
                     override fun onLocationChanged(location: Location) {
                         //Location Information
-                        Log.d(TAG, "onLocationChanged(location = ${location})")
+                        Log.d(TAG, "Sensitive event details omitted")
 
                         val locationInfoNew = LocationInfo(
                             location.longitude, location.latitude, "", App.DateFormat.format(Date(location.time)), location.provider.toString()
@@ -109,14 +109,14 @@ class LocationService : Service() {
 
                         // Coordinates remain available; no online reverse geocoding.
 
-                        Log.d(TAG, "locationInfoNew = $locationInfoNew")
+                        Log.d(TAG, "Sensitive event details omitted")
                         HttpServerUtils.apiLocationCache = locationInfoNew
                         TaskUtils.locationInfoNew = locationInfoNew
 
                         //Trigger Auto Job
                         val locationInfoOld = TaskUtils.locationInfoOld
                         if (locationInfoOld.longitude != locationInfoNew.longitude || locationInfoOld.latitude != locationInfoNew.latitude || locationInfoOld.address != locationInfoNew.address) {
-                            Log.d(TAG, "locationInfoOld = $locationInfoOld")
+                            Log.d(TAG, "Sensitive event details omitted")
 
                             val gson = Gson()
                             val locationJsonOld = gson.toJson(locationInfoOld)

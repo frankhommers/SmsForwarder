@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/xui_config_color_white"
+    android:background="?attr/colorSurface"
     android:orientation="vertical"
     android:paddingTop="?attr/xui_bottom_sheet_grid_padding_vertical"
     android:paddingBottom="?attr/xui_bottom_sheet_grid_padding_vertical"
@@ -51,7 +51,7 @@
         android:background="?attr/xui_bottom_sheet_button_background"
         android:orientation="horizontal">
 
-        <com.xuexiang.xui.widget.alpha.XUIAlphaTextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/bottom_sheet_close_button"
             android:layout_width="match_parent"
             android:layout_height="?attr/xui_bottom_sheet_button_height"

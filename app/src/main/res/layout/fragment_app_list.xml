@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.xuexiang.xui.widget.tabbar.EasyIndicator
+    <cn.ppps.forwarder.widget.material.TargetTabs
         android:id="@+id/tabBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

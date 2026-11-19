@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Labels, helper lines and question-mark dialogs for the Bark, Email, Telegram, Gotify and URL Scheme target editors (TargetForm). -->
+<resources>
+    <string name="target_form_tags_show">Show template tags</string>
+    <string name="target_form_tags_hide">Hide template tags</string>
+    <string name="target_form_template_default_sender">Leave empty to use the message sender</string>
+    <string name="target_form_section_notification">Notification</string>
+    <string name="target_form_section_templates">Templates</string>
+    <string name="target_form_section_encryption">Encryption</string>
+    <string name="target_form_section_message">Message</string>
+    <string name="target_form_section_smtp">SMTP server</string>
+    <string name="target_form_bark_call">Ring for 30 seconds</string>
+    <string name="target_form_bark_auto_copy_helper">Leave empty to copy a verification code, if found</string>
+    <string name="target_form_bark_server_dialog">The push address from the Bark app on your iPhone. It ends with your device key, for example https://api.day.app/yourkey/. A self-hosted Bark server works too. A user name and password in the address (https://user:password@host/…) are sent as HTTP basic authentication.</string>
+    <string name="target_form_bark_notification_dialog">How the notification appears in Bark. Notification level: how urgently iOS shows it. Ring for 30 seconds: the sound keeps playing for 30 seconds. Sound: the name of a Bark sound, for example minuet. Group: notifications with the same group are bundled. Badge: the number on the Bark app icon. Icon: a link to a small image. Link: opened when you tap the notification; message data codes such as {{FROM}} work here. Empty fields use the Bark default.</string>
+    <string name="target_form_bark_templates_dialog">Notification title: the title in Bark. Leave it empty to use the message sender. Text to copy: the text Bark copies, for example a code. Leave it empty to let the app copy a verification code it finds in the message. Use Insert data to add message details and Preview to check the result with sample data.</string>
+    <string name="target_form_bark_encryption_dialog">Encrypts the notification so that only your Bark app can read it. Use the same algorithm, key and IV as in the encryption settings of the Bark app. The key must be 16 characters for AES128, 24 for AES192 and 32 for AES256. The IV must be 16 characters for CBC and 12 for GCM; ECB uses none. If you leave the IV empty, the app makes a random one and sends it along. NONE sends the notification unencrypted.</string>
+    <string name="target_form_gotify_server_dialog">The message address of your Gotify server with an application token, for example https://push.example.org/message?token=apptoken. Create the application and copy its token in the Gotify web interface. A user name and password in the address (https://user:password@host/…) are sent as HTTP basic authentication.</string>
+    <string name="target_form_url_scheme_helper">e.g. myapp://api/add?type=0&amp;msg=[msg]</string>
+    <string name="target_form_url_scheme_dialog">Opens another app on this phone with a link that app supports (its URL scheme). The app must be installed: Save and Test check that a matching app exists, and Test opens it with a sample message. These placeholders are replaced (text is URL-encoded): [msg] or [content] for the message, [org_content] for the original text, [from] for the sender, [card_slot] or [title] for the SIM information, [receive_time], [device_mark], [app_version] and [timestamp].</string>
+    <string name="target_form_telegram_token">Bot token</string>
+    <string name="target_form_telegram_token_helper">Or a full API URL starting with http</string>
+    <string name="target_form_telegram_token_dialog">The token that BotFather gave your bot, for example 123456789:AAE…. The app then sends to https://api.telegram.org/bot&lt;token&gt;/sendMessage. If Telegram is blocked on your network, you can enter a complete address starting with http instead, for example a relay ending in /bot&lt;token&gt;/sendMessage; the app sends the same request to exactly that address.</string>
+    <string name="target_form_telegram_chat_dialog">Where the messages go: the ID of a user, group or channel, or @channelname for a public channel. Send your bot a message first, then open https://api.telegram.org/bot&lt;token&gt;/getUpdates in a browser and look for the chat ID. Group and channel IDs are negative numbers.</string>
+    <string name="target_form_telegram_topic_helper">Optional. Only for groups with topics</string>
+    <string name="target_form_telegram_parse_mode_dialog">How Telegram formats the message. Text: no formatting. HTML: formatting tags such as &lt;b&gt; in your template are applied. MarkdownV2: Telegram Markdown. The app escapes at most the - character, so other special characters in a message, such as _ or *, can make Telegram reject it.</string>
+    <string name="target_form_email_provider">Email provider</string>
+    <string name="target_form_email_provider_helper">Choose Other for a custom SMTP server.</string>
+    <string name="target_form_email_address">Username or email address</string>
+    <string name="target_form_email_address_helper">Gmail/iCloud: username. Other: full email address.</string>
+    <string name="target_form_smtp_port_helper">Usually 465 with SSL or 587 with StartTLS</string>
+    <string name="target_form_smtp_dialog">Only needed for Other; for listed providers the app fills in the server itself. Enter the SMTP host and port of your mail provider, for example smtp.example.org. SSL: the connection is encrypted from the start, usually port 465. StartTLS: encryption is required before sending, usually port 587 with SSL off. If the server cannot provide it, sending stops.</string>
+    <string name="target_form_email_encryption_dialog">Unencrypted: a normal email. S/MIME or OpenPGP: each recipient needs a certificate or public key and gets an encrypted email. Add your own key and its password to also sign the emails; if that key cannot be used, nothing is sent. OpenKeychain: the OpenKeychain app encrypts with the keys it has for the recipient addresses; it must be installed. Recipients whose email cannot be encrypted: see “Send unencrypted if encryption fails”.</string>
+    <string name="target_form_openkeychain_sign_key">Signing key (optional)</string>
+    <string name="target_form_sign_key_dialog">Optional: a key in OpenKeychain that signs every email. Without one, emails are only encrypted. If the key has a passphrase, let OpenKeychain remember it; otherwise signing in the background fails.</string>
+    <string name="target_form_sender_key_supporting">Signs the email, together with the key password.</string>
+    <string name="target_form_email_to_tips">Tap + to add a recipient.</string>
+    <string name="target_form_remove_recipient">Remove recipient</string>
+    <string name="target_form_key_file_helper">Paste it as Base64, or use Select file (Download folder)</string>
+    <string name="target_form_sender_key_password_helper">Needed to sign with this key</string>
+    <string name="target_form_recipient_key_password_helper">Only if the file contains a private key</string>
+    <string name="target_form_bark_iv_helper">Same as in Bark, or leave empty for a random IV</string>
+    <string name="target_form_bark_url_helper">Opens on tap, e.g. https://example.org</string>
+</resources>

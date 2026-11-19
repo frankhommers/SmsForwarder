@@ -39,10 +39,10 @@ import cn.ppps.forwarder.service.NotificationService
 import com.xuexiang.xpage.base.XPageFragment
 import com.xuexiang.xpage.core.PageOption
 import com.xuexiang.xui.utils.ColorUtils
-import com.xuexiang.xui.widget.dialog.DialogLoader
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog.SingleButtonCallback
+import cn.ppps.forwarder.widget.material.DialogLoader
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
+import cn.ppps.forwarder.widget.material.MaterialDialog.SingleButtonCallback
 import com.xuexiang.xui.widget.imageview.preview.PreviewBuilder
 import com.xuexiang.xutil.XUtil
 import com.xuexiang.xutil.common.StringUtils
@@ -185,11 +185,9 @@ class CommonUtils private constructor() {
             editText.requestFocus()
 
             val editable = editText.text ?: return
-            val textLength = editable.length
-            var cursor = editText.selectionStart
-            if (cursor < 0 || cursor > textLength) {
-                cursor = textLength
-            }
+            // Inserts at the selection start (a selection is kept, not replaced); no cursor appends. Editable.insert
+            // keeps spans and the IME/undo history. Same rule as the unit-tested TemplateInsertion.
+            val cursor = cn.ppps.forwarder.utils.template.TemplateInsertion.position(editText.selectionStart, editable.length)
 
             editable.insert(cursor, str)
             val newCursor = (cursor + str.length).coerceAtMost(editable.length)
@@ -356,13 +354,20 @@ class CommonUtils private constructor() {
             XUtil.exitApp()
         }
 
-        // Dynamically create tab buttons and set click events(Insert a label into the specified input box)
+        /**
+         * Template field actions: "Insert data" (a Material list with each item's name, exact token and a sample
+         * value; the token is inserted unchanged at the cursor) and a local "Preview" with sample data.
+         * Which tokens are offered per context, their order and exclusions are unchanged; see TemplatePicker.
+         */
         fun createTagButtons(context: Context, gridLayout: GridLayout, editText: EditText, scene: String = "basic", excludeButtons: Array<String> = emptyArray()) {
+            gridLayout.removeAllViews()
+            cn.ppps.forwarder.widget.material.TemplatePicker.install(context, gridLayout, editText, scene, templateTags(scene, excludeButtons))
+        }
+
+        /** Tokens offered for a template field, in the same order and with the same rules as the former tag grid. */
+        fun templateTags(scene: String = "basic", excludeButtons: Array<String> = emptyArray()): List<cn.ppps.forwarder.widget.material.TemplatePicker.Item> {
             // Converts the excluded button to a collection that is easy to search for
             val excludeSet = excludeButtons.toSet()
-
-            // ClearGridLayoutAll views in
-            gridLayout.removeAllViews()
 
             // Build button data dynamically for the context
             val allButtons = when (scene) {
@@ -381,46 +386,10 @@ class CommonUtils private constructor() {
             }
             allButtons += COMMON_TAG_MAP
 
-            val btnBackground = getDrawable(R.drawable.rounded_button)
-            val btnTextColor = getColor(android.R.color.white)
+            // For calls {{SMS}} carries the call details (PhoneUtils.getCallMsg), not a notification text.
+            if (scene == "call") allButtons[getString(R.string.tag_sms)] = getString(R.string.template_label_call_details)
 
-            // Walk through all button data and filter out buttons that need to be excluded
-            allButtons.forEach { (tag, lable) ->
-                if (excludeSet.isNotEmpty() && excludeSet.contains(tag)) {
-                    return@forEach
-                }
-
-                val button = TextView(context).apply {
-                    text = lable
-                    setOnClickListener {
-                        insertOrReplaceText2Cursor(editText, tag)
-                    }
-
-                    // Set Tight Styles
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 9f)
-                    maxLines = 1
-                    ellipsize = TextUtils.TruncateAt.END
-                    setPadding(5, 5, 5, 5)
-                    gravity = android.view.Gravity.CENTER
-                    background = btnBackground
-                    setTextColor(btnTextColor)
-
-                    // Layout Parameters
-                    layoutParams = GridLayout.LayoutParams().apply {
-                        height = GridLayout.LayoutParams.WRAP_CONTENT
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            width = 0
-                            columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                        } else {
-                            width = GridLayout.LayoutParams.WRAP_CONTENT
-                        }
-                        setMargins(8, 8, 8, 8)
-                    }
-                }
-
-                gridLayout.addView(button)
-            }
-
+            return allButtons.filterKeys { !excludeSet.contains(it) }.map { (tag, label) -> cn.ppps.forwarder.widget.material.TemplatePicker.Item(tag, label) }
         }
 
     }

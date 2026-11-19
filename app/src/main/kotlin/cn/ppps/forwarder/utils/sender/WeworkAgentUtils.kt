@@ -48,7 +48,6 @@ class WeworkAgentUtils private constructor() {
             var getTokenUrl = "$customApi/cgi-bin/gettoken?"
             getTokenUrl += "corpid=" + setting.corpID
             getTokenUrl += "&corpsecret=" + setting.secret
-            Log.d(TAG, "getTokenUrl：$getTokenUrl")
 
             val request = XHttp.get(getTokenUrl)
 
@@ -63,7 +62,6 @@ class WeworkAgentUtils private constructor() {
 
                 //Proxy authentication credentials
                 if (setting.proxyAuthenticator && (!TextUtils.isEmpty(setting.proxyUsername) || !TextUtils.isEmpty(setting.proxyPassword))) {
-                    Log.i(TAG, "proxyUsername = ${setting.proxyUsername}, proxyPassword = ${setting.proxyPassword}")
 
                     if (setting.proxyType == Proxy.Type.HTTP) {
                         request.okproxyAuthenticator { _: Route?, response: Response ->
@@ -82,7 +80,6 @@ class WeworkAgentUtils private constructor() {
             }
 
             request.keepJson(true)
-                .ignoreHttpsCert()
                 .retryCount(SettingUtils.requestRetryTimes) //Number of overtime retrys
                 .retryDelay(SettingUtils.requestDelayTime * 1000) //Timeout retry delay
                 .retryIncreaseDelay(SettingUtils.requestDelayTime * 1000) //Incremental timeout retry backoff
@@ -98,7 +95,6 @@ class WeworkAgentUtils private constructor() {
                     }
 
                     override fun onSuccess(response: String) {
-                        Log.i(TAG, response)
 
                         val resp = Gson().fromJson(response, WeworkAgentResult::class.java)
                         if (resp?.errcode == 0L) {
@@ -142,9 +138,7 @@ class WeworkAgentUtils private constructor() {
             val accessToken: String by SharedPreference("access_token_" + setting.agentID, "")
             val customApi = if (TextUtils.isEmpty(setting.customizeAPI)) "https://qyapi.weixin.qq.com" else setting.customizeAPI
             val requestUrl = "$customApi/cgi-bin/message/send?access_token=$accessToken"
-            Log.i(TAG, "requestUrl:$requestUrl")
             val requestMsg: String = Gson().toJson(textMsgMap)
-            Log.i(TAG, "requestMsg:$requestMsg")
 
             val request = XHttp.post(requestUrl)
 
@@ -159,7 +153,6 @@ class WeworkAgentUtils private constructor() {
 
                 //Proxy authentication credentials
                 if (setting.proxyAuthenticator && (!TextUtils.isEmpty(setting.proxyUsername) || !TextUtils.isEmpty(setting.proxyPassword))) {
-                    Log.i(TAG, "proxyUsername = ${setting.proxyUsername}, proxyPassword = ${setting.proxyPassword}")
 
                     if (setting.proxyType == Proxy.Type.HTTP) {
                         request.okproxyAuthenticator { _: Route?, response: Response ->
@@ -179,7 +172,6 @@ class WeworkAgentUtils private constructor() {
 
             request.upJson(requestMsg)
                 .keepJson(true)
-                .ignoreHttpsCert()
                 .retryCount(SettingUtils.requestRetryTimes) //Number of overtime retrys
                 .retryDelay(SettingUtils.requestDelayTime * 1000) //Timeout retry delay
                 .retryIncreaseDelay(SettingUtils.requestDelayTime * 1000) //Incremental timeout retry backoff
@@ -195,7 +187,6 @@ class WeworkAgentUtils private constructor() {
                     }
 
                     override fun onSuccess(response: String) {
-                        Log.i(TAG, response)
 
                         val resp = Gson().fromJson(response, WeworkAgentResult::class.java)
                         val status = if (resp?.errcode == 0L) 2 else 0

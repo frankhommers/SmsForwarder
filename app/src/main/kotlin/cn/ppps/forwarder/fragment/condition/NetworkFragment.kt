@@ -23,7 +23,7 @@ import com.xuexiang.xaop.annotation.SingleClick
 import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 
 @Page(name = "Network")
 @Suppress("PrivatePropertyName", "SameParameterValue")
@@ -64,10 +64,8 @@ class NetworkFragment : BaseFragment<FragmentTasksConditionNetworkBinding?>(), V
             checkSetting(true)
         }
 
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             val settingVo = Gson().fromJson(eventData, NetworkSetting::class.java)
-            Log.d(TAG, "initViews settingVo:$settingVo")
             binding!!.tvDescription.text = settingVo.description
             binding!!.rgDataSimSlot.check(settingVo.getDataSimSlotCheckId())
             binding!!.etWifiSsid.setText(settingVo.wifiSsid)

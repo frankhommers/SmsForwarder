@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="review_add_allowed_sender">Toegestane afzender toevoegen</string>
+    <string name="review_text_keyboard">Volledig toetsenbord gebruiken</string>
+    <string name="review_alarm_sound">Geluid op %1$d%% volume</string>
+    <string name="review_alarm_continuous">doorlopend</string>
+    <string name="review_alarm_count">Aantal herhalingen: %1$d</string>
+    <string name="review_alarm_custom_audio">eigen geluidsbestand</string>
+    <string name="review_alarm_vibration">Trillen</string>
+    <string name="review_alarm_flash">Flitslicht</string>
+    <string name="review_web_folder">Map met webclientbestanden</string>
+    <string name="review_reload_device_name">Apparaatnaam opnieuw ophalen</string>
+</resources>

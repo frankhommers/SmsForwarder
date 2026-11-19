@@ -3,11 +3,17 @@
     android:id="@+id/refreshLayout"
     style="@style/PullDownStyle">
 
+    <cn.ppps.forwarder.widget.MaterialHeader
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <cn.ppps.forwarder.widget.MaterialFooter
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
     <cn.ppps.forwarder.core.webview.LollipopFixedWebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/xui_config_color_white"
+        android:background="?attr/colorSurface"
         android:overScrollMode="never"
         android:visibility="visible" />
 

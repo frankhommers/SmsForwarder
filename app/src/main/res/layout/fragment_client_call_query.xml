@@ -7,14 +7,10 @@
     android:background="?attr/xui_config_color_background"
     android:orientation="vertical"
     tools:ignore="Overdraw">
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
 
-    <com.xuexiang.xui.widget.searchview.MaterialSearchView
-        android:id="@+id/search_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/call_keyword_hint" />
 
-    <com.xuexiang.xui.widget.tabbar.EasyIndicator
+    <cn.ppps.forwarder.widget.material.TargetTabs
         android:id="@+id/tabBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -32,7 +28,7 @@
         app:srlEnableAutoLoadMore="true"
         app:srlEnableLoadMore="true">
 
-        <com.scwang.smartrefresh.header.MaterialHeader
+        <cn.ppps.forwarder.widget.MaterialHeader
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
@@ -50,4 +46,10 @@
 
     </com.scwang.smartrefresh.layout.SmartRefreshLayout>
 
+    <cn.ppps.forwarder.widget.material.TargetSearch
+        android:id="@+id/search_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:hint="@string/call_keyword_hint" />
+    </FrameLayout>
 </LinearLayout>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Logs filter dialog (dialog_logs_filter.xml, LogsFragment). Namespaced: logs_filter_*. -->
+<resources>
+    <string name="logs_filter_title">Filter logs</string>
+    <string name="logs_filter_from_sms">Sender contains</string>
+    <string name="logs_filter_from_number">Phone number contains</string>
+    <string name="logs_filter_from_app">Package name contains</string>
+    <string name="logs_filter_app_title">Notification title contains</string>
+    <string name="logs_filter_message">Message contains</string>
+    <string name="logs_filter_message_app">Notification text contains</string>
+    <string name="logs_filter_period">Time Period</string>
+    <string name="logs_filter_period_help">Leave empty for no limit.</string>
+    <string name="logs_filter_start">From date and time</string>
+    <string name="logs_filter_end">Until date and time</string>
+    <string name="logs_filter_clear_start">Clear start time</string>
+    <string name="logs_filter_clear_end">Clear end time</string>
+    <string name="logs_filter_end_before_start">Must be later than the start time</string>
+    <string name="logs_filter_result">Forwarding Result</string>
+    <string name="logs_filter_none_means_all">Select none to show all.</string>
+</resources>

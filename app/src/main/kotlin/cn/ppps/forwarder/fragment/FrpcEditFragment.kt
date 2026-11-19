@@ -20,11 +20,11 @@ import com.jeremyliao.liveeventbus.LiveEventBus
 import com.xuexiang.xaop.annotation.SingleClick
 import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xui.utils.ThemeUtils
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.button.switchbutton.SwitchButton
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
-import com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.TargetSwitch as SwitchButton
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
+import com.google.android.material.textfield.TextInputEditText as MaterialEditText
 import com.xuexiang.xutil.resource.ResUtils.getColors
 import java.util.regex.Pattern
 

@@ -31,7 +31,6 @@ class LoggerInterceptor : HandlerInterceptor {
             val valueMap = request.parameter
             Log.i(TAG, "Path: $httpPath")
             Log.i(TAG, "Method: " + method.value())
-            Log.i(TAG, "Param: $valueMap")
 
             //Judge whether or not to open the function
             if (

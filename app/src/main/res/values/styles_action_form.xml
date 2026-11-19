@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Task-action editor additions on top of the shared Form.* recipe (styles_form.xml, unchanged).
+  Used only by fragment_tasks_edit.xml and fragment_tasks_action_{settings,alarm,rule,sender,task,cleaner,resend,
+  http_server,wol,send_sms}.xml. No text here; every locale inherits these styles from base values/.
+-->
+<resources>
+
+    <!-- Empty root so the dotted ActionForm.* names resolve (implicit parent). -->
+    <style name="ActionForm" />
+
+    <!-- Decorative action icon above the form, centred; 16dp to the first section. -->
+    <style name="ActionForm.Hero">
+        <item name="android:layout_width">120dp</item>
+        <item name="android:layout_height">120dp</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:layout_marginBottom">16dp</item>
+    </style>
+
+    <!-- Dependent block directly below the switch or option that controls it. Stays on the 16dp keyline. -->
+    <style name="ActionForm.Nested">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:layout_marginTop">8dp</item>
+    </style>
+
+    <!-- Stack of Form.CheckRow rows (one full-width labelled square checkbox per row), 8dp below its heading. -->
+    <style name="ActionForm.CheckGroup" parent="ActionForm.Nested" />
+
+    <!-- Heading of an option or checkbox group that follows other content in the same section: 16dp above. -->
+    <style name="ActionForm.GroupTitle" parent="Form.GroupTitle">
+        <item name="android:layout_marginTop">16dp</item>
+    </style>
+
+    <!-- Full-width Material slider at the keyline (TargetSlider reads only xsb_min/xsb_max). -->
+    <style name="ActionForm.Slider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
+    <!-- Visible current value directly above its slider; the fragment sets text and visibility from the slider. -->
+    <style name="ActionForm.SliderValue" parent="Form.Supporting">
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.Material3.BodyLarge</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+    <!-- Row of equal insert buttons below a pattern field. -->
+    <style name="ActionForm.ButtonRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:layout_marginTop">8dp</item>
+    </style>
+
+    <!-- Insert-symbol button: outlined, equal width, at least 48dp, label may wrap to two lines. -->
+    <style name="ActionForm.InsertButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:maxLines">2</item>
+    </style>
+
+    <!-- Every following insert button in the row: 8dp gap. -->
+    <style name="ActionForm.InsertButton.Next">
+        <item name="android:layout_marginStart">8dp</item>
+    </style>
+
+    <!-- Task editor "Add condition" / "Add action" row: icon + title + example, full width, at least 56dp, ripple. -->
+    <style name="ActionForm.AddRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+    </style>
+
+    <style name="ActionForm.AddIcon">
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">24dp</item>
+    </style>
+
+    <!-- Text column of an add row: 16dp after the 24dp icon. -->
+    <style name="ActionForm.AddText">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="ActionForm.AddTitle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">@style/TextAppearance.Material3.BodyLarge</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+    </style>
+
+    <style name="ActionForm.AddSupporting" parent="Form.Supporting">
+        <item name="android:layout_marginTop">0dp</item>
+    </style>
+
+</resources>

@@ -1,5 +1,6 @@
 // Export the original pinned dependencies for the source rebuild bootstrap.
 // Invoked by scripts/rebuild_english_dependencies.py, never by normal packaging.
+// Exports only the pinned dependency classpath; app resources (R.jar) are deliberately not an input.
 allprojects { p ->
     afterEvaluate {
         if (p.path == ':app') {

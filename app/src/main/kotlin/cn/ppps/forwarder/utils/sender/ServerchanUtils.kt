@@ -46,7 +46,6 @@ class ServerchanUtils {
                 String.format("https://sctapi.ftqq.com/%s.send", setting.sendKey) // Default Sending Address
             }
 
-            Log.i(TAG, "requestUrl:$requestUrl")
 
             val request = XHttp.post(requestUrl)
                 .params("title", title)
@@ -71,7 +70,6 @@ class ServerchanUtils {
                     }
 
                     override fun onSuccess(response: String) {
-                        Log.i(TAG, response)
                         val resp = Gson().fromJson(response, ServerchanResult::class.java)
                         val status = if (resp?.code == 0L) 2 else 0
                         SendUtils.updateLogs(logId, status, response)

@@ -1,0 +1,8 @@
+SmsForwarder Private — gebruik en naamsvermelding
+
+Gebruik deze app alleen op apparaten en accounts die u beheert en met de juiste toestemming. Het doorsturen van berichten kan wachtwoorden, verificatiecodes en persoonsgegevens openbaar maken. Er wordt geen garantie gegeven.
+
+Oorspronkelijk project: SmsForwarder, pppscn en andere bijdragers, https://github.com/pppscn/SmsForwarder
+De oorspronkelijke LICENSE en vermeldingen blijven behouden in de broncoderepository. De upstream-README noemt ook beperkingen op commercieel gebruik, die niet overeenkomen met de BSD-2-Clause-metadata van GitHub. Deze fork lost die juridische onduidelijkheid niet op en verleent geen aanvullende rechten. Vraag om opheldering voordat u de app commercieel verspreidt of gebruikt.
+
+Hieronder staat de oorspronkelijke licentie in het Engels.

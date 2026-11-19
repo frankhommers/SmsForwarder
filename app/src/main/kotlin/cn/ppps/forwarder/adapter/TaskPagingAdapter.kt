@@ -16,6 +16,7 @@ import cn.ppps.forwarder.adapter.TaskPagingAdapter.MyViewHolder
 import cn.ppps.forwarder.database.entity.Task
 import cn.ppps.forwarder.databinding.AdapterTasksCardViewListItemBinding
 import cn.ppps.forwarder.entity.TaskSetting
+import cn.ppps.forwarder.entity.condition.LocationConditionRules
 import com.xuexiang.xutil.data.DateUtils
 
 @Suppress("EmptyMethod")
@@ -105,7 +106,13 @@ class TaskPagingAdapter(private val itemClickListener: OnItemClickListener) : Pa
                 holder.binding.sbEnable.visibility = View.GONE
             }
             holder.binding.tvName.text = item.name
-            holder.binding.tvDescription.text = item.description
+            // Display-only marker when a task still has an unsupported address-keyword location condition.
+            val legacyLocation = item.type >= 1000 && item.conditions.isNotEmpty() && try {
+                Gson().fromJson(item.conditions, Array<TaskSetting>::class.java).any { LocationConditionRules.isLegacyAddressCondition(it.type, it.setting) }
+            } catch (e: Exception) { false }
+            holder.binding.tvDescription.text = if (legacyLocation) {
+                holder.binding.root.context.getString(R.string.location_validation_legacy_row, item.description)
+            } else item.description
             holder.binding.ivCopy.setOnClickListener { view: View? ->
                 itemClickListener.onItemClicked(view, item)
             }

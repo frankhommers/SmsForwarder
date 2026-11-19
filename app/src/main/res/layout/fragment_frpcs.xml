@@ -15,7 +15,7 @@
         app:srlEnableAutoLoadMore="true"
         app:srlEnableLoadMore="false">
 
-        <com.scwang.smartrefresh.header.MaterialHeader
+        <cn.ppps.forwarder.widget.MaterialHeader
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

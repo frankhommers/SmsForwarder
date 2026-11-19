@@ -26,7 +26,7 @@
                 app:srcCompat="@drawable/icon_api_battery_query"
                 tools:ignore="ImageContrastCheck" />
 
-            <com.xuexiang.xui.widget.grouplist.XUIGroupListView
+            <cn.ppps.forwarder.widget.material.TargetInfoList
                 android:id="@+id/info_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

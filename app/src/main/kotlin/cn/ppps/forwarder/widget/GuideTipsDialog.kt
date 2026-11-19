@@ -14,7 +14,7 @@ import cn.ppps.forwarder.core.http.entity.TipInfo
 import cn.ppps.forwarder.utils.AppUtils
 import cn.ppps.forwarder.utils.SharedPreference
 import com.xuexiang.xaop.annotation.SingleClick
-import com.xuexiang.xui.widget.dialog.BaseDialog
+import androidx.appcompat.app.AlertDialog
 import com.xuexiang.xutil.resource.ResUtils.getString
 import com.zzhoujay.richtext.RichText
 
@@ -26,7 +26,7 @@ import com.zzhoujay.richtext.RichText
  */
 @Suppress("SameReturnValue")
 class GuideTipsDialog(context: Context?, tips: List<TipInfo>) :
-    BaseDialog(context, R.layout.dialog_guide_tips), View.OnClickListener,
+    AlertDialog(requireNotNull(context), com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog), View.OnClickListener,
     CompoundButton.OnCheckedChangeListener {
     private var mTips: List<TipInfo>? = null
     private var mIndex = -1
@@ -54,8 +54,25 @@ class GuideTipsDialog(context: Context?, tips: List<TipInfo>) :
         mTvNext!!.setOnClickListener(this)
         mTvPrevious!!.isEnabled = false
         mTvNext!!.isEnabled = true
-        setCancelable(false)
+        // Back, outside tap and Close all dismiss; Previous/Next page without closing the dialog.
+        setCancelable(true)
         setCanceledOnTouchOutside(true)
+        setOnShowListener {
+            getButton(BUTTON_NEGATIVE)?.setOnClickListener { onClick(mTvPrevious!!) }
+            getButton(BUTTON_POSITIVE)?.setOnClickListener { onClick(mTvNext!!) }
+            syncButtons()
+        }
+    }
+
+    /** Mirrors the legacy Previous/Next enabled state onto the dialog's Material buttons and shows the page number. */
+    private fun syncButtons() {
+        getButton(BUTTON_NEGATIVE)?.isEnabled = mTvPrevious?.isEnabled == true
+        getButton(BUTTON_POSITIVE)?.isEnabled = mTvNext?.isEnabled == true
+        val count = mTips?.size ?: 0
+        findViewById<TextView>(R.id.tv_tip_page)?.apply {
+            visibility = if (count > 1) View.VISIBLE else View.GONE
+            text = context.getString(R.string.infra_form_tip_page, mIndex + 1, count)
+        }
     }
 
     /**
@@ -68,7 +85,9 @@ class GuideTipsDialog(context: Context?, tips: List<TipInfo>) :
         if (mTips!!.isNotEmpty() && mTvContent != null) {
             mIndex = 0
             showRichText(mTips!![mIndex])
+            mTvNext!!.isEnabled = mTips!!.size > 1
         }
+        syncButtons()
     }
 
     /**
@@ -96,6 +115,7 @@ class GuideTipsDialog(context: Context?, tips: List<TipInfo>) :
                         mTvNext!!.isEnabled = true
                     }
                 }
+                syncButtons()
             }
         }
     }
@@ -107,7 +127,10 @@ class GuideTipsDialog(context: Context?, tips: List<TipInfo>) :
      */
     private fun showRichText(tipInfo: TipInfo) {
         mTvTitle!!.text = tipInfo.title
+        // Bundled tips only: no images and no clickable remote links.
         RichText.fromHtml(tipInfo.content)
+            .noImage(true)
+            .clickable(false)
             .bind(this)
             .into(mTvContent)
     }
@@ -163,7 +186,7 @@ class GuideTipsDialog(context: Context?, tips: List<TipInfo>) :
         @JvmStatic
         fun showTipsForce(context: Context?) {
             if (context == null) return
-            val json = context.assets.open("tips.json").bufferedReader().use { it.readText() }
+            val json = context.assets.open(if (context.resources.configuration.locale.language == "nl") "tips_nl.json" else "tips.json").bufferedReader().use { it.readText() }
             val data = Gson().fromJson(json, JsonObject::class.java)["Data"].asJsonArray
             val listType = object : TypeToken<List<TipInfo>>() {}.type
             GuideTipsDialog(context, Gson().fromJson<List<TipInfo>>(data, listType)).show()
@@ -179,6 +202,12 @@ class GuideTipsDialog(context: Context?, tips: List<TipInfo>) :
     }
 
     init {
+        setTitle(R.string.settings_setup)
+        setView(android.view.LayoutInflater.from(getContext()).inflate(R.layout.dialog_guide_tips, null))
+        setButton(BUTTON_NEUTRAL, getContext().getString(R.string.m3_close)) { _, _ -> dismiss() }
+        setButton(BUTTON_NEGATIVE, getContext().getString(R.string.label_previous)) { _, _ -> }
+        setButton(BUTTON_POSITIVE, getContext().getString(R.string.label_next)) { _, _ -> }
+        create()
         initViews()
         updateTips(tips)
     }

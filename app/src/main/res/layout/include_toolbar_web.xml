@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.appbar.MaterialToolbar xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="?attr/xui_actionbar_height"
-    android:background="#299EE3"
+    android:layout_height="64dp"
+    android:background="?attr/colorSurface"
     app:contentInsetLeft="0dp"
     app:contentInsetStart="0dp"
-    app:titleTextColor="@android:color/white">
+    app:titleTextColor="?attr/colorOnSurface">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#299EE3">
+        android:background="?attr/colorSurface">
 
-        <com.xuexiang.xui.widget.alpha.XUIAlphaImageView
-            android:id="@+id/iv_back"
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iv_back" android:contentDescription="@string/action_back" app:tint="?attr/colorOnSurface"
             android:layout_width="55dp"
             android:layout_height="match_parent"
             android:layout_centerVertical="true"
@@ -30,10 +30,10 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"
             android:layout_toEndOf="@id/iv_back"
-            android:background="@color/xui_config_color_white" />
+            android:background="?attr/colorSurface" />
 
-        <com.xuexiang.xui.widget.alpha.XUIAlphaImageView
-            android:id="@+id/iv_finish"
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iv_finish" android:contentDescription="@string/m3_close" app:tint="?attr/colorOnSurface"
             android:layout_width="55dp"
             android:layout_height="match_parent"
             android:layout_toEndOf="@id/view_line"
@@ -47,12 +47,12 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:singleLine="true"
-            android:textColor="@android:color/white"
+            android:textColor="?attr/colorOnSurface"
             android:textSize="@dimen/text_size_medium"
             tools:ignore="RelativeOverlap" />
 
-        <com.xuexiang.xui.widget.alpha.XUIAlphaImageView
-            android:id="@+id/iv_more"
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iv_more" android:contentDescription="@string/menu_settings" app:tint="?attr/colorOnSurface"
             android:layout_width="55dp"
             android:layout_height="match_parent"
             android:layout_alignParentEnd="true"
@@ -63,5 +63,5 @@
     </RelativeLayout>
 
 
-</androidx.appcompat.widget.Toolbar>
+</com.google.android.material.appbar.MaterialToolbar>
 

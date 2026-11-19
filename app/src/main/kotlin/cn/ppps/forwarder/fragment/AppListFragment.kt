@@ -32,7 +32,7 @@ import com.xuexiang.xui.XUI
 import com.xuexiang.xui.utils.DensityUtils
 import com.xuexiang.xui.utils.ThemeUtils
 import com.xuexiang.xui.utils.WidgetUtils
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 import com.xuexiang.xutil.resource.ResUtils.getStringArray
 
 @Suppress("PrivatePropertyName", "DEPRECATION")

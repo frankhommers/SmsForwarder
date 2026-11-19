@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Task-condition editor labels (ConditionForm). Display only; stored condition values are unchanged. -->
+<resources>
+    <string name="condition_form_unknown">Unknown</string>
+    <string name="condition_form_any_power_source">Any power source</string>
+    <string name="condition_form_any_health">Any health status</string>
+    <string name="condition_form_no_voltage_limit">No voltage limit</string>
+    <string name="condition_form_no_temperature_limit">No temperature limit</string>
+    <string name="condition_form_detection_method">Detection method</string>
+    <string name="condition_form_use_current_location">Fill in current coordinates</string>
+    <string name="condition_form_radius">Radius (meters)</string>
+    <string name="condition_form_radius_help_to">Triggers when you come within this distance of the point.</string>
+    <string name="condition_form_radius_help_leave">Triggers when you move further than this distance from the point.</string>
+    <string name="condition_form_address_help_to">Triggers when the GPS address starts to contain this keyword.</string>
+    <string name="condition_form_address_help_leave">Triggers when the GPS address no longer contains this keyword.</string>
+    <string name="condition_form_level_value">Battery level: %1$d%%</string>
+    <string name="condition_form_delay_value">Delay: %1$d min</string>
+    <string name="condition_form_delay_none">Delay: none</string>
+</resources>

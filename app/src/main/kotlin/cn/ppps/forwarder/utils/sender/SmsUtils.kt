@@ -55,7 +55,7 @@ class SmsUtils {
             if (App.SimInfoList.isEmpty()) {
                 App.SimInfoList = PhoneUtils.getSimMultiInfo()
             }
-            Log.d(TAG, App.SimInfoList.toString())
+            Log.d(TAG, "SIM inventory refreshed; details omitted")
 
             //Replace {{Source number}} Label
             val mobiles = setting.mobiles.replace(getString(R.string.tag_from), msgInfo.from)

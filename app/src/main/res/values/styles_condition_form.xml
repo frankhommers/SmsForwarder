@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Task-condition editor additions on top of the shared Form.* recipe (styles_form.xml, unchanged).
+  Used only by fragment_tasks_condition_{msg,charge,to_address,leave_address,battery,lock_screen,bluetooth,sim}.xml.
+  No text here; every locale inherits these styles from base values/.
+-->
+<resources>
+
+    <!-- Empty root so the dotted ConditionForm.* names resolve (implicit parent). -->
+    <style name="ConditionForm" />
+
+    <!-- Decorative condition icon above the form, centred; 16dp to the first section. -->
+    <style name="ConditionForm.Hero">
+        <item name="android:layout_width">120dp</item>
+        <item name="android:layout_height">120dp</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:layout_marginBottom">16dp</item>
+    </style>
+
+    <!-- Stack of Form.CheckRow rows (one full-width labelled square checkbox per row), 8dp below the heading. -->
+    <style name="ConditionForm.CheckGroup">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:layout_marginTop">8dp</item>
+    </style>
+
+    <!--
+      Dependent block directly below the option or checkbox that reveals it (fields, nested choices, sliders).
+      Stays on the 16dp content keyline: no start margin or padding.
+    -->
+    <style name="ConditionForm.Nested">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
+    <!-- Full-width Material slider at the keyline (TargetSlider / TargetRangeSlider read only their min/max attributes). -->
+    <style name="ConditionForm.Slider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
+    <!-- Visible current value above a slider; the fragment sets its text and visibility from the slider. -->
+    <style name="ConditionForm.SliderValue" parent="Form.Supporting">
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.Material3.BodyLarge</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+</resources>

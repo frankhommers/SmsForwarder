@@ -1,644 +1,125 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/xui_config_color_background"
-    android:orientation="vertical">
+<!-- Form pattern (privacy-verification/form-pattern/PATTERN.md + TargetForm.* in styles_target_form.xml): one 16dp keyline from Form.Content. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:background="?attr/xui_config_color_background" android:orientation="vertical">
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:overScrollMode="never" android:fillViewport="true">
+        <LinearLayout style="@style/Form.Content">
 
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:overScrollMode="never">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:orientation="vertical">
-
-            <LinearLayout
-                style="@style/BarStyle.Switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/sender_name_status"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_name"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="1"
-                    android:singleLine="true"
-                    app:met_clearButton="true" />
-
-                <com.xuexiang.xui.widget.button.switchbutton.SwitchButton
-                    android:id="@+id/sb_enable"
-                    style="@style/SwitchButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true" />
-
+            <!-- Name and status -->
+            <LinearLayout style="@style/Form.Section.First">
+                <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:hint="@string/m3_target_name">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_name" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <cn.ppps.forwarder.widget.material.TargetSwitch android:id="@+id/sb_enable" style="@style/Form.SwitchRow" android:layout_marginTop="8dp" android:checked="true" android:text="@string/status_param_option_enabled" />
             </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="10dp"
-                android:text="@string/account"
-                android:textColor="@color/colorBlueGreyDark"
-                android:textSize="@dimen/text_size_medium"
-                android:textStyle="bold"
-                tools:ignore="HardcodedText" />
-
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/email_account"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_from_email"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="1"
-                    android:hint="@string/from_email_hint"
-                    android:singleLine="true"
-                    app:met_clearButton="true" />
-
-                <com.xuexiang.xui.widget.spinner.materialspinner.MaterialSpinner
-                    android:id="@+id/sp_mail_type"
-                    style="@style/Material.SpinnerStyle"
-                    android:layout_marginStart="5dp"
-                    app:ms_entries="@array/MailType" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/email_password"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_pwd"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="1"
-                    android:hint="@string/mail_pwd_hint"
-                    android:singleLine="true"
-                    app:met_passWordButton="true" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/email_from_alias"
-                    android:textStyle="bold" />
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_from_email_alias"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="1"
-                    android:hint="@string/email_from_alias_tips"
-                    android:singleLine="true"
-                    app:met_clearButton="true" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_sms_template_to_nickname"
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/email_nickname"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:text="@string/custom_template_tips"
-                        android:textSize="@dimen/text_size_mini" />
-
+            <!-- Email account -->
+            <LinearLayout style="@style/Form.Section">
+                <TextView style="@style/Form.SectionTitle" android:text="@string/email_account" />
+                <cn.ppps.forwarder.widget.material.TargetDropdown android:id="@+id/sp_mail_type" style="@style/Form.Dropdown" android:layout_marginTop="8dp" android:theme="@style/ThemeOverlay.Material3.AutoCompleteTextView.OutlinedBox" android:hint="@string/target_form_email_provider" app:helperText="@string/target_form_email_provider_helper" app:ms_entries="@array/MailType" />
+                <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field.Next" android:hint="@string/target_form_email_address" app:helperText="@string/target_form_email_address_helper">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_from_email" android:inputType="textEmailAddress" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field.Next" android:hint="@string/email_password" app:endIconMode="password_toggle">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_pwd" android:importantForAutofill="no" android:inputType="textPassword" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field.Next" android:hint="@string/email_from_alias" app:helperText="@string/email_from_alias_tips">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_from_email_alias" android:inputType="textEmailAddress" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <LinearLayout android:id="@+id/layout_sms_template_to_nickname" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:orientation="vertical">
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:hint="@string/email_nickname" app:helperText="@string/target_form_template_default_sender">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_nickname" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_tags_nickname" style="@style/TargetForm.TagToggle" android:text="@string/target_form_tags_show" />
+                    <GridLayout android:id="@+id/gl_nickname" style="@style/TargetForm.TagGrid" />
                 </LinearLayout>
-
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_nickname"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:singleLine="true"
-                    app:met_clearButton="true" />
-
-                <GridLayout
-                    android:id="@+id/gl_nickname"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:columnCount="4"
-                    android:orientation="horizontal" />
-
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/layoutServiceSetting"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/servers"
-                    android:textColor="@color/colorBlueGreyDark"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold"
-                    tools:ignore="HardcodedText" />
-
-                <LinearLayout
-                    style="@style/BarStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/email_host"
-                        android:textStyle="bold" />
-
-                    <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                        android:id="@+id/et_host"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_weight="3"
-                        android:singleLine="true"
-                        app:met_clearButton="true" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:text="@string/smtp_port"
-                        android:textStyle="bold" />
-
-                    <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                        android:id="@+id/et_port"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_weight="1"
-                        android:digits="0123456789"
-                        android:inputType="number"
-                        android:maxLength="5"
-                        android:singleLine="true"
-                        app:met_clearButton="true" />
-
+            <!-- Own SMTP server: EmailFragment shows this only for the "other" provider -->
+            <LinearLayout android:id="@+id/layoutServiceSetting" style="@style/Form.Section" android:visibility="gone">
+                <LinearLayout style="@style/TargetForm.TitleRow">
+                    <TextView style="@style/Form.SectionTitle" android:layout_width="0dp" android:layout_weight="1" android:text="@string/target_form_section_smtp" />
+                    <androidx.appcompat.widget.AppCompatImageButton android:id="@+id/btn_help_smtp" style="@style/Form.HelpIcon" />
                 </LinearLayout>
-
-                <LinearLayout
-                    style="@style/BarStyle.Switch"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="3"
-                        android:text="@string/enable_ssl"
-                        android:textStyle="bold" />
-
-                    <com.xuexiang.xui.widget.button.switchbutton.SwitchButton
-                        android:id="@+id/sb_ssl"
-                        style="@style/SwitchButtonStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:checked="true" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
-                        android:layout_weight="3"
-                        android:text="@string/enable_starttls"
-                        android:textStyle="bold" />
-
-                    <com.xuexiang.xui.widget.button.switchbutton.SwitchButton
-                        android:id="@+id/sb_startTls"
-                        style="@style/SwitchButtonStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:checked="false" />
-
-                </LinearLayout>
-
+                <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:layout_marginTop="8dp" android:hint="@string/email_host">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_host" android:inputType="textUri" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field.Next" android:hint="@string/smtp_port" app:helperText="@string/target_form_smtp_port_helper">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_port" android:digits="0123456789" android:inputType="number" android:maxLength="5" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <cn.ppps.forwarder.widget.material.TargetSwitch android:id="@+id/sb_ssl" style="@style/Form.SwitchRow" android:layout_marginTop="8dp" android:checked="true" android:text="@string/enable_ssl" />
+                <cn.ppps.forwarder.widget.material.TargetSwitch android:id="@+id/sb_startTls" style="@style/Form.SwitchRow" android:checked="false" android:text="@string/enable_starttls" />
             </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="10dp"
-                android:text="@string/email_settings"
-                android:textColor="@color/colorBlueGreyDark"
-                android:textSize="@dimen/text_size_medium"
-                android:textStyle="bold"
-                tools:ignore="HardcodedText" />
-
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/encryption_protocol"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:text="@string/encryption_protocol_tips"
-                        android:textSize="@dimen/text_size_mini" />
-
+            <!-- Encryption -->
+            <LinearLayout style="@style/Form.Section">
+                <LinearLayout style="@style/TargetForm.TitleRow">
+                    <TextView style="@style/Form.SectionTitle" android:layout_width="0dp" android:layout_weight="1" android:text="@string/encryption_protocol" />
+                    <androidx.appcompat.widget.AppCompatImageButton android:id="@+id/btn_help_encryption" style="@style/Form.HelpIcon" />
                 </LinearLayout>
-
-                <RadioGroup
-                    android:id="@+id/rg_encryption_protocol"
-                    style="@style/rg_style"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rb_encryption_protocol_plain"
-                        style="@style/rg_rb_style"
-                        android:checked="true"
-                        android:text="@string/plain" />
-
-                    <RadioButton
-                        android:id="@+id/rb_encryption_protocol_smime"
-                        style="@style/rg_rb_style"
-                        android:text="@string/smime" />
-
-                    <RadioButton
-                        android:id="@+id/rb_encryption_protocol_openpgp"
-                        style="@style/rg_rb_style"
-                        android:text="@string/openpgp" />
-
-                    <RadioButton
-                        android:id="@+id/rb_encryption_protocol_openkeychain"
-                        style="@style/rg_rb_style"
-                        android:text="@string/openkeychain" />
-
+                <RadioGroup android:id="@+id/rg_encryption_protocol" style="@style/Form.OptionGroup">
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_encryption_protocol_plain" style="@style/Form.Option" android:checked="true" android:text="@string/plain" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_encryption_protocol_smime" style="@style/Form.Option" android:text="@string/smime" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_encryption_protocol_openpgp" style="@style/Form.Option" android:text="@string/openpgp" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/rb_encryption_protocol_openkeychain" style="@style/Form.Option" android:text="@string/openkeychain" />
                 </RadioGroup>
 
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_openkeychain_sign_key"
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/sender_openkeychain_sign_key"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/openkeychain_sign_key_tips"
-                    android:textSize="@dimen/text_size_mini" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/tv_openkeychain_sign_key"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/openkeychain_sign_key_none"
-                        android:textSize="@dimen/text_size_small" />
-
-                    <com.xuexiang.xui.widget.button.shadowbutton.RippleShadowShadowButton
-                        android:id="@+id/btn_openkeychain_sign_key_picker"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:gravity="center"
-                        android:padding="5dp"
-                        android:text="@string/openkeychain_select_sign_key"
-                        android:textColor="@color/white"
-                        android:textSize="@dimen/text_size_mini"
-                        app:sb_color_unpressed="@color/colorBlueGrey"
-                        app:sb_ripple_color="@color/white"
-                        app:sb_ripple_duration="500"
-                        app:sb_shape_type="rectangle"
-                        tools:ignore="SmallSp" />
-
-                    <com.xuexiang.xui.widget.button.shadowbutton.RippleShadowShadowButton
-                        android:id="@+id/btn_openkeychain_sign_key_clear"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:gravity="center"
-                        android:padding="5dp"
-                        android:text="@string/openkeychain_clear_sign_key"
-                        android:textColor="@color/white"
-                        android:textSize="@dimen/text_size_mini"
-                        app:sb_color_unpressed="@color/colorBlueGrey"
-                        app:sb_ripple_color="@color/white"
-                        app:sb_ripple_duration="500"
-                        app:sb_shape_type="rectangle"
-                        tools:ignore="SmallSp" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_sender_keystore"
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:id="@+id/tv_sender_keystore"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/sender_smime_keystore"
-                    android:textStyle="bold" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/keystore_base64"
-                        android:textSize="@dimen/text_size_small"
-                        android:textStyle="bold" />
-
-                    <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                        android:id="@+id/et_sender_keystore"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_weight="1"
-                        android:hint="@string/keystore_base64_tips"
-                        android:importantForAutofill="no"
-                        android:inputType="textMultiLine"
-                        android:maxLines="5"
-                        android:minLines="2"
-                        android:scrollbars="vertical"
-                        android:textSize="@dimen/text_size_mini"
-                        app:met_clearButton="true" />
-
-                    <com.xuexiang.xui.widget.button.shadowbutton.RippleShadowShadowButton
-                        android:id="@+id/btn_sender_keystore_picker"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:gravity="center"
-                        android:padding="5dp"
-                        android:text="@string/select_file"
-                        android:textColor="@color/white"
-                        android:textSize="@dimen/text_size_mini"
-                        app:sb_color_unpressed="@color/colorBlueGrey"
-                        app:sb_ripple_color="@color/white"
-                        app:sb_ripple_duration="500"
-                        app:sb_shape_type="rectangle"
-                        tools:ignore="SmallSp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/keystore_password"
-                        android:textSize="@dimen/text_size_small"
-                        android:textStyle="bold" />
-
-                    <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                        android:id="@+id/et_sender_password"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_weight="1"
-                        android:hint="@string/keystore_password_tips"
-                        android:importantForAutofill="no"
-                        android:singleLine="true"
-                        android:textSize="@dimen/text_size_small"
-                        app:met_passWordButton="true" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_recipients"
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    tools:ignore="UseCompoundDrawables">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        tools:ignore="UseCompoundDrawables">
-
-                        <TextView
-                            android:id="@+id/tv_email_to"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/email_to"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tv_email_to_tips"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/email_to_tips"
-                            android:textSize="@dimen/text_size_mini" />
-
+                <!-- S/MIME, OpenPGP, OpenKeychain: unencrypted fallback (stored as allowUnencryptedFallback, default off).
+                     Disabled with its value kept while Unencrypted is selected. -->
+                <LinearLayout android:id="@+id/layout_unencrypted_fallback" style="@style/Form.Subsection">
+                    <LinearLayout style="@style/Form.HelpRow.Heading">
+                        <cn.ppps.forwarder.widget.material.TargetSwitch android:id="@+id/sb_unencrypted_fallback" style="@style/Form.SwitchRow" android:layout_width="0dp" android:layout_weight="1" android:checked="false" android:text="@string/target_form_email_fallback" />
+                        <androidx.appcompat.widget.AppCompatImageButton android:id="@+id/btn_help_unencrypted_fallback" style="@style/Form.HelpIcon" />
                     </LinearLayout>
-
-                    <ImageView
-                        android:id="@+id/btn_add_recipient"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:layout_marginStart="@dimen/config_margin_5dp"
-                        android:background="@color/colorBlueGrey"
-                        android:src="@drawable/icon_api_contact_add"
-                        app:tint="#FFFFFF"
-                        tools:ignore="ContentDescription,ImageContrastCheck" />
-
+                    <TextView android:id="@+id/tv_unencrypted_fallback_state" style="@style/Form.Supporting" android:layout_marginTop="0dp" android:text="@string/target_form_email_fallback_off" />
                 </LinearLayout>
 
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_sms_template"
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/email_title"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:text="@string/custom_template_tips"
-                        android:textSize="@dimen/text_size_mini" />
-
+                <!-- OpenKeychain only: optional signing key -->
+                <LinearLayout android:id="@+id/layout_openkeychain_sign_key" style="@style/Form.Subsection" android:visibility="gone">
+                    <LinearLayout style="@style/TargetForm.TitleRow">
+                        <TextView style="@style/Form.GroupTitle" android:layout_width="0dp" android:layout_weight="1" android:text="@string/target_form_openkeychain_sign_key" />
+                        <androidx.appcompat.widget.AppCompatImageButton android:id="@+id/btn_help_sign_key" style="@style/Form.HelpIcon" />
+                    </LinearLayout>
+                    <TextView android:id="@+id/tv_openkeychain_sign_key" style="@style/TargetForm.Value" android:layout_marginTop="0dp" android:text="@string/openkeychain_sign_key_none" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_openkeychain_sign_key_picker" style="@style/Form.Action" android:text="@string/openkeychain_select_sign_key" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_openkeychain_sign_key_clear" style="@style/Form.Disclosure" android:text="@string/openkeychain_clear_sign_key" />
                 </LinearLayout>
 
-                <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-                    android:id="@+id/et_title_template"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:singleLine="true"
-                    app:met_clearButton="true" />
-
-                <GridLayout
-                    android:id="@+id/gl_title_template"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:columnCount="4"
-                    android:orientation="horizontal" />
-
+                <!-- S/MIME and OpenPGP: optional own key for signing (tv_sender_keystore text is set by EmailFragment) -->
+                <LinearLayout android:id="@+id/layout_sender_keystore" style="@style/Form.Subsection" android:visibility="gone">
+                    <TextView android:id="@+id/tv_sender_keystore" style="@style/Form.GroupTitle" android:text="@string/sender_smime_keystore" />
+                    <TextView style="@style/Form.Supporting" android:text="@string/target_form_sender_key_supporting" />
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:layout_marginTop="16dp" android:hint="@string/keystore_base64" app:helperText="@string/target_form_key_file_helper">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_sender_keystore" android:gravity="start|top" android:importantForAutofill="no" android:inputType="textMultiLine" android:maxLines="5" android:minLines="2" android:scrollbars="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_sender_keystore_picker" style="@style/Form.Action" android:text="@string/select_file" />
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field.Next" android:hint="@string/keystore_password" app:endIconMode="password_toggle" app:helperText="@string/target_form_sender_key_password_helper">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_sender_password" android:importantForAutofill="no" android:inputType="textPassword" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
             </LinearLayout>
 
+            <!-- Recipients: EmailFragment appends one item_add_recipient row per address to this layout -->
+            <LinearLayout android:id="@+id/layout_recipients" style="@style/Form.Section">
+                <LinearLayout style="@style/TargetForm.TitleRow">
+                    <TextView android:id="@+id/tv_email_to" style="@style/Form.SectionTitle" android:layout_width="0dp" android:layout_weight="1" android:text="@string/email_to" />
+                    <ImageView android:id="@+id/btn_add_recipient" style="@style/TargetForm.IconAction" android:contentDescription="@string/copy_add_recipient" android:src="@drawable/ic_add" app:tint="?attr/colorPrimary" />
+                </LinearLayout>
+                <TextView android:id="@+id/tv_email_to_tips" style="@style/Form.Supporting" android:layout_marginTop="0dp" android:text="@string/target_form_email_to_tips" />
+            </LinearLayout>
+
+            <!-- Subject -->
+            <LinearLayout android:id="@+id/layout_sms_template" style="@style/Form.Section">
+                <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:hint="@string/email_title" app:helperText="@string/target_form_template_default_sender">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_title_template" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_tags_title_template" style="@style/TargetForm.TagToggle" android:text="@string/target_form_tags_show" />
+                <GridLayout android:id="@+id/gl_title_template" style="@style/TargetForm.TagGrid" />
+            </LinearLayout>
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="10dp">
-
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
-            android:id="@+id/btn_del"
-            style="@style/SuperButton.Gray.Icon.Spacing"
-            android:drawableStart="@drawable/ic_delete"
-            android:text="@string/del"
-            tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
-
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
-            android:id="@+id/btn_save"
-            style="@style/SuperButton.Blue.Icon.Spacing"
-            android:drawableStart="@drawable/ic_save"
-            android:text="@string/save"
-            tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
-
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
-            android:id="@+id/btn_test"
-            style="@style/SuperButton.Green.Icon.Spacing"
-            android:drawableStart="@drawable/ic_test"
-            android:text="@string/test"
-            tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
-
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="horizontal" android:padding="10dp">
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_del" style="@style/MaterialActionButton.Secondary" android:drawableStart="@drawable/ic_delete" android:text="@string/del" tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_save" style="@style/MaterialActionButton" android:drawableStart="@drawable/ic_save" android:text="@string/save" tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_test" style="@style/MaterialActionButton.Secondary" android:drawableStart="@drawable/ic_test" android:text="@string/test" tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
     </LinearLayout>
-
 </LinearLayout>

@@ -28,7 +28,7 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 import java.util.Date
 
 @Page(name = "Wol")
@@ -83,10 +83,8 @@ class WolFragment : BaseFragment<FragmentTasksActionWolBinding?>(), View.OnClick
             }
         })
 
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             val settingVo = Gson().fromJson(eventData, WolSetting::class.java)
-            Log.d(TAG, "initViews settingVo:$settingVo")
 
             mac = settingVo.mac
             ip = settingVo.ip
@@ -126,7 +124,6 @@ class WolFragment : BaseFragment<FragmentTasksActionWolBinding?>(), View.OnClick
 
                     try {
                         val settingVo = checkSetting()
-                        Log.d(TAG, settingVo.toString())
                         val taskAction = TaskSetting(
                             TASK_ACTION_WOL,
                             getString(R.string.task_wol),

@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import cn.ppps.forwarder.R
 import cn.ppps.forwarder.adapter.base.ItemMoveCallback
 import cn.ppps.forwarder.entity.TaskSetting
+import cn.ppps.forwarder.entity.condition.LocationConditionRules
 import java.util.Collections
 
 @Suppress("DEPRECATION")
@@ -72,7 +73,10 @@ class TaskSettingAdapter(
         fun bind(taskSetting: TaskSetting) {
             icon.setImageResource(taskSetting.iconId)
             title.text = taskSetting.title
-            description.text = taskSetting.description
+            // Display-only marker for an unsupported address-keyword location condition; stored data is unchanged.
+            description.text = if (LocationConditionRules.isLegacyAddressCondition(taskSetting.type, taskSetting.setting)) {
+                itemView.context.getString(R.string.location_validation_legacy_row, taskSetting.description)
+            } else taskSetting.description
         }
 
         override fun onClick(v: View?) {

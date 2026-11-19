@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Infrastructure screens: Server, Client, Clone/backup, Help, setup tips, About links. -->
+<resources>
+    <string name="infra_form_time_tolerance_value">%1$d seconds</string>
+    <string name="infra_form_clone_requires_encryption">Available only with RSA or SM4 encryption under Security.</string>
+    <string name="infra_form_storage_title">Allow access to files</string>
+    <string name="infra_form_storage_clone_message">This backup feature uses “All files access” for SmsForwarder.json in Download. This gives broad access to shared storage. Open Android settings, allow access for this app, then return.</string>
+    <string name="infra_form_storage_server_message">This web client feature uses “All files access” to read a folder in Download. This gives broad access to shared storage. Open Android settings, allow access for this app, then return.</string>
+    <string name="infra_form_storage_continue">Settings</string>
+    <string name="infra_form_storage_grant">Allow file access</string>
+    <string name="infra_form_clone_push_help">Sends this phone’s configuration to the server phone and replaces its configuration there.</string>
+    <string name="infra_form_clone_pull_help">Gets the configuration of the server phone and replaces the configuration of this phone.</string>
+    <string name="infra_form_clone_export_help">Saves this phone’s configuration to a file.</string>
+    <string name="infra_form_clone_import_help">Replaces this phone’s configuration with the one in the file.</string>
+    <string name="infra_form_tip_page">Tip %1$d of %2$d</string>
+    <string name="infra_form_help_online">Open online documentation</string>
+    <string name="infra_form_help_online_note">The help above works offline. The button opens the project page on GitHub, which sees your IP address.</string>
+    <string name="infra_form_about_upstream">Original project</string>
+    <string name="infra_form_about_fork">This version</string>
+    <string name="infra_form_url_project_fork" translatable="false">https://github.com/frankhommers/SmsForwarder</string>
+</resources>

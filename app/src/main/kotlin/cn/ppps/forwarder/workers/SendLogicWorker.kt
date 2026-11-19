@@ -24,7 +24,7 @@ class SendLogicWorker(context: Context, params: WorkerParameters) : CoroutineWor
         val ruleJson = inputData.getString(Worker.RULE)
         val senderIndex = inputData.getInt(Worker.SENDER_INDEX, 0)
         val msgId = inputData.getLong(Worker.MSG_ID, 0L)
-        Log.d("SendLogicWorker", "msgInfoJson: $msgInfoJson, ruleJson: $ruleJson, senderIndex: $senderIndex, msgId: $msgId")
+        Log.d("SendLogicWorker", "senderIndex: $senderIndex, msgId: $msgId")
 
         val rule = Gson().fromJson(ruleJson, Rule::class.java) ?: return@withContext Result.failure()
         if (senderIndex >= rule.senderList.size) return@withContext Result.failure()

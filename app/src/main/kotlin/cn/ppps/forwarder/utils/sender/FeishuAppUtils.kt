@@ -39,18 +39,15 @@ class FeishuAppUtils private constructor() {
             }
 
             val requestUrl = "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal"
-            Log.d(TAG, "requestUrl：$requestUrl")
 
             val msgMap: MutableMap<String, Any> = mutableMapOf()
             msgMap["app_id"] = setting.appId
             msgMap["app_secret"] = setting.appSecret
             val requestMsg: String = Gson().toJson(msgMap)
-            Log.i(TAG, "requestMsg:$requestMsg")
 
             XHttp.post(requestUrl)
                 .upJson(requestMsg)
                 .keepJson(true)
-                .ignoreHttpsCert()
                 .retryCount(SettingUtils.requestRetryTimes) //Number of overtime retrys
                 .retryDelay(SettingUtils.requestDelayTime * 1000) //Timeout retry delay
                 .retryIncreaseDelay(SettingUtils.requestDelayTime * 1000) //Incremental timeout retry backoff
@@ -66,7 +63,6 @@ class FeishuAppUtils private constructor() {
                     }
 
                     override fun onSuccess(response: String) {
-                        Log.i(TAG, response)
 
                         val resp = Gson().fromJson(response, FeishuAppResult::class.java)
                         if (!TextUtils.isEmpty(resp?.tenant_access_token)) {
@@ -93,7 +89,6 @@ class FeishuAppUtils private constructor() {
             msgId: Long = 0L
         ) {
             val requestUrl = "https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=${setting.receiveIdType}"
-            Log.d(TAG, "requestUrl：$requestUrl")
 
             val content: String = if (rule != null) {
                 msgInfo.getContentForSend(rule.smsTemplate, rule.regexReplace, rule.title)
@@ -128,11 +123,9 @@ class FeishuAppUtils private constructor() {
             textMsgMap["content"] = msgContent
 
             val requestMsg: String = Gson().toJson(textMsgMap)
-            Log.i(TAG, "requestMsg:$requestMsg")
 
             val accessToken: String by SharedPreference("feishu_access_token_" + setting.appId, "")
             XHttp.post(requestUrl).upJson(requestMsg).headers("Authorization", "Bearer $accessToken").keepJson(true)
-                //.ignoreHttpsCert()
                 .retryCount(SettingUtils.requestRetryTimes) //Number of overtime retrys
                 .retryDelay(SettingUtils.requestDelayTime * 1000) //Timeout retry delay
                 .retryIncreaseDelay(SettingUtils.requestDelayTime * 1000) //Incremental timeout retry backoff
@@ -148,7 +141,6 @@ class FeishuAppUtils private constructor() {
                     }
 
                     override fun onSuccess(response: String) {
-                        Log.i(TAG, response)
                         //Log.d(TAG, "tlsVersion=" + response.handshake().tlsVersion())
                         //Log.d(TAG, "cipherSuite=" + response.handshake().cipherSuite().toString())
 

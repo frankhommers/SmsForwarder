@@ -76,7 +76,7 @@ class PhoneUtils private constructor() {
                             simInfo.mNumber = subscriptionInfo.number?.toString()
                             simInfo.mCountryIso = subscriptionInfo.countryIso?.toString()
                             simInfo.mSubscriptionId = subscriptionInfo.subscriptionId
-                            Log.d(TAG, simInfo.toString())
+                            Log.d(TAG, "SIM information loaded")
                             infoList[simInfo.mSimSlotIndex] = simInfo
                         }
                     }
@@ -98,7 +98,7 @@ class PhoneUtils private constructor() {
                             simInfo.mNumber = cursor.getString(cursor.getColumnIndex("number"))
                             simInfo.mCountryIso = cursor.getString(cursor.getColumnIndex("mcc"))
                             //val id = cursor.getString(cursor.getColumnIndex("_id"))
-                            Log.d(TAG, simInfo.toString())
+                            Log.d(TAG, "SIM information loaded")
                             infoList[simInfo.mSimSlotIndex] = simInfo
                         } while (cursor.moveToNext())
                         cursor.close()
@@ -159,7 +159,7 @@ class PhoneUtils private constructor() {
                     }
                 }
             }*/
-            Log.i(TAG, infoList.toString())
+            Log.d(TAG, "Sensitive event details omitted")
             return infoList
         }
 
@@ -187,17 +187,17 @@ class PhoneUtils private constructor() {
         @RequiresPermission(permission.SEND_SMS)
         fun sendSms(subId: Int, mobileList: String, message: String): String? {
             if (TextUtils.isEmpty(mobileList) || TextUtils.isEmpty(message)) {
-                Log.e(TAG, "mobileList or message is empty!")
-                return "mobileList or message is empty!"
+                Log.e(TAG, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_sms_empty))
+                return cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_sms_empty)
             }
 
             val mobiles = mobileList.replace("；", ";").replace("，", ";").replace(",", ";")
-            Log.d(TAG, "subId = $subId, mobiles = $mobiles, message = $message")
+            Log.d(TAG, "subId = $subId")
             val mobileArray = mobiles.split(";".toRegex()).toTypedArray()
             for (mobile in mobileArray) {
-                Log.d(TAG, "mobile = $mobile")
+                Log.d(TAG, "Sensitive event details omitted")
                 if (!isValidPhoneNumber(mobile)) {
-                    Log.e(TAG, "mobile ($mobile) is invalid!")
+                    Log.d(TAG, "Sensitive event details omitted")
                     continue
                 }
 
@@ -307,7 +307,7 @@ class PhoneUtils private constructor() {
                     selectionArgs.add("%$phoneNumber%")
                 }
                 Log.d(TAG, "selection = $selection")
-                Log.d(TAG, "selectionArgs = $selectionArgs")
+                Log.d(TAG, "Local query prepared")
 
                 //Retrieve all records, then paginate locally for compatibility
                 val cursor = Core.app.contentResolver.query(
@@ -359,7 +359,7 @@ class PhoneUtils private constructor() {
                                 val forwardIndex = cursor.getColumnIndex(forwardColumn)
                                 if (forwardIndex != -1) {
                                     val forwardedValue = cursor.getInt(forwardIndex)
-                                    Log.d(TAG, "forwardColumn = $forwardColumn, forwardedValue = $forwardedValue")
+                                    Log.d(TAG, "Sensitive event details omitted")
                                     if (forwardedValue == 1) {
                                         isForwarded = true
                                         break
@@ -378,7 +378,6 @@ class PhoneUtils private constructor() {
                                 if (indexSubId != -1) cursor.getInt(indexSubId) else 0,  //SIM subscription ID
                                 isForwarded //Whether the call was forwarded
                             )
-                            Log.d(TAG, callInfo.toString())
                             callInfoList.add(callInfo)
                             if (limit == 1) {
                                 cursor.close()
@@ -427,7 +426,7 @@ class PhoneUtils private constructor() {
                     selectionArgs.add("%$name%")
                 }
                 Log.d(TAG, "selection = $selection")
-                Log.d(TAG, "selectionArgs = $selectionArgs")
+                Log.d(TAG, "Local query prepared")
 
                 val cursor = Core.app.contentResolver.query(
                     ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, selection, selectionArgs.toTypedArray(), ContactsContract.CommonDataKinds.Phone.SORT_KEY_PRIMARY
@@ -448,7 +447,6 @@ class PhoneUtils private constructor() {
                             cursor.getString(displayNameIndex),  //Name
                             cursor.getString(mobileNoIndex),  //Number
                         )
-                        Log.d(TAG, contactInfo.toString())
                         contactInfoList.add(contactInfo)
                         if (limit == 1) {
                             cursor.close()
@@ -581,7 +579,7 @@ class PhoneUtils private constructor() {
                     selectionArgs.add("%$keyword%")
                 }
                 Log.d(TAG, "selection = $selection")
-                Log.d(TAG, "selectionArgs = $selectionArgs")
+                Log.d(TAG, "Local query prepared")
 
                 // Avoid loop-out after exceeding the total
                 val cursorTotal = Core.app.contentResolver.query(
@@ -698,13 +696,13 @@ class PhoneUtils private constructor() {
                 if (App.SimInfoList.isEmpty()) {
                     App.SimInfoList = getSimMultiInfo()
                 }
-                Log.i(TAG, "SimInfoList = " + App.SimInfoList.toString())
+                Log.d(TAG, "SIM inventory refreshed; details omitted")
 
                 val simSlot = -1
                 if (App.SimInfoList.isEmpty()) return simSlot
                 for (simInfo in App.SimInfoList.values) {
                     if (simInfo.mSubscriptionId == mId && simInfo.mSimSlotIndex != -1) {
-                        Log.i(TAG, "simInfo = $simInfo")
+                        Log.d(TAG, "Sensitive event details omitted")
                         return simInfo.mSimSlotIndex
                     }
                 }

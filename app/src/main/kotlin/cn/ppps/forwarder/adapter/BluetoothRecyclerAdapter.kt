@@ -60,7 +60,7 @@ class BluetoothRecyclerAdapter(
         @SuppressLint("MissingPermission")
         fun bind(device: BluetoothDevice) {
             // Set Device Name and Address
-            textDeviceName.text = device.name ?: "Unknown Device"
+            textDeviceName.text = device.name ?: itemView.context.getString(R.string.copy_unknown_device)
             textDeviceAddress.text = device.address
 
             // Set Icon by Device Type

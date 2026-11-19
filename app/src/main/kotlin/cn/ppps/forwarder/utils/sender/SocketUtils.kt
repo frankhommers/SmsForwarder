@@ -167,7 +167,6 @@ class SocketUtils {
                         Charset.forName(setting.inCharset)
                     )
                     Log.d(TAG, "UDP received ACK from ${ackPacket.address}:${ackPacket.port}")
-                    Log.d(TAG, "UDP ACK data: $response")
 
                     val status = if (setting.response.isEmpty() || response.contains(setting.response)) 2 else 0
 
@@ -182,7 +181,7 @@ class SocketUtils {
                 }
             }
 
-            SendUtils.updateLogs(logId, 0, "UDP ACK timeout")
+            SendUtils.updateLogs(logId, 0, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_udp_timeout))
             SendUtils.senderLogic(0, msgInfo, rule, senderIndex, msgId)
             socket.close()
         }
@@ -236,7 +235,7 @@ class SocketUtils {
 
                                 // Nothing. response Expectation, direct success.
                                 if (setting.response.isEmpty() || setting.retained) {
-                                    cont.resume(2 to "MQTT sent", null)
+                                    cont.resume(2 to cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_mqtt_sent), null)
                                 }
 
                             } catch (e: Exception) {
@@ -261,7 +260,7 @@ class SocketUtils {
                         }
 
                         override fun connectionLost(cause: Throwable?) {
-                            cont.resume(0 to (cause?.message ?: "MQTT connection lost"), null)
+                            cont.resume(0 to (cause?.message ?: cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_mqtt_lost)), null)
                         }
                     })
 

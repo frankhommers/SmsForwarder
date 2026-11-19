@@ -34,7 +34,7 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 import java.util.Date
 
 @Page(name = "HttpServer")
@@ -81,11 +81,9 @@ class HttpServerFragment : BaseFragment<FragmentTasksActionHttpServerBinding?>()
             }
         })
 
-        Log.d(TAG, "initViews eventData:$eventData")
         var settingVo = HttpServerSetting(getString(R.string.task_http_server_tips))
         if (eventData != null) {
             settingVo = Gson().fromJson(eventData, HttpServerSetting::class.java)
-            Log.d(TAG, "initViews settingVo:$settingVo")
         }
         binding!!.rgHttpServerState.check(if (settingVo.action == "start") R.id.rb_start_server else R.id.rb_stop_server)
         binding!!.sbApiClone.isChecked = settingVo.enableApiClone
@@ -147,7 +145,6 @@ class HttpServerFragment : BaseFragment<FragmentTasksActionHttpServerBinding?>()
                     mCountDownHelper?.start()
                     try {
                         val settingVo = checkSetting()
-                        Log.d(TAG, settingVo.toString())
                         val taskAction = TaskSetting(TASK_ACTION_HTTPSERVER, getString(R.string.task_http_server), settingVo.description, Gson().toJson(settingVo), requestCode)
                         val taskActionsJson = Gson().toJson(arrayListOf(taskAction))
                         val msgInfo = MsgInfo("task", getString(R.string.task_http_server), settingVo.description, Date(), getString(R.string.task_http_server))

@@ -10,7 +10,6 @@ import cn.ppps.forwarder.utils.XToastUtils
 import com.xuexiang.xrouter.facade.Postcard
 import com.xuexiang.xrouter.facade.callback.NavCallback
 import com.xuexiang.xrouter.launcher.XRouter
-import com.xuexiang.xui.widget.slideback.SlideBack
 
 /**
  * Shell Browser
@@ -22,10 +21,10 @@ class AgentWebActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_agent_web)
-        SlideBack.with(this)
-            .haveScroll(true)
-            .callBack { finish() }
-            .register()
+        if (savedInstanceState != null) {
+            mAgentWebFragment = supportFragmentManager.findFragmentById(R.id.container_frame_layout) as? AgentWebFragment
+            return
+        }
         val uri = intent.data
         if (uri != null) {
             XRouter.getInstance().build(uri).navigation(this, object : NavCallback() {
@@ -77,7 +76,6 @@ class AgentWebActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        SlideBack.unregister(this)
         super.onDestroy()
     }
 

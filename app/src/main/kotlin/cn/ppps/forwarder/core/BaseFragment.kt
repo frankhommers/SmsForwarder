@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
 import cn.ppps.forwarder.App
+import cn.ppps.forwarder.core.editor.EditorActionRow
 import cn.ppps.forwarder.core.http.loader.ProgressLoader
 import com.xuexiang.xhttp2.subsciber.impl.IProgressLoader
 import com.xuexiang.xpage.base.XPageActivity
@@ -19,8 +20,8 @@ import com.xuexiang.xpage.enums.CoreAnim
 import com.xuexiang.xpage.utils.Utils
 import com.xuexiang.xrouter.facade.service.SerializationService
 import com.xuexiang.xrouter.launcher.XRouter
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.actionbar.TitleUtils
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.TitleUtils
 import java.io.Serializable
 import java.lang.reflect.Type
 
@@ -37,6 +38,7 @@ import java.lang.reflect.Type
 @Suppress("MemberVisibilityCanBePrivate", "EmptyMethod")
 abstract class BaseFragment<Binding : ViewBinding?> : XPageFragment() {
     private var mIProgressLoader: IProgressLoader? = null
+    private var actionRow: EditorActionRow? = null
 
     /**
      * ViewBinding
@@ -72,13 +74,63 @@ abstract class BaseFragment<Binding : ViewBinding?> : XPageFragment() {
         initTitle()
         initViews()
         initListeners()
+        cn.ppps.forwarder.utils.ItemRows.installKnownLists(binding!!.root)
+        if (this is cn.ppps.forwarder.fragment.SettingsFragment || this is cn.ppps.forwarder.fragment.action.SettingsFragment) {
+            cn.ppps.forwarder.utils.DependentControls.install(binding!!.root)
+        }
+        updateContentWidth()
+        updateActionRow()
+    }
+
+    private fun updateContentWidth() {
+        val content = binding?.root ?: return
+        val wide = resources.configuration.screenWidthDp >= 600
+        val available = resources.displayMetrics.widthPixels
+        val inset = if (wide) ((available - 640 * resources.displayMetrics.density) / 2).toInt().coerceAtLeast(24) else 0
+        content.setPadding(inset, content.paddingTop, inset, content.paddingBottom)
+    }
+
+    /**
+     * Editor Delete/Save/Test row: label-weighted sizing plus hiding while the software keyboard
+     * is open. View-owned; non-editor screens get null and are left untouched.
+     */
+    private fun updateActionRow() {
+        actionRow?.release()
+        actionRow = binding?.root?.let { EditorActionRow.install(it) }
     }
 
     protected open fun initTitle(): TitleBar? {
         return TitleUtils.addTitleBarDynamic(
             rootView as ViewGroup,
             pageTitle
-        ) { popToBack() }
+        ) { (requireActivity() as? BaseActivity<*>)?.navigateBack() ?: popToBack() }
+    }
+
+    /** Only the visible fragment may consume an in-page Back action. */
+    open fun consumeNavigationBack(): Boolean {
+        if (!isVisible) return false
+        fun closeSearch(view: View): Boolean {
+            if (view is cn.ppps.forwarder.widget.material.TargetSearch && view.hasOpenSearch) {
+                view.hide(); return true
+            }
+            if (view is ViewGroup) for (i in 0 until view.childCount) {
+                if (closeSearch(view.getChildAt(i))) return true
+            }
+            return false
+        }
+        return binding?.root?.let(::closeSearch) ?: false
+    }
+
+    // A task child stores its receiver identity in arguments, not XPage’s transient lambda.
+    override fun setFragmentResult(resultCode: Int, intent: android.content.Intent?) {
+        val receiver = arguments?.getString("task.result.receiver")
+        if (receiver != null) {
+            parentFragmentManager.setFragmentResult(receiver, android.os.Bundle().apply {
+                putInt("request", arguments?.getInt("task.result.request") ?: 0)
+                putInt("result", resultCode)
+                putParcelable("data", intent)
+            })
+        } else super.setFragmentResult(resultCode, intent)
     }
 
     override fun initListeners() {}
@@ -114,14 +166,14 @@ abstract class BaseFragment<Binding : ViewBinding?> : XPageFragment() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         //Refresh the screen when it rotates.title
         super.onConfigurationChanged(newConfig)
-        val root = rootView as ViewGroup
-        if (root.getChildAt(0) is TitleBar) {
-            root.removeViewAt(0)
-            initTitle()
-        }
+        // MaterialToolbar responds to configuration without destroying title/actions or drafts.
+        updateContentWidth()
+        actionRow?.onConfigurationChanged()
     }
 
     override fun onDestroyView() {
+        actionRow?.release()
+        actionRow = null
         if (mIProgressLoader != null) {
             mIProgressLoader!!.dismissLoading()
         }

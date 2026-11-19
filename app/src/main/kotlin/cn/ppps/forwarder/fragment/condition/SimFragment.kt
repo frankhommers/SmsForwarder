@@ -20,9 +20,9 @@ import com.xuexiang.xaop.annotation.SingleClick
 import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 
-@Page(name = "Sim")
+@Page(name = "SIM")
 @Suppress("PrivatePropertyName", "SameParameterValue")
 class SimFragment : BaseFragment<FragmentTasksConditionSimBinding?>(), View.OnClickListener {
 
@@ -53,10 +53,8 @@ class SimFragment : BaseFragment<FragmentTasksConditionSimBinding?>(), View.OnCl
      * Initialize controls
      */
     override fun initViews() {
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             val settingVo = Gson().fromJson(eventData, SimSetting::class.java)
-            Log.d(TAG, "initViews settingVo:$settingVo")
             binding!!.tvDescription.text = settingVo.description
             binding!!.rgSimState.check(settingVo.getSimStateCheckId())
         }

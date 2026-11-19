@@ -28,7 +28,7 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 import java.util.Date
 
 @Page(name = "Resend")
@@ -76,10 +76,8 @@ class ResendFragment : BaseFragment<FragmentTasksActionResendBinding?>(), View.O
         })
 
         var settingVo = ResendSetting(getString(R.string.task_resend_tips), 1, listOf(0))
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             settingVo = Gson().fromJson(eventData, ResendSetting::class.java)
-            Log.d(TAG, "initViews settingVo:$settingVo")
         }
         binding!!.xsbHours.setDefaultValue(settingVo.hours)
         settingVo.statusList.forEach { item ->
@@ -96,6 +94,15 @@ class ResendFragment : BaseFragment<FragmentTasksActionResendBinding?>(), View.O
         binding!!.btnTest.setOnClickListener(this)
         binding!!.btnDel.setOnClickListener(this)
         binding!!.btnSave.setOnClickListener(this)
+        // Visible value readout (no setOnSeekBarListener on this slider); display only. 0 = whole history.
+        binding!!.xsbHours.addOnChangeListener { _, _, _ -> syncHoursReadout() }
+        syncHoursReadout()
+    }
+
+    private fun syncHoursReadout() {
+        val b = binding ?: return
+        b.actionFormHoursValue.text = if (b.xsbHours.selectedNumber == 0) getString(R.string.action_form_hours_all) else getString(R.string.action_form_hours_value, b.xsbHours.selectedNumber)
+        b.actionFormHoursValue.visibility = b.xsbHours.visibility
     }
 
     @SingleClick
@@ -106,7 +113,6 @@ class ResendFragment : BaseFragment<FragmentTasksActionResendBinding?>(), View.O
                     mCountDownHelper?.start()
                     try {
                         val settingVo = checkSetting()
-                        Log.d(TAG, settingVo.toString())
                         val taskAction = TaskSetting(TASK_ACTION_RESEND, getString(R.string.task_resend), settingVo.description, Gson().toJson(settingVo), requestCode)
                         val taskActionsJson = Gson().toJson(arrayListOf(taskAction))
                         val msgInfo = MsgInfo("task", getString(R.string.task_resend), settingVo.description, Date(), getString(R.string.task_resend))

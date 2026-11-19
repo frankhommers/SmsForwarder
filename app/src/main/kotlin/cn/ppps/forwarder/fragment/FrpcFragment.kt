@@ -36,7 +36,7 @@ import com.xuexiang.xpage.base.XPageActivity
 import com.xuexiang.xpage.core.PageOption
 import com.xuexiang.xui.utils.ThemeUtils
 import com.xuexiang.xui.utils.WidgetUtils
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 import com.xuexiang.xui.widget.dialog.LoadingDialog
 import com.xuexiang.xutil.system.ClipboardUtils
 import frpclib.Frpclib

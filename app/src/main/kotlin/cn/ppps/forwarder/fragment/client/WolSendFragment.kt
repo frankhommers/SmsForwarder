@@ -23,9 +23,9 @@ import com.xuexiang.xhttp2.exception.ApiException
 import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.utils.TextUtils
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
 import com.xuexiang.xutil.data.ConvertTools
 import com.xuexiang.xutil.resource.ResUtils.getColors
 
@@ -149,7 +149,6 @@ class WolSendFragment : BaseFragment<FragmentClientWolSendBinding?>(), View.OnCl
                 msgMap["data"] = dataMap
 
                 var requestMsg: String = Gson().toJson(msgMap)
-                Log.i(TAG, "requestMsg:$requestMsg")
 
                 val postRequest = XHttp.post(requestUrl).keepJson(true).timeStamp(true)
 
@@ -159,7 +158,6 @@ class WolSendFragment : BaseFragment<FragmentClientWolSendBinding?>(), View.OnCl
                         try {
                             requestMsg = Base64.encode(requestMsg.toByteArray())
                             requestMsg = RSACrypt.encryptByPublicKey(requestMsg, publicKey)
-                            Log.i(TAG, "requestMsg: $requestMsg")
                         } catch (e: Exception) {
                             XToastUtils.error(getString(R.string.request_failed) + e.message)
                             e.printStackTrace()
@@ -175,7 +173,6 @@ class WolSendFragment : BaseFragment<FragmentClientWolSendBinding?>(), View.OnCl
                             //requestMsg = Base64.encode(requestMsg.toByteArray())
                             val encryptCBC = SM4Crypt.encrypt(requestMsg.toByteArray(), sm4Key)
                             requestMsg = ConvertTools.bytes2HexString(encryptCBC)
-                            Log.i(TAG, "requestMsg: $requestMsg")
                         } catch (e: Exception) {
                             XToastUtils.error(getString(R.string.request_failed) + e.message)
                             e.printStackTrace()
@@ -198,7 +195,6 @@ class WolSendFragment : BaseFragment<FragmentClientWolSendBinding?>(), View.OnCl
                     }
 
                     override fun onSuccess(response: String) {
-                        Log.i(TAG, response)
                         try {
                             var json = response
                             if (HttpServerUtils.clientSafetyMeasures == 2) {

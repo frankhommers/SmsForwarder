@@ -21,13 +21,13 @@ class ConfigController {
     @CrossOrigin(methods = [RequestMethod.POST])
     @PostMapping("/query")
     fun test(@RequestBody bean: BaseRequest<*>): ConfigData {
-        Log.d(TAG, bean.data.toString())
+        Log.d(TAG, "Local event processed")
 
         //Get SIM slot information
         if (App.SimInfoList.isEmpty()) {
             App.SimInfoList = PhoneUtils.getSimMultiInfo()
         }
-        Log.d(TAG, App.SimInfoList.toString())
+        Log.d(TAG, "SIM inventory refreshed; details omitted")
 
         return ConfigData(
             HttpServerUtils.enableApiClone,

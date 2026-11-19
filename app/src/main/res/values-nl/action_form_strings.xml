@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Task-action editor labels (ActionForm). Display only; stored action settings are unchanged. -->
+<resources>
+    <string name="action_form_task_name">Taaknaam</string>
+    <string name="action_form_task_enabled">Taak ingeschakeld</string>
+    <string name="action_form_call_types">Door te sturen oproepgebeurtenissen</string>
+    <string name="action_form_app_types">Te laden apptypen</string>
+    <string name="action_form_allowed_numbers">Toegestane telefoonnummers</string>
+    <string name="action_form_dismiss_apps">Meldingen van deze apps altijd wissen</string>
+    <string name="action_form_min_interval">Minimuminterval (seconden)</string>
+    <string name="action_form_min_interval_help">Wacht minstens zo lang tussen twee locatie-updates.</string>
+    <string name="action_form_min_distance">Minimumafstand (meter)</string>
+    <string name="action_form_min_distance_help">Alleen bijwerken na zoveel verplaatsing. Bij 0 telt elke verplaatsing.</string>
+    <string name="action_form_duplicate_value">Dubbele berichten binnen %1$d seconden negeren</string>
+    <string name="action_form_duplicate_off">0 seconden: dubbelfilter uit</string>
+    <string name="action_form_set_status">Status instellen op</string>
+    <string name="action_form_rules_pick">Te wijzigen regels</string>
+    <string name="action_form_targets_pick">Te wijzigen bestemmingen</string>
+    <string name="action_form_tasks_pick">Te wijzigen taken</string>
+    <string name="action_form_volume_value">Alarmvolume: %1$d%%</string>
+    <string name="action_form_play_times_value">Aantal keer afspelen: %1$d</string>
+    <string name="action_form_play_times_infinite">Aantal keer afspelen: tot stoppen (0)</string>
+    <string name="action_form_repeat_value">Herhalingen: %1$d</string>
+    <string name="action_form_repeat_infinite">Herhalingen: tot stoppen (0)</string>
+    <string name="action_form_music_file">Geluidsbestand</string>
+    <string name="action_form_music_help">Optioneel MP3, OGG of WAV. Leeg speelt het ingebouwde alarmgeluid af.</string>
+    <string name="action_form_pick_music">Bestand kiezen uit de map Download</string>
+    <string name="action_form_vibration_pattern">Trilpatroon</string>
+    <string name="action_form_vibration_help">= sterk, - zwak, _ pauze. Elk teken duurt 100 ms.</string>
+    <string name="action_form_insert_strong">= Sterk</string>
+    <string name="action_form_insert_weak">- Zwak</string>
+    <string name="action_form_insert_pause">_ Pauze</string>
+    <string name="action_form_insert_strong_desc">Sterke trilling invoegen (=)</string>
+    <string name="action_form_insert_weak_desc">Zwakke trilling invoegen (-)</string>
+    <string name="action_form_insert_pause_desc">Pauze invoegen (_)</string>
+    <string name="action_form_flash_pattern">Lichtpatroon</string>
+    <string name="action_form_flash_help">X of 1 = lamp aan, O of 0 = uit. Elk teken duurt 100 ms.</string>
+    <string name="action_form_insert_light_on">X Lamp aan</string>
+    <string name="action_form_insert_light_off">O Lamp uit</string>
+    <string name="action_form_insert_light_on_desc">Lamp aan invoegen (X)</string>
+    <string name="action_form_insert_light_off_desc">Lamp uit invoegen (O)</string>
+    <string name="action_form_days">Leeftijd van te verwijderen logboeken</string>
+    <string name="action_form_days_value">Logboeken ouder dan %1$d dagen verwijderen</string>
+    <string name="action_form_days_all">0 dagen: alle doorstuurlogboeken verwijderen</string>
+    <string name="action_form_hours">Aantal uren terug</string>
+    <string name="action_form_hours_value">Terugkijkperiode in uren: %1$d</string>
+    <string name="action_form_hours_all">0 uur: alle berichten uit de geschiedenis</string>
+    <string name="action_form_original_result">Oorspronkelijk resultaat</string>
+    <string name="action_form_remote_features">Functies die op afstand zijn toegestaan</string>
+    <string name="action_form_mac_address">MAC-adres</string>
+    <string name="action_form_mac_help">Verplicht, bijvoorbeeld AA:BB:CC:DD:EE:FF</string>
+    <string name="action_form_broadcast_help">Optioneel, bijvoorbeeld 192.168.1.255. Leeg gebruikt 255.255.255.255.</string>
+    <string name="action_form_port_help">Optioneel. Leeg gebruikt poort 9; sommige apparaten hebben poort 7 nodig.</string>
+    <string name="action_form_msg_help">Verplicht. Maximaal 390 tekens; lange teksten kunnen meerdere SMS kosten.</string>
+</resources>

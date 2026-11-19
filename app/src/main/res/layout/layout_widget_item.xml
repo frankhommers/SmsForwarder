@@ -18,7 +18,9 @@
     <TextView
         android:id="@+id/item_name"
         style="@style/TextStyle.Explain"
-        android:lines="2"
+        android:singleLine="false"
+        android:maxLines="3"
+        android:minLines="2"
         android:textSize="@dimen/text_size_small" />
 
 </LinearLayout>

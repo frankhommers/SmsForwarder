@@ -51,7 +51,6 @@ class DingtalkGroupRobotUtils private constructor() {
                 requestUrl += "&timestamp=$timestamp&sign=$sign"
             }
 
-            Log.i(TAG, "requestUrl:$requestUrl")
 
             val msgMap: MutableMap<String, Any> = mutableMapOf()
             msgMap["msgtype"] = setting.msgtype
@@ -95,7 +94,6 @@ class DingtalkGroupRobotUtils private constructor() {
             }
 
             val requestMsg: String = Gson().toJson(msgMap)
-            Log.i(TAG, "requestMsg:$requestMsg")
 
             XHttp.post(requestUrl)
                 .upJson(requestMsg)
@@ -115,7 +113,6 @@ class DingtalkGroupRobotUtils private constructor() {
                     }
 
                     override fun onSuccess(response: String) {
-                        Log.i(TAG, response)
 
                         val resp = Gson().fromJson(response, DingtalkResult::class.java)
                         val status = if (resp?.errcode == 0L) 2 else 0

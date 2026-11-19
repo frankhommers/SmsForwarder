@@ -31,7 +31,6 @@ class AppMessageConverter : MessageConverter {
     override fun convert(output: Any?, mediaType: MediaType?): ResponseBody {
         //Return to Unified Structure Message
         var response = HttpServerUtils.response(output)
-        Log.d(TAG, "response: $response")
 
         return when (HttpServerUtils.safetyMeasures) {
             2 -> {
@@ -56,22 +55,20 @@ class AppMessageConverter : MessageConverter {
         Log.d(TAG, "Charset: $charset")
 
         var json = if (charset == null) IOUtils.toString(stream) else IOUtils.toString(stream, charset)
-        Log.d(TAG, "Json: $json")
 
         if (HttpServerUtils.safetyMeasures == 2) {
             if (TextUtils.isEmpty(HttpServerUtils.serverPrivateKey)) {
                 Log.e(TAG, "RSADecrypt failed: Private key is empty")
-                throw HttpException(500, "Service does not configure private key")
+                throw HttpException(500, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_server_private_key))
             }
 
             val privateKey = RSACrypt.getPrivateKey(HttpServerUtils.serverPrivateKey)
             json = RSACrypt.decryptByPrivateKey(json, privateKey)
             json = String(Base64.decode(json))
-            Log.d(TAG, "Json: $json")
         } else if (HttpServerUtils.safetyMeasures == 3) {
             if (TextUtils.isEmpty(HttpServerUtils.serverSm4Key)) {
                 Log.e(TAG, "SM4Decrypt failed: SM4Key is empty")
-                throw HttpException(500, "Service not configuredSM4Key")
+                throw HttpException(500, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_server_sm4_key))
             }
 
             val sm4Key = ConvertTools.hexStringToByteArray(HttpServerUtils.serverSm4Key)
@@ -79,7 +76,6 @@ class AppMessageConverter : MessageConverter {
             val decryptCBC = SM4Crypt.decrypt(encryptCBC, sm4Key)
             //json = String(Base64.decode(decryptCBC.toString()))
             json = String(decryptCBC)
-            Log.d(TAG, "Json: $json")
         }
 
         //Modifying interface datanull, ''is the default value

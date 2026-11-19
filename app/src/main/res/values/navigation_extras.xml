@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Extras primary tab (former side-menu tools) and the Help & info section of Settings. -->
+    <string name="settings_extras">Extras</string>
+    <string name="settings_extras_intro">Advanced tools for automation and remote control.</string>
+    <string name="extras_tasks_summary">Run actions automatically when conditions are met</string>
+    <string name="extras_server_summary">Let another device control this phone over HTTP</string>
+    <string name="extras_client_summary">Control another phone that runs the server</string>
+    <string name="extras_tunnel_summary">Not available in this privacy build</string>
+    <string name="extras_apps_summary">Installed apps and their package names</string>
+    <string name="settings_help_info">Help &amp; info</string>
+    <string name="settings_guide_summary">How the app works, available offline</string>
+    <string name="settings_about_updates">About &amp; updates</string>
+    <string name="settings_about_summary">Version, updates and privacy policy</string>
+</resources>

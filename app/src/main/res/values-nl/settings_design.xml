@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_forwarding">Doorsturen</string>
+    <string name="settings_sms">SMS</string>
+    <string name="settings_calls">Oproepen</string>
+    <string name="settings_notifications">App-meldingen</string>
+    <string name="settings_filtering">Filters en planning</string>
+    <string name="settings_duplicates">Dubbele berichten</string>
+    <string name="settings_quiet">Stille uren</string>
+    <string name="settings_filters">Meldingsfilters</string>
+    <string name="settings_automation">Apparaat en automatisering</string>
+    <string name="settings_bluetooth">Bluetooth-detectie</string>
+    <string name="settings_location">Locatie</string>
+    <string name="settings_apps">Geïnstalleerde apps</string>
+    <string name="settings_background">Werking op de achtergrond</string>
+    <string name="settings_keepalive">Actief houden</string>
+    <string name="settings_delivery">Aflevering</string>
+    <string name="settings_retry">Pogingen en time-out</string>
+    <string name="settings_identity">Identiteit en berichten</string>
+    <string name="settings_sim">SIM-labels</string>
+    <string name="settings_app">App en onderhoud</string>
+    <string name="settings_startup">Startscherm</string>
+    <string name="settings_diagnostics">Diagnostiek</string>
+    <string name="settings_backup">Back-up en herstel</string>
+    <string name="settings_setup">Hulp bij instellen</string>
+    <string name="settings_backup_help">Configuratie exporteren, importeren of overzetten</string>
+    <string name="settings_setup_help">Machtigingen en achtergrondwerking</string>
+    <string name="settings_on">Aan</string>
+    <string name="settings_off">Uit</string>
+    <string name="settings_not_set">Niet ingesteld</string>
+    <string name="settings_unavailable">Niet beschikbaar op dit apparaat</string>
+    <string name="settings_no_events">Geen gebeurtenissen geselecteerd</string>
+    <string name="settings_item_count">%1$d items opgeslagen</string>
+    <string name="settings_retry_summary">%1$d pogingen · %2$d s interval · %3$d s time-out</string>
+    <string name="settings_autosave">Wijzigingen worden automatisch opgeslagen</string>
+    <string name="settings_call_events">Door te sturen gebeurtenissen</string>
+    <string name="settings_main_screen">Hoofdscherm</string>
+    <string name="settings_system_settings">Android-instellingen openen</string>
+    <string name="settings_accessibility_help">Beheer toegankelijkheidsdiensten in Android-instellingen. Deze pagina openen schakelt geen dienst in.</string>
+    <string name="settings_accessibility">Toegankelijkheid</string>
+    <string name="settings_recents">Recente apps</string>
+    <string name="settings_proximity">Schermgedrag</string>
+    <string name="settings_saved_events">Opgeslagen keuze: %1$s</string>
+    <string name="settings_duplicate_interval">Herhalingen binnen %1$d s onderdrukken</string>
+    <string name="settings_calls_none_selected">Selecteer hieronder welke oproepgebeurtenissen u wilt doorsturen.</string>
+</resources>

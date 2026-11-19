@@ -1,46 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center_vertical"
-    android:orientation="horizontal">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/header_key" />
-
-    <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-        android:id="@+id/editTextHeaderKey"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_weight="1"
-        android:singleLine="true"
-        app:met_clearButton="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:text="@string/header_value" />
-
-    <com.xuexiang.xui.widget.edittext.materialedittext.MaterialEditText
-        android:id="@+id/editTextHeaderValue"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_weight="1"
-        android:singleLine="true"
-        app:met_clearButton="true" />
-
-    <ImageView
-        android:id="@+id/imageViewRemoveHeader"
-        android:layout_width="18dp"
-        android:layout_height="18dp"
-        android:contentDescription="@string/header_del"
-        android:src="@drawable/ic_delete"
-        app:tint="#F15C58" />
-
+<!-- Webhook header row (form pattern pilot): same shape as the ItemRows parameter rows.
+     Key field + 48dp remove action on one line, value field full width below; labels inside the fields.
+     Inflated with a null parent, so spacing uses padding, not margins. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingTop="16dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+        <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:layout_width="0dp" android:layout_weight="1" android:hint="@string/header_key">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/editTextHeaderKey" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <ImageView android:id="@+id/imageViewRemoveHeader" android:layout_width="48dp" android:layout_height="48dp" android:padding="12dp" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/header_del" android:src="@drawable/ic_delete" app:tint="?attr/colorError" />
+    </LinearLayout>
+    <com.google.android.material.textfield.TextInputLayout style="@style/Form.Field" android:layout_marginTop="8dp" android:hint="@string/header_value">
+        <com.google.android.material.textfield.TextInputEditText android:id="@+id/editTextHeaderValue" android:singleLine="true" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
 </LinearLayout>

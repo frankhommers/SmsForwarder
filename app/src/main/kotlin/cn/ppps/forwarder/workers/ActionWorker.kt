@@ -84,7 +84,7 @@ class ActionWorker(context: Context, params: WorkerParameters) : CoroutineWorker
         val taskConditionsJson = inputData.getString(TaskWorker.TASK_CONDITIONS)
         val taskActionsJson = inputData.getString(TaskWorker.TASK_ACTIONS)
         val msgInfoJson = inputData.getString(TaskWorker.MSG_INFO)
-        Log.d(TAG, "taskId: $taskId, taskActionsJson: $taskActionsJson, msgInfoJson: $msgInfoJson")
+        Log.d(TAG, "taskId: $taskId")
         if (taskId == -1L || taskActionsJson.isNullOrEmpty() || msgInfoJson.isNullOrEmpty()) {
             Log.d(TAG, "taskId is -1L or actionSetting is null")
             return Result.failure()
@@ -129,7 +129,7 @@ class ActionWorker(context: Context, params: WorkerParameters) : CoroutineWorker
                         if (App.SimInfoList.isEmpty()) {
                             App.SimInfoList = PhoneUtils.getSimMultiInfo()
                         }
-                        Log.d(TAG, App.SimInfoList.toString())
+                        Log.d(TAG, "SIM inventory refreshed; details omitted")
 
                         //Send card slots: 1=SIM1, 2=SIM2
                         val simSlotIndex = smsSetting.simSlot - 1
@@ -221,7 +221,7 @@ class ActionWorker(context: Context, params: WorkerParameters) : CoroutineWorker
                             App.context.startService(serviceIntent)
                         }
 
-                        if (settingsSetting.enableLoadAppList) {
+                        if (settingsSetting.enableLoadAppList && (settingsSetting.enableLoadUserAppList || settingsSetting.enableLoadSystemAppList)) {
                             val request = OneTimeWorkRequestBuilder<LoadAppListWorker>().build()
                             WorkManager.getInstance(XUtil.getContext()).enqueue(request)
                         }
@@ -368,7 +368,7 @@ class ActionWorker(context: Context, params: WorkerParameters) : CoroutineWorker
 
                         val logsList = Core.logs.getIdsByTimeAndStatus(resendSetting.hours, resendSetting.statusList)
                         logsList.forEach { item ->
-                            Log.d(TAG, "resend logsList item: $item")
+                            Log.d(TAG, "resend logsList item id: ${item.id}")
                             SendUtils.retrySendMsg(item.id)
                         }
 
@@ -398,7 +398,6 @@ class ActionWorker(context: Context, params: WorkerParameters) : CoroutineWorker
                         } else {
                             // Through local servicesAPI
                             val requestUrl: String = HttpServerUtils.serverAddress + "/wol/send"
-                            Log.i(TAG, "requestUrl:$requestUrl")
 
                             val msgMap: MutableMap<String, Any> = mutableMapOf()
                             val timestamp = System.currentTimeMillis()
@@ -415,7 +414,6 @@ class ActionWorker(context: Context, params: WorkerParameters) : CoroutineWorker
                             msgMap["data"] = dataMap
 
                             var requestMsg: String = Gson().toJson(msgMap)
-                            Log.i(TAG, "requestMsg:$requestMsg")
 
                             val postRequest = XHttp.post(requestUrl).keepJson(true).timeStamp(true)
 
@@ -425,7 +423,6 @@ class ActionWorker(context: Context, params: WorkerParameters) : CoroutineWorker
                                     try {
                                         requestMsg = Base64.encode(requestMsg.toByteArray())
                                         requestMsg = RSACrypt.encryptByPublicKey(requestMsg, publicKey)
-                                        Log.i(TAG, "requestMsg: $requestMsg")
                                     } catch (e: Exception) {
                                         writeLog("WOL request failed: ${e.message}", "ERROR")
                                         continue
@@ -438,7 +435,6 @@ class ActionWorker(context: Context, params: WorkerParameters) : CoroutineWorker
                                         val sm4Key = ConvertTools.hexStringToByteArray(HttpServerUtils.clientSignKey)
                                         val encryptCBC = SM4Crypt.encrypt(requestMsg.toByteArray(), sm4Key)
                                         requestMsg = ConvertTools.bytes2HexString(encryptCBC)
-                                        Log.i(TAG, "requestMsg: $requestMsg")
                                     } catch (e: Exception) {
                                         writeLog("WOL request failed: ${e.message}", "ERROR")
                                         continue
@@ -457,7 +453,6 @@ class ActionWorker(context: Context, params: WorkerParameters) : CoroutineWorker
                                 }
 
                                 override fun onSuccess(response: String) {
-                                    Log.i(TAG, response)
                                     try {
                                         var json = response
                                         if (HttpServerUtils.clientSafetyMeasures == 2) {

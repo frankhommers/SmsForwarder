@@ -27,13 +27,12 @@ class SmsController {
     @PostMapping("/send")
     fun send(@RequestBody bean: BaseRequest<SmsSendData>): String {
         val smsSendData = bean.data
-        Log.d(TAG, smsSendData.toString())
 
         //Get SIM slot information
         if (App.SimInfoList.isEmpty()) {
             App.SimInfoList = PhoneUtils.getSimMultiInfo()
         }
-        Log.d(TAG, App.SimInfoList.toString())
+        Log.d(TAG, "SIM inventory refreshed; details omitted")
 
         //Send card slots: 1=SIM1, 2=SIM2
         val simSlotIndex = smsSendData.simSlot - 1
@@ -52,7 +51,6 @@ class SmsController {
     @PostMapping("/query")
     fun query(@RequestBody bean: BaseRequest<SmsQueryData>): List<SmsInfo> {
         val smsQueryData = bean.data
-        Log.d(TAG, smsQueryData.toString())
 
         val limit = smsQueryData.pageSize
         val offset = (smsQueryData.pageNum - 1) * limit

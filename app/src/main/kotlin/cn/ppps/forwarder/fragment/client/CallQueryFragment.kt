@@ -40,8 +40,8 @@ import com.xuexiang.xpage.core.PageOption
 import com.xuexiang.xrouter.utils.TextUtils
 import com.xuexiang.xui.adapter.recyclerview.RecyclerViewHolder
 import com.xuexiang.xui.utils.SnackbarUtils
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.searchview.MaterialSearchView
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.TargetSearch as MaterialSearchView
 import com.xuexiang.xutil.data.ConvertTools
 import com.xuexiang.xutil.data.DateUtils
 import com.xuexiang.xutil.resource.ResUtils.getColor
@@ -148,14 +148,13 @@ class CallQueryFragment : BaseFragment<FragmentClientCallQueryBinding?>() {
         }
 
         //Search Box
-        binding!!.searchView.findViewById<View>(com.xuexiang.xui.R.id.search_layout).visibility = View.GONE
+        binding!!.searchView.hide()
         //binding!!.searchView.setVoiceSearch(true)
         binding!!.searchView.setEllipsize(true)
         //binding!!.searchView.setSuggestions(resources.getStringArray(R.array.query_suggestions))
         binding!!.searchView.setOnQueryTextListener(object : MaterialSearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
-                SnackbarUtils.Indefinite(view, String.format(getString(R.string.search_keyword), query)).info()
-                    .actionColor(getColor(R.color.xui_config_color_white))
+                com.google.android.material.snackbar.Snackbar.make(requireView(), String.format(getString(R.string.search_keyword), query), com.google.android.material.snackbar.Snackbar.LENGTH_INDEFINITE)
                     .setAction(getString(R.string.clear)) {
                         keyword = ""
                         loadRemoteData(true)
@@ -217,7 +216,6 @@ class CallQueryFragment : BaseFragment<FragmentClientCallQueryBinding?>() {
         msgMap["data"] = CallQueryData(callType, pageNum, pageSize, keyword)
 
         var requestMsg: String = Gson().toJson(msgMap)
-        Log.i(TAG, "requestMsg:$requestMsg")
 
         val postRequest = XHttp.post(requestUrl).keepJson(true).timeStamp(true)
 
@@ -227,7 +225,6 @@ class CallQueryFragment : BaseFragment<FragmentClientCallQueryBinding?>() {
                 try {
                     requestMsg = Base64.encode(requestMsg.toByteArray())
                     requestMsg = RSACrypt.encryptByPublicKey(requestMsg, publicKey)
-                    Log.i(TAG, "requestMsg: $requestMsg")
                 } catch (e: Exception) {
                     XToastUtils.error(getString(R.string.request_failed) + e.message)
                     e.printStackTrace()
@@ -243,7 +240,6 @@ class CallQueryFragment : BaseFragment<FragmentClientCallQueryBinding?>() {
                     //requestMsg = Base64.encode(requestMsg.toByteArray())
                     val encryptCBC = SM4Crypt.encrypt(requestMsg.toByteArray(), sm4Key)
                     requestMsg = ConvertTools.bytes2HexString(encryptCBC)
-                    Log.i(TAG, "requestMsg: $requestMsg")
                 } catch (e: Exception) {
                     XToastUtils.error(getString(R.string.request_failed) + e.message)
                     e.printStackTrace()
@@ -264,7 +260,6 @@ class CallQueryFragment : BaseFragment<FragmentClientCallQueryBinding?>() {
             }
 
             override fun onSuccess(response: String) {
-                Log.i(TAG, response)
                 try {
                     var json = response
                     if (HttpServerUtils.clientSafetyMeasures == 2) {

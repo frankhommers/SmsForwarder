@@ -6,8 +6,8 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import com.xuexiang.xaop.annotation.SingleClick
 import com.xuexiang.xpage.base.XPageContainerListFragment
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.actionbar.TitleUtils
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.TitleUtils
 
 /**
  * Modify the list style to display the main subheading

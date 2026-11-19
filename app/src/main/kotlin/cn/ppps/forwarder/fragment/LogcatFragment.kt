@@ -11,7 +11,7 @@ import cn.ppps.forwarder.utils.XToastUtils
 import com.xuexiang.xaop.annotation.SingleClick
 import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xui.utils.ThemeUtils
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 import com.xuexiang.xutil.system.ClipboardUtils
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter

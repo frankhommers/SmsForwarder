@@ -21,7 +21,7 @@ import com.xuexiang.xaop.annotation.SingleClick
 import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 
 @Page(name = "Battery")
 @Suppress("PrivatePropertyName", "SameParameterValue")
@@ -64,13 +64,12 @@ class BatteryFragment : BaseFragment<FragmentTasksConditionBatteryBinding?>(), V
                 binding!!.xsbLevelMin.visibility = View.GONE
                 binding!!.xsbLevelMax.visibility = View.VISIBLE
             }
+            syncLevelReadouts()
             checkSetting(true)
         }
 
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             val settingVo = Gson().fromJson(eventData, BatterySetting::class.java)
-            Log.d(TAG, "initViews settingVo:$settingVo")
             binding!!.tvDescription.text = settingVo.description
             binding!!.xsbLevelMin.setDefaultValue(settingVo.levelMin)
             binding!!.xsbLevelMax.setDefaultValue(settingVo.levelMax)
@@ -95,6 +94,19 @@ class BatteryFragment : BaseFragment<FragmentTasksConditionBatteryBinding?>(), V
         binding!!.sbKeepReminding.setOnCheckedChangeListener { _, _ ->
             checkSetting(true)
         }
+        // Visible value readouts. Added after setOnSeekBarListener (which clears change listeners); display only.
+        binding!!.xsbLevelMin.addOnChangeListener { _, _, _ -> syncLevelReadouts() }
+        binding!!.xsbLevelMax.addOnChangeListener { _, _, _ -> syncLevelReadouts() }
+        syncLevelReadouts()
+    }
+
+    // Each readout shows its own slider's value and follows that slider's visibility.
+    private fun syncLevelReadouts() {
+        val b = binding ?: return
+        b.conditionFormLevelMinValue.text = getString(R.string.condition_form_level_value, b.xsbLevelMin.selectedNumber)
+        b.conditionFormLevelMinValue.visibility = b.xsbLevelMin.visibility
+        b.conditionFormLevelMaxValue.text = getString(R.string.condition_form_level_value, b.xsbLevelMax.selectedNumber)
+        b.conditionFormLevelMaxValue.visibility = b.xsbLevelMax.visibility
     }
 
     @SingleClick

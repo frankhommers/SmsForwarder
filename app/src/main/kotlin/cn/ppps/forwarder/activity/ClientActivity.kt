@@ -9,6 +9,6 @@ class ClientActivity : BaseActivity<ViewBinding?>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        openPage(ClientFragment::class.java)
+        if (savedInstanceState == null) openPage(ClientFragment::class.java)
     }
 }

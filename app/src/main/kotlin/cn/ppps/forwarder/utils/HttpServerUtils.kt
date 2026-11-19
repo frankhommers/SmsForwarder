@@ -162,8 +162,6 @@ class HttpServerUtils private constructor() {
 
             val sign = calcSign(req.timestamp.toString(), signSecret)
             if (sign != req.sign) {
-                Log.e("calcSign", sign)
-                Log.e("reqSign", req.sign.toString())
                 throw HttpException(HTTP_UNAUTHORIZED_CODE, getString(R.string.sign_verify_failed))
             }
         }

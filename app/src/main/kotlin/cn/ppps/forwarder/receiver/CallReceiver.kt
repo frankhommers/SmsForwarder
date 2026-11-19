@@ -30,37 +30,37 @@ open class CallReceiver : PhoneStateReceiver() {
 
     //Incoming call alert
     override fun onIncomingCallReceived(context: Context, number: String?, start: Date) {
-        Log.d(TAG, "onIncomingCallReceived：$number")
+        Log.d(TAG, "Sensitive event details omitted")
         sendNotice(context, 4, number)
     }
 
     //Incoming call answered
     override fun onIncomingCallAnswered(context: Context, number: String?, start: Date) {
-        Log.d(TAG, "onIncomingCallAnswered：$number")
+        Log.d(TAG, "Sensitive event details omitted")
         sendNotice(context, 5, number)
     }
 
     //Incoming call ended
     override fun onIncomingCallEnded(context: Context, number: String?, start: Date, end: Date) {
-        Log.d(TAG, "onIncomingCallEnded：$number")
+        Log.d(TAG, "Sensitive event details omitted")
         sendCallMsg(context, 1, number)
     }
 
     //Outgoing call dialed
     override fun onOutgoingCallStarted(context: Context, number: String?, start: Date) {
-        Log.d(TAG, "onOutgoingCallStarted：$number")
+        Log.d(TAG, "Sensitive event details omitted")
         sendNotice(context, 6, number)
     }
 
     //Outgoing call ended
     override fun onOutgoingCallEnded(context: Context, number: String?, start: Date, end: Date) {
-        Log.d(TAG, "onOutgoingCallEnded：$number")
+        Log.d(TAG, "Sensitive event details omitted")
         sendCallMsg(context, 2, number)
     }
 
     //Missed call
     override fun onMissedCall(context: Context, number: String?, start: Date) {
-        Log.d(TAG, "onMissedCall：$number")
+        Log.d(TAG, "Sensitive event details omitted")
         sendCallMsg(context, 3, number)
     }
 
@@ -69,7 +69,7 @@ open class CallReceiver : PhoneStateReceiver() {
         if (TextUtils.isEmpty(phoneNumber)) return
 
         //Judge whether or not to open this type of forward
-        if ((callType == 4 && !SettingUtils.enableCallType4) || (callType == 5 && !SettingUtils.enableCallType5) || (callType == 6 && !SettingUtils.enableCallType6)) {
+        if (!callTypeEnabled(callType)) {
             Log.w(TAG, "This type of forwarding is not started，type=$callType")
             return
         }
@@ -91,15 +91,29 @@ open class CallReceiver : PhoneStateReceiver() {
         WorkManager.getInstance(context).enqueue(request)
     }
 
+    private fun callTypeEnabled(callType: Int) = when (callType) {
+        1 -> SettingUtils.enableCallType1
+        2 -> SettingUtils.enableCallType2
+        3 -> SettingUtils.enableCallType3
+        4 -> SettingUtils.enableCallType4
+        5 -> SettingUtils.enableCallType5
+        6 -> SettingUtils.enableCallType6
+        else -> false
+    }
+
     //Transmitting call records
     private fun sendCallMsg(context: Context, callType: Int, phoneNumber: String?) {
+        // Nothing to forward when this event is not selected (also covers 'master on, no event selected').
+        if (!callTypeEnabled(callType)) {
+            Log.w(TAG, "This type of forwarding is not started，type=$callType")
+            return
+        }
         //You have to go to sleep to get a call record, or you might get the last call.
         Thread.sleep(1000)
 
         //Get the latter call log.
-        Log.d(TAG, "callType = $callType, phoneNumber = $phoneNumber")
+        Log.d(TAG, "Sensitive event details omitted")
         val callInfo: CallInfo? = PhoneUtils.getLastCallInfo(callType, phoneNumber)
-        Log.d(TAG, "callInfo = $callInfo")
         if (callInfo?.number == null) {
             Log.w(TAG, "No call record found; send the notification directly")
             sendNotice(context, callType, phoneNumber)

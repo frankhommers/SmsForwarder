@@ -35,8 +35,8 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.MaterialDialog
 import java.io.File
 import java.util.Date
 import java.util.Locale
@@ -97,10 +97,8 @@ class AlarmFragment : BaseFragment<FragmentTasksActionAlarmBinding?>(), View.OnC
         }
 
         var settingVo = AlarmSetting()
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             settingVo = Gson().fromJson(eventData, AlarmSetting::class.java)
-            Log.d(TAG, "initViews settingVo:$settingVo")
             if (settingVo.action == "start") {
                 binding!!.rgAlarmState.check(R.id.rb_start_alarm)
                 binding!!.layoutAlarmSettings.visibility = View.VISIBLE
@@ -159,6 +157,25 @@ class AlarmFragment : BaseFragment<FragmentTasksActionAlarmBinding?>(), View.OnC
         binding!!.btInsertVibrationEffect3.setOnClickListener(this)
         binding!!.btInsertFlashEffect1.setOnClickListener(this)
         binding!!.btInsertFlashEffect2.setOnClickListener(this)
+        // Visible value readouts. Added after setOnSeekBarListener (which clears change listeners); display only.
+        binding!!.xsbVolume.addOnChangeListener { _, _, _ -> syncSliderReadouts() }
+        binding!!.xsbPlayTimes.addOnChangeListener { _, _, _ -> syncSliderReadouts() }
+        binding!!.xsbRepeatTimes.addOnChangeListener { _, _, _ -> syncSliderReadouts() }
+        binding!!.xsbFlashTimes.addOnChangeListener { _, _, _ -> syncSliderReadouts() }
+        syncSliderReadouts()
+    }
+
+    // Each readout shows its own slider's value and follows that slider's visibility. 0 = until stopped.
+    private fun syncSliderReadouts() {
+        val b = binding ?: return
+        b.actionFormVolumeValue.text = getString(R.string.action_form_volume_value, b.xsbVolume.selectedNumber)
+        b.actionFormVolumeValue.visibility = b.xsbVolume.visibility
+        b.actionFormPlayTimesValue.text = if (b.xsbPlayTimes.selectedNumber == 0) getString(R.string.action_form_play_times_infinite) else getString(R.string.action_form_play_times_value, b.xsbPlayTimes.selectedNumber)
+        b.actionFormPlayTimesValue.visibility = b.xsbPlayTimes.visibility
+        b.actionFormRepeatTimesValue.text = if (b.xsbRepeatTimes.selectedNumber == 0) getString(R.string.action_form_repeat_infinite) else getString(R.string.action_form_repeat_value, b.xsbRepeatTimes.selectedNumber)
+        b.actionFormRepeatTimesValue.visibility = b.xsbRepeatTimes.visibility
+        b.actionFormFlashTimesValue.text = if (b.xsbFlashTimes.selectedNumber == 0) getString(R.string.action_form_repeat_infinite) else getString(R.string.action_form_repeat_value, b.xsbFlashTimes.selectedNumber)
+        b.actionFormFlashTimesValue.visibility = b.xsbFlashTimes.visibility
     }
 
     @SingleClick
@@ -256,7 +273,6 @@ class AlarmFragment : BaseFragment<FragmentTasksActionAlarmBinding?>(), View.OnC
                                 mCountDownHelper?.start()
                                 try {
                                     val settingVo = checkSetting()
-                                    Log.d(TAG, settingVo.toString())
                                     if (settingVo.playTimes < 0 && settingVo.repeatTimes < 0 && settingVo.flashTimes < 0) {
                                         XToastUtils.error(getString(R.string.alarm_settings_error))
                                         return
@@ -348,26 +364,26 @@ class AlarmFragment : BaseFragment<FragmentTasksActionAlarmBinding?>(), View.OnC
         val action = if (binding!!.rgAlarmState.checkedRadioButtonId == R.id.rb_start_alarm) {
             description.append(getString(R.string.start_alarm))
             if (enableMusic) {
-                description.append(", ").append(getString(R.string.alarm_volume)).append(":").append(volume).append("%")
-                description.append(", ").append(getString(R.string.alarm_play_times)).append(":").append(playTimes)
+                description.append("\n").append(getString(R.string.review_alarm_sound, volume))
+                description.append(" · ").append(if (playTimes == 0) getString(R.string.review_alarm_continuous) else getString(R.string.review_alarm_count, playTimes))
                 if (music.isNotEmpty()) {
-                    description.append(", ").append(getString(R.string.alarm_music)).append(":").append(music)
+                    description.append(" · ").append(getString(R.string.review_alarm_custom_audio))
                 }
             } else {
                 playTimes = -1
             }
             if (enableVibrate) {
                 vibrationEffect.ifEmpty { "---___===___".also { binding!!.etVibrationEffect.setText(it) } }
-                description.append(", ").append(getString(R.string.alarm_vibration_effect)).append(":").append(vibrationEffect)
-                description.append(", ").append(getString(R.string.alarm_repeat_times)).append(":").append(repeatTimes)
+                description.append("\n").append(getString(R.string.review_alarm_vibration))
+                description.append(" · ").append(if (repeatTimes == 0) getString(R.string.review_alarm_continuous) else getString(R.string.review_alarm_count, repeatTimes))
             } else {
                 repeatTimes = -1
             }
             if (enableFlash) {
                 flashEffect.ifEmpty { "XXOOXXOO".also { binding!!.etFlashEffect.setText(it) } }
                 flashEffect = flashEffect.toUpperCase(Locale.ROOT).replace("1", "X").replace("0", "O")
-                description.append(", ").append(getString(R.string.alarm_flash_effect)).append(":").append(flashEffect)
-                description.append(", ").append(getString(R.string.alarm_repeat_times)).append(":").append(flashTimes)
+                description.append("\n").append(getString(R.string.review_alarm_flash))
+                description.append(" · ").append(if (flashTimes == 0) getString(R.string.review_alarm_continuous) else getString(R.string.review_alarm_count, flashTimes))
             } else {
                 flashTimes = -1
             }

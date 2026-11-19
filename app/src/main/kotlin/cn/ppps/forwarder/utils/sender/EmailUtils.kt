@@ -5,26 +5,31 @@ import cn.ppps.forwarder.R
 import cn.ppps.forwarder.database.entity.Rule
 import cn.ppps.forwarder.entity.MsgInfo
 import cn.ppps.forwarder.entity.setting.EmailSetting
-import cn.ppps.forwarder.utils.Base64
 import cn.ppps.forwarder.utils.Log
+import cn.ppps.forwarder.utils.EVENT_TOAST_WARNING
+import com.jeremyliao.liveeventbus.LiveEventBus
 import cn.ppps.forwarder.utils.SendUtils
 import cn.ppps.forwarder.utils.SettingUtils
+import cn.ppps.forwarder.utils.mail.EmailCrypto
+import cn.ppps.forwarder.utils.mail.EmailDeliveryReport
+import cn.ppps.forwarder.utils.mail.EmailKeys
+import cn.ppps.forwarder.utils.mail.EmailOutcome
 import cn.ppps.forwarder.utils.mail.EmailSender
+import cn.ppps.forwarder.utils.mail.EncryptedEmailDelivery
 import cn.ppps.forwarder.utils.mail.OpenKeychainHelper
+import cn.ppps.forwarder.utils.mail.OpenKeychainMailUtils
+import cn.ppps.forwarder.utils.mail.PgpUtils
+import cn.ppps.forwarder.utils.mail.RecipientKey
+import cn.ppps.forwarder.utils.mail.SigningKey
+import cn.ppps.forwarder.utils.mail.SmimeUtils
+import jakarta.mail.Session
+import jakarta.mail.Transport
 import com.xuexiang.xutil.resource.ResUtils.getString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.bouncycastle.openpgp.PGPPublicKeyRing
-import org.bouncycastle.openpgp.PGPSecretKeyRing
-import org.pgpainless.PGPainless
-import org.pgpainless.key.info.KeyRingInfo
-import java.io.ByteArrayInputStream
-import java.io.FileInputStream
-import java.security.KeyStore
-import java.security.PrivateKey
-import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 
 class EmailUtils {
@@ -158,40 +163,23 @@ class EmailUtils {
                         val openSSL = setting.ssl
                         val startTls = setting.startTls
 
-                        //FromS/MIMEPrivate key (for signature)）
-                        var signingPrivateKey: PrivateKey? = null
-                        var signingCertificate: X509Certificate? = null
-                        //FromOpenPGPPrivate key (for signature)）
-                        var senderPGPSecretKeyRing: PGPSecretKeyRing? = null
-                        var senderPGPSecretKeyPassword = ""
+                        //Number and interval of failed retries (sets for retries of failed requests interfaces）
+                        val retryTimes = SettingUtils.requestRetryTimes
+                        val delayTime = SettingUtils.requestDelayTime
 
-                        if (setting.keystore.isNotEmpty() && setting.password.isNotEmpty()) {
-                            try {
-                                val keystoreStream = if (setting.keystore.startsWith("/")) {
-                                    FileInputStream(setting.keystore)
-                                } else {
-                                    val decodedBytes = Base64.decode(setting.keystore)
-                                    ByteArrayInputStream(decodedBytes)
-                                }
-                                when (setting.encryptionProtocol) {
-                                    "S/MIME" -> {
-                                        val keystorePassword = setting.password
-                                        val keyStore = KeyStore.getInstance("PKCS12")
-                                        keyStore.load(keystoreStream, keystorePassword.toCharArray())
-                                        val privateKeyAlias = keyStore.aliases().toList().first { keyStore.isKeyEntry(it) }
-                                        signingPrivateKey = keyStore.getKey(privateKeyAlias, keystorePassword.toCharArray()) as PrivateKey
-                                        signingCertificate = keyStore.getCertificate(privateKeyAlias) as X509Certificate
-                                    }
-
-                                    "OpenPGP" -> {
-                                        senderPGPSecretKeyRing = PGPainless.readKeyRing().secretKeyRing(keystoreStream)
-                                        senderPGPSecretKeyPassword = setting.password
-                                    }
-                                }
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                Log.w(TAG, "Failed to load keystore: ${e.message}")
+                        if (EmailCrypto.isEncryptionMode(setting.encryptionProtocol)) {
+                            //S/MIME, OpenPGP, OpenKeychain: explicit per-recipient outcome; unencrypted only by explicit fallback
+                            val outcomes = deliverEncrypted(setting, host, port, from, password, fromAlias, nickname, title, content, openSSL, startTls, retryTimes, delayTime)
+                            val status = EmailDeliveryReport.status(outcomes)
+                            val summary = EmailDeliveryReport.describe(outcomes) { id, args -> App.context.getString(id, *args) }
+                            Log.i(TAG, "Email delivery status=$status, recipients=${outcomes.size}, unencrypted=${outcomes.count { it is EmailOutcome.Unencrypted }}, failed=${outcomes.count { it is EmailOutcome.Failed }}")
+                            SendUtils.updateLogs(logId, status, if (status == 2) getString(R.string.request_succeeded) + ": " + summary else summary)
+                            //Test button (no log entry): a success toast alone would hide that a copy went out unencrypted
+                            if ((logId == 0L) && outcomes.any { it is EmailOutcome.Unencrypted }) {
+                                LiveEventBus.get(EVENT_TOAST_WARNING, String::class.java).post(summary)
                             }
+                            SendUtils.senderLogic(status, msgInfo, rule, senderIndex, msgId)
+                            return@launch
                         }
 
                         // Send a result monitor
@@ -208,10 +196,6 @@ class EmailUtils {
                             }
                         }
 
-                        //Number and interval of failed retries (sets for retries of failed requests interfaces）
-                        val retryTimes = SettingUtils.requestRetryTimes
-                        val delayTime = SettingUtils.requestDelayTime
-
                         //Intercept each send result; retry after a delay on failure; report only the final result to listener
                         suspend fun sendWithRetry(build: (EmailSender.EmailTaskListener) -> EmailSender) {
                             var attempt = 0
@@ -227,164 +211,31 @@ class EmailUtils {
                                 build(innerListener).sendEmail()
                                 if (success || attempt >= retryTimes) break
                                 attempt++
-                                Log.w(TAG, "Email sending failed; preparing retry $attempt/$retryTimes Try again, delay ${delayTime}s，Reason：$resultMessage")
+                                Log.w(TAG, "Email sending failed; preparing retry $attempt/$retryTimes, delay ${delayTime}s")
                                 if (delayTime > 0) delay(delayTime * 1000L)
                             }
                             listener.onEmailSent(success, resultMessage)
                         }
 
-                        //Send encrypted emails one by one
-                        val recipientsWithoutCert = mutableListOf<String>()
-                        if (setting.encryptionProtocol == "OpenKeychain") {
-                            //OpenKeychain：Public key byOpenKeychainAutomatically match, encrypted to all recipients at a time
-                            val openKeychainHelper = OpenKeychainHelper(App.context)
-                            try {
-                                sendWithRetry { emailListener ->
-                                    EmailSender(
-                                        host,
-                                        port,
-                                        from,
-                                        password,
-                                        fromAlias,
-                                        nickname,
-                                        title,
-                                        content,
-                                        toAddress = setting.recipients.keys.toMutableList(),
-                                        listener = emailListener,
-                                        openSSL = openSSL,
-                                        startTls = startTls,
-                                        encryptionProtocol = setting.encryptionProtocol,
-                                        openKeychainHelper = openKeychainHelper,
-                                        openKeychainSignKeyId = setting.openKeychainSignKeyId,
-                                    )
-                                }
-                            } finally {
-                                openKeychainHelper.unbind()
-                            }
-                            return@launch
-                        }
-                        setting.recipients.forEach { (email, cert) ->
-                            val keystoreBase64 = cert.first
-                            val keystorePassword = cert.second
-                            var recipientX509Cert: X509Certificate? = null
-                            var recipientPGPPublicKeyRing: PGPPublicKeyRing? = null
-                            try {
-                                when {
-                                    //Extract a public key from a private key certificate file
-                                    keystoreBase64.isNotEmpty() && keystorePassword.isNotEmpty() -> {
-                                        val keystoreStream = if (keystoreBase64.startsWith("/")) {
-                                            FileInputStream(keystoreBase64)
-                                        } else {
-                                            val decodedBytes = Base64.decode(keystoreBase64)
-                                            ByteArrayInputStream(decodedBytes)
-                                        }
-
-                                        when (setting.encryptionProtocol) {
-                                            "S/MIME" -> {
-                                                val keyStore = KeyStore.getInstance("PKCS12")
-                                                keyStore.load(keystoreStream, keystorePassword.toCharArray())
-                                                val alias = keyStore.aliases().nextElement()
-                                                recipientX509Cert = keyStore.getCertificate(alias) as X509Certificate
-                                            }
-
-                                            "OpenPGP" -> {
-                                                val recipientPGPSecretKeyRing = PGPainless.readKeyRing().secretKeyRing(keystoreStream)
-                                                recipientPGPPublicKeyRing = recipientPGPSecretKeyRing?.let { PGPainless.extractCertificate(it) }
-                                                if (recipientPGPPublicKeyRing != null) {
-                                                    val keyInfo = KeyRingInfo(recipientPGPPublicKeyRing)
-                                                    Log.d(TAG, "Recipient key info: $keyInfo")
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    //Extract a public key from a certificate file
-                                    keystoreBase64.isNotEmpty() && keystorePassword.isEmpty() -> {
-                                        val keystoreStream = if (keystoreBase64.startsWith("/")) {
-                                            FileInputStream(keystoreBase64)
-                                        } else {
-                                            val decodedBytes = Base64.decode(keystoreBase64)
-                                            ByteArrayInputStream(decodedBytes)
-                                        }
-
-                                        when (setting.encryptionProtocol) {
-                                            "S/MIME" -> {
-                                                val certFactory = CertificateFactory.getInstance("X.509")
-                                                recipientX509Cert = certFactory.generateCertificate(FileInputStream(keystoreBase64)) as X509Certificate
-                                            }
-
-                                            "OpenPGP" -> {
-                                                recipientPGPPublicKeyRing = PGPainless.readKeyRing().publicKeyRing(keystoreStream)
-                                                if (recipientPGPPublicKeyRing != null) {
-                                                    val keyInfo = KeyRingInfo(recipientPGPPublicKeyRing)
-                                                    Log.d(TAG, "Recipient key info: $keyInfo")
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    else -> {
-                                        recipientsWithoutCert.add(email)
-                                    }
-                                }
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                Log.w(TAG, "Failed to load recipient($email) keystore($cert): ${e.message}")
-                                //Send plaintext if the certificate cannot be loaded
-                                recipientsWithoutCert.add(email)
-                            }
-
-                            if (recipientX509Cert != null || recipientPGPPublicKeyRing != null) {
-                                sendWithRetry { emailListener ->
-                                    EmailSender(
-                                        host,
-                                        port,
-                                        from,
-                                        password,
-                                        fromAlias,
-                                        nickname,
-                                        title,
-                                        content,
-                                        toAddress = mutableListOf(email),
-                                        listener = emailListener,
-                                        openSSL = openSSL,
-                                        startTls = startTls,
-                                        encryptionProtocol = setting.encryptionProtocol,
-                                        recipientX509Cert = recipientX509Cert,
-                                        senderPrivateKey = signingPrivateKey,
-                                        senderX509Cert = signingCertificate,
-                                        recipientPGPPublicKeyRing = recipientPGPPublicKeyRing,
-                                        senderPGPSecretKeyRing = senderPGPSecretKeyRing,
-                                        senderPGPSecretKeyPassword = senderPGPSecretKeyPassword,
-                                    )
-                                }
-                            }
-                        }
-
-                        //Batch Send Out Email
-                        if (recipientsWithoutCert.isNotEmpty()) {
-                            sendWithRetry { emailListener ->
-                                EmailSender(
-                                    host,
-                                    port,
-                                    from,
-                                    password,
-                                    fromAlias,
-                                    nickname,
-                                    title,
-                                    content,
-                                    toAddress = recipientsWithoutCert,
-                                    listener = emailListener,
-                                    openSSL = openSSL,
-                                    startTls = startTls,
-                                    encryptionProtocol = setting.encryptionProtocol,
-                                    senderPrivateKey = signingPrivateKey,
-                                    senderX509Cert = signingCertificate,
-                                    //TODO: OpenPGP Only if the signature is unencrypted, hint for invalid digital signature is not resolved
-                                    senderPGPSecretKeyRing = senderPGPSecretKeyRing,
-                                    senderPGPSecretKeyPassword = senderPGPSecretKeyPassword,
-                                )
-                            }
+                        // Explicitly unencrypted mode uses all configured recipients, regardless of retained keys.
+                        val plainRecipients = plainModeRecipients(setting.recipients)
+                        if (plainRecipients.isNotEmpty()) sendWithRetry { emailListener ->
+                            EmailSender(
+                                host,
+                                port,
+                                from,
+                                password,
+                                fromAlias,
+                                nickname,
+                                title,
+                                content,
+                                toAddress = plainRecipients,
+                                listener = emailListener,
+                                openSSL = openSSL,
+                                startTls = startTls,
+                                encryptionProtocol = setting.encryptionProtocol,
+                                smtpTimeoutMs = EmailSender.smtpTimeoutMillis(SettingUtils.requestTimeout),
+                            )
                         }
 
                     } catch (e: Exception) {
@@ -398,6 +249,87 @@ class EmailUtils {
                 job.join() // Wait for coroutines to finish
             }
 
+        }
+
+
+
+        /** Explicit Unencrypted mode addresses every configured recipient. Retained keys are
+         * inactive configuration, not a reason to silently omit a recipient. Encrypted modes use
+         * deliverEncrypted and its separate, default-off fallback policy instead.
+         */
+        @JvmStatic
+        fun plainModeRecipients(recipients: Map<String, Pair<String, String>>): MutableList<String> =
+            recipients.keys.toMutableList()
+
+        /**
+         * S/MIME, OpenPGP and OpenKeychain delivery. Keys are loaded and messages built first; an unencrypted copy
+         * is only sent for recipients whose encryption could not be prepared and only with
+         * [EmailSetting.allowUnencryptedFallback]. SMTP retries resend the same prepared message.
+         */
+        private suspend fun deliverEncrypted(
+            setting: EmailSetting, host: String, port: String, from: String, password: String, fromAlias: String,
+            nickname: String, title: String, content: String, openSSL: Boolean, startTls: Boolean, retryTimes: Int, delayTime: Int,
+        ): List<EmailOutcome> {
+            val protocol = setting.encryptionProtocol
+            val properties = EmailSender.smtpProperties(host, port, openSSL, startTls, EmailSender.smtpTimeoutMillis(SettingUtils.requestTimeout))
+            val authenticator = EmailSender.authenticator(from, password)
+            val signing = EmailKeys.loadSigningKey(protocol, setting.keystore, setting.password)
+            if (signing is SigningKey.Failed) Log.w(TAG, "Signing key not usable: ${signing.failure} (${signing.detail})")
+            val smimeSigning = signing as? SigningKey.Smime
+            val pgpSigning = signing as? SigningKey.Pgp
+            val recipients = setting.recipients.map { (email, cert) ->
+                val key = if (protocol == EmailCrypto.OPENKEYCHAIN) RecipientKey.None else EmailKeys.loadRecipientKey(protocol, cert.first, cert.second)
+                if (key is RecipientKey.Invalid) Log.w(TAG, "Recipient key not usable: ${key.failure} (${key.detail})")
+                email to key
+            }
+
+            fun smime(emails: List<String>, certificate: X509Certificate?) = SmimeUtils(
+                properties, authenticator, from, fromAlias, nickname, title, content,
+                toAddress = emails.toMutableList(), recipientX509Cert = certificate,
+                senderPrivateKey = smimeSigning?.privateKey, senderX509Cert = smimeSigning?.certificate,
+            )
+
+            fun pgp(emails: List<String>, ring: PGPPublicKeyRing?) = PgpUtils(
+                properties = properties, session = Session.getInstance(properties, authenticator), from = from,
+                fromAlias = fromAlias, nickname = nickname, subject = title, body = content, toAddress = emails,
+                recipientPGPPublicKeyRing = ring, senderPGPSecretKeyRing = pgpSigning?.secretKeyRing,
+                senderPGPSecretKeyPassword = pgpSigning?.password ?: "",
+            )
+
+            val openKeychainHelper = if (protocol == EmailCrypto.OPENKEYCHAIN) OpenKeychainHelper(App.context) else null
+            try {
+                val delivery = EncryptedEmailDelivery(
+                    protocol = protocol,
+                    allowUnencryptedFallback = setting.allowUnencryptedFallback,
+                    signing = signing,
+                    retryTimes = retryTimes,
+                    retryDelayMillis = delayTime * 1000L,
+                    prepareEncrypted = { emails, key ->
+                        when (key) {
+                            is RecipientKey.Smime -> smime(emails, key.certificate).prepareMessage(encrypt = true, sign = smimeSigning != null)
+                            is RecipientKey.Pgp -> pgp(emails, key.publicKeyRing).prepareMessage(encrypt = true, sign = pgpSigning != null)
+                            else -> OpenKeychainMailUtils(
+                                session = Session.getInstance(properties, authenticator), fromAlias = fromAlias, nickname = nickname,
+                                subject = title, body = content, toAddress = emails,
+                                openKeychainHelper = openKeychainHelper ?: throw IllegalStateException("OpenKeychain not bound"),
+                                signKeyId = setting.openKeychainSignKeyId,
+                            ).prepareMessage()
+                        }
+                    },
+                    prepareUnencrypted = { emails ->
+                        when {
+                            smimeSigning != null -> smime(emails, null).prepareMessage(encrypt = false, sign = true)
+                            pgpSigning != null -> pgp(emails, null).prepareMessage(encrypt = false, sign = true)
+                            else -> smime(emails, null).prepareMessage(encrypt = false, sign = false)
+                        }
+                    },
+                    send = { message -> Transport.send(message) },
+                    openKeychainSigned = setting.openKeychainSignKeyId != 0L,
+                )
+                return delivery.deliver(recipients)
+            } finally {
+                openKeychainHelper?.unbind()
+            }
         }
 
     }

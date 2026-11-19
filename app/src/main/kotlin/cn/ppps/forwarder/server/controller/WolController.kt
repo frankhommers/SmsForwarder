@@ -22,7 +22,6 @@ class WolController {
     @PostMapping("/send")
     fun send(@RequestBody bean: BaseRequest<WolData>): String {
         val wolData = bean.data
-        Log.d(TAG, wolData.toString())
 
         if (TextUtils.isEmpty(wolData.mac)) return "mac is empty"
         val port = if (wolData.port > 0) wolData.port else 9

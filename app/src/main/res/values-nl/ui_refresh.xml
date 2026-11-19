@@ -1,0 +1,50 @@
+<resources>
+    <string name="target_legacy">Niet-ondersteunde oude bestemming</string>
+    <string name="target_legacy_help">Deze dienst is niet meer beschikbaar in de editor. De opgeslagen configuratie en bestaande doorstuurregels blijven ongewijzigd. U kunt deze expliciet verwijderen of een ondersteunde bestemming maken.</string>
+    <string name="add_item">Item toevoegen</string>
+    <string name="remove_item">Verwijderen</string>
+    <string name="add_parameter">Parameter toevoegen</string>
+    <string name="item_key">Parameternaam</string>
+    <string name="item_value">Waarde</string>
+    <string name="item_invalid">Vul hier één item in; gebruik Toevoegen voor een volgend item.</string>
+    <string name="webhook_mode">Aanvraaggegevens</string>
+    <string name="webhook_mode_parameters">Parameters</string>
+    <string name="webhook_mode_json">JSON-inhoud</string>
+    <string name="webhook_mode_legacy">Oude inhoud (ongewijzigd)</string>
+    <string name="webhook_mode_change">Wis eerst de huidige gegevens voordat u een ander formaat of andere HTTP-methode kiest. Er vindt geen automatische conversie plaats.</string>
+    <string name="webhook_query_help">Elke rij wordt een URL-parameter. Zonder rijen worden from en content verstuurd.</string>
+    <string name="webhook_form_help">Elke rij wordt een formulierveld. Zonder rijen worden from, content en timestamp verstuurd.</string>
+    <string name="webhook_json_help">Eén JSON-object of -array, bijvoorbeeld {\"text\":\"[msg]\"}.</string>
+    <string name="webhook_substitution">Gegevens invoegen voegt velden zoals [msg] toe; Voorbeeld bekijken toont het verzoek met voorbeeldgegevens.</string>
+    <string name="webhook_legacy_help">Bestaande gegevens blijven ongewijzigd. Wis dit veld om een ander formaat te kiezen.</string>
+    <string name="webhook_advanced_show">Geavanceerd: headers, authenticatie, ondertekening, proxy ▾</string>
+    <string name="webhook_advanced_hide">Geavanceerde instellingen verbergen ▴</string>
+    <string name="webhook_headers_help">Bijvoorbeeld Authorization: Bearer &lt;token&gt;.</string>
+    <string name="webhook_add_header">Header toevoegen</string>
+    <string name="webhook_sign_help">Optioneel. Hiermee kan uw server controleren dat verzoeken van deze app komen.</string>
+    <string name="webhook_response_help">Optioneel. Markeert een bezorging als mislukt als deze tekst in het antwoord ontbreekt.</string>
+    <string name="webhook_test_help">Test verstuurt een echte voorbeeldaanvraag zonder op te slaan.</string>
+    <string name="webhook_json_invalid">Vul een geldig JSON-object of -array in, met variabelen tussen aanhalingstekens.</string>
+    <string name="webhook_header_invalid">Gebruik een unieke headernaam en een waarde op één regel. Verwijder lege rijen.</string>
+    <string name="webhook_type_conflict">Content-Type past niet bij dit gegevensformaat. Bewerk of verwijder die header onder Geavanceerd.</string>
+    <string name="webhook_port_invalid">Vul een proxypoort tussen 1 en 65535 in.</string>
+    <string name="webhook_url_invalid">Vul een volledige http://- of https://-URL met een host in.</string>
+    <string name="webhook_result_success">Webhook-aanvraag geslaagd. Antwoordinhoud weggelaten voor privacy.</string>
+    <string name="webhook_result_failed">Webhook-aanvraag mislukt of antwoord kwam niet overeen. Details weggelaten voor privacy.</string>
+    <string name="form_secret_label">Ondertekeningsgeheim</string>
+    <string name="form_response_label">Antwoord moet bevatten</string>
+    <string name="form_body_label">Aanvraaginhoud</string>
+    <string name="form_quiet_days">Dagen</string>
+    <string name="form_help_content_description">Uitleg: %1$s</string>
+    <string name="webhook_params_dialog">Wat de app naar uw server stuurt. Parameters: een lijst met namen en waarden. JSON-inhoud: een JSON-tekst die u zelf schrijft. Beide kunnen webhookvelden bevatten, zoals [msg] voor het opgemaakte bericht en [from] voor de afzender, en berichtgegevens zoals {{FROM}}. Gegevens invoegen voegt er een bij de cursor toe; Voorbeeld bekijken toont het verzoek met voorbeeldgegevens en verstuurt niets.</string>
+    <string name="webhook_sign_dialog">Hiermee kan uw server controleren dat een verzoek echt van deze app komt. Met een geheim ingevuld voegt de app aan elk verzoek een tijdstempel (timestamp) en een handtekening (sign) toe. Laat dit leeg als uw server geen handtekeningen controleert.</string>
+    <string name="webhook_response_dialog">Gebruik dit als uw server bij succes met een vaste tekst antwoordt, bijvoorbeeld ok. Ontbreekt die tekst in het antwoord, dan wordt de bezorging als Mislukt gelogd. Laat dit leeg om elk antwoord zonder fout te accepteren. Een mislukte controle start geen nieuwe poging; opnieuw versturen kan vanuit het logboek.</string>
+    <string name="webhook_headers_dialog">Extra HTTP-headers die met elk verzoek worden meegestuurd. De meeste servers hebben er alleen een nodig voor een inlogtoken. Laat dit leeg als uw server er geen nodig heeft.</string>
+    <string name="regex_find_label">Zoeken (reguliere expressie)</string>
+    <string name="regex_replace_label">Vervangen door</string>
+    <string name="regex_add_replacement">Vervanging toevoegen</string>
+    <string name="regex_invalid_pattern">Geen geldige reguliere expressie</string>
+    <string name="regex_pattern_required">Vul een reguliere expressie in</string>
+    <string name="regex_separator_forbidden">Mag geen === bevatten</string>
+    <string name="regex_trailing_equals">Mag niet eindigen op =</string>
+</resources>

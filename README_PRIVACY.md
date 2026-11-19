@@ -1,6 +1,6 @@
 # SmsForwarder Private (local privacy fork)
 
-Independent fork of [pppscn/SmsForwarder](https://github.com/pppscn/SmsForwarder), retaining upstream attribution and `LICENSE`. Application ID: **`nl.hommers.smsforwarder`**, so it can be installed alongside `cn.ppps.forwarder`. Source namespaces remain unchanged intentionally. No publishing or automatic upstream updates.
+Independent fork of [pppscn/SmsForwarder](https://github.com/pppscn/SmsForwarder), retaining upstream attribution and `LICENSE`. Application ID: **`nl.hommers.smsforwarder`**, so it can be installed alongside `cn.ppps.forwarder`. Source namespaces remain unchanged intentionally. No automatic updates from upstream; the app updates itself only from this fork's own GitHub Releases (see [In-app updater](#in-app-updater)).
 
 ## Languages
 
@@ -13,7 +13,8 @@ Legacy Chinese template aliases and localized mail-provider values are no longer
 | Surface | Fork behavior |
 | --- | --- |
 | Umeng common/asms/uyumao SDK, app initialization, fragment page analytics | Removed, including build keys and ProGuard rules. APK gate checks DEX and native libraries. |
-| Upstream update/preview API and APK downloader | Removed with XUpdate dependency, helpers and activity. Update controls disabled. Install reviewed fork builds manually. |
+| Upstream update/preview API and APK downloader | Removed with XUpdate dependency, helpers and activity; `xupdate.ppps.cn` stays banned by the privacy gate. Replaced, at the owner's request, by the fork's own updater below. |
+| In-app updater (owner's request) | Reads the public release list of `frankhommers/SmsForwarder` on GitHub at most about once a day and on **Check now**. See [In-app updater](#in-app-updater). Off switch: About → Updates → *Check automatically once a day*. |
 | Downloaded FRPC `libgojni.so` and writable-storage native loader | Downloader and activation removed. `FrpclibInited` is immutable false. Native payload excluded from APK; FRPC unavailable, not replaced with another unverified binary. AAR bindings remain for legacy screens/data compatibility. |
 | Phone-area lookup | Local `Unknown Area`; phone numbers never sent to a lookup provider. |
 | Public-IP discovery | **At the owner's explicit request:** `https://ip.hommers.it/`, replacing ipify. Existing network-change triggers retained; one bounded HTTPS GET per worker execution, no redirects, 5-second connect/read timeouts, literal-address validation and bounded response. Only the returned address family is populated; simultaneous IPv4 and IPv6 discovery is not promised. Server sees source IP/timing, not message payloads or device IDs. |
@@ -28,6 +29,31 @@ Legacy Chinese template aliases and localized mail-provider values are no longer
 | App icons / attachments / exports | App list icons use installed-app data. Local imports/exports remain; exported backups and debug logs may contain secrets. |
 
 The approval for the owner's IP endpoint is explicit, not a claim of zero background traffic. DNS, TLS, operating-system services and opted-in destinations remain. Static scanning is a regression guard, not a proof that every third-party dependency is telemetry-free. No blanket network firewall is installed: that would break configured forwarding. Existing optional certificate-validation bypass settings for user-configured servers are not broadened; do not enable them on untrusted networks.
+
+## Email encryption
+
+With S/MIME, OpenPGP or OpenKeychain selected, a recipient whose email cannot be encrypted (no key, a key that cannot be read or used, or an encryption error) gets **no** email by default; the delivery log says why per recipient, and the other recipients still get theirs. The target option *Send unencrypted if encryption fails* (default off, also for targets saved before it existed) sends those recipients a normal readable email instead, marked "sent UNENCRYPTED" in the log. A mail-server error after encryption is retried as the same encrypted message and never becomes an unencrypted copy. A configured own signing key that cannot be used (wrong file or password) stops the delivery instead of sending unsigned. The *Unencrypted* mode is unchanged.
+
+## In-app updater
+
+At the owner's explicit request the app updates itself from GitHub Releases of this fork. The fork is public.
+
+**What it contacts.** Only these, over HTTPS with normal certificate validation:
+1. `https://api.github.com/repos/frankhommers/SmsForwarder/releases?per_page=10` (the release list; releases are pre-releases, so the "latest release" endpoint is not used);
+2. `https://github.com/frankhommers/SmsForwarder/releases/download/build-N/smsforwarder-update.json` (the small manifest of a newer release, at most three per check);
+3. `https://github.com/frankhommers/SmsForwarder/releases/download/build-N/SmsForwarder-N-debug.apk`, only when a newer valid version exists. GitHub redirects this to a `*.githubusercontent.com` download host; redirects to any other host, or to plain HTTP, are refused.
+
+**How often.** On *Check now* in About, and automatically about once a day (WorkManager periodic work, only with a network connection, survives reboot; the worker also refuses to contact GitHub when the previous automatic check started less than 24 hours ago, also after the clock is changed). Offline: nothing is sent and it retries quietly later. Any automatic check that started, including one that failed halfway or was rate-limited by GitHub (60 unauthenticated requests per hour per IP address), counts as that day's check. Nothing runs when automatic checks are off, except a manual *Check now*.
+
+**What GitHub can see.** Your IP address, the time, and that someone fetched this repository's release list and assets (so: that this app checked for updates). The requests carry no account, token, cookie, device identifier, installed version or any app data; only the default headers of the HTTP library (OkHttp's `User-Agent: okhttp/3.12.13`, `Accept-Encoding`, `Host`, `Connection`). Nothing is uploaded.
+
+**Before installing, all of these must hold** (otherwise the download is deleted and the specific reason is shown in About): the file size and SHA-256 equal the manifest; the APK's package is `nl.hommers.smsforwarder`; its versionCode is higher than the installed one and equals the manifest; its signing certificate equals the certificate of the *running* app, read from Android's PackageManager (not from the manifest, not hardcoded). Releases without a valid manifest are ignored.
+
+**Installing.** Through Android's package installer. Android 8 and later asks once to allow *Install unknown apps* for this app. On Android 12 and later the app asks Android to update itself without confirmation (`UPDATE_PACKAGES_WITHOUT_USER_ACTION`); Android decides whether that is allowed (it requires the app to be the installer of record of the installed copy and a recent enough target SDK); otherwise the normal system confirmation appears, or a notification that opens it when the app is in the background. Android 4.4 cannot install from within the app and only reports that an update exists. After an update Android restarts the forwarding service through `MY_PACKAGE_REPLACED`, the same way as after boot.
+
+**Turn it off.** About → Updates → untick *Check automatically once a day*. The daily job is cancelled; *Check now* still works when you press it. The builds are debug test builds signed with the same debug key as earlier installs.
+
+**Release format.** Tag `build-N` (pre-release), universal versionCode `100000 + N`, assets `SmsForwarder-N-debug.apk`, `smsforwarder-update.json` (`format`, `packageName`, `buildNumber`, `versionCode`, `versionName`, `apk`, `apkSize`, `apkSha256`, `certSha256`, `testBuild`) and `SmsForwarder-N-debug.apk.sha256`. Produced by `python3 scripts/release.py build`, which refuses to stage an APK whose signing certificate SHA-256 is not `546f8d56f4f13beec65be2ff882cef169e87f03a6c7a715bdef79d060aeec123`; uploaded separately by `python3 scripts/release.py publish --build-number N`.
 
 ## Build and verification
 

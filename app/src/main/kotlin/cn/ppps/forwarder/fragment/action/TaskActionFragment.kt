@@ -39,7 +39,7 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 import com.xuexiang.xutil.resource.ResUtils.getDrawable
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -104,16 +104,13 @@ class TaskActionFragment : BaseFragment<FragmentTasksActionTaskBinding?>(), View
             }
         })
 
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             val settingVo = Gson().fromJson(eventData, TaskActionSetting::class.java)
             binding!!.rgStatus.check(if (settingVo.status == 1) R.id.rb_status_enable else R.id.rb_status_disable)
-            Log.d(TAG, settingVo.taskList.toString())
             settingVo.taskList.forEach {
                 taskId = it.id
                 taskListSelected.add(it)
             }
-            Log.d(TAG, "initViews settingVo:$settingVo")
         }
 
         //Initialize automated tasks dropdown
@@ -140,7 +137,6 @@ class TaskActionFragment : BaseFragment<FragmentTasksActionTaskBinding?>(), View
                     mCountDownHelper?.start()
                     try {
                         val settingVo = checkSetting()
-                        Log.d(TAG, settingVo.toString())
                         val taskAction = TaskSetting(TASK_ACTION_TASK, getString(R.string.task_task), settingVo.description, Gson().toJson(settingVo), requestCode)
                         val taskActionsJson = Gson().toJson(arrayListOf(taskAction))
                         val msgInfo = MsgInfo("task", getString(R.string.task_task), settingVo.description, Date(), getString(R.string.task_task))
@@ -226,7 +222,6 @@ class TaskActionFragment : BaseFragment<FragmentTasksActionTaskBinding?>(), View
             override fun onDragFinished() {
                 taskListSelected = taskRecyclerAdapter.itemList
                 //taskRecyclerAdapter.notifyDataSetChanged()
-                Log.d(TAG, "onDragFinished: $taskListSelected")
             }
         })
         val taskTouchHelper = ItemTouchHelper(taskMoveCallback)
@@ -260,7 +255,7 @@ class TaskActionFragment : BaseFragment<FragmentTasksActionTaskBinding?>(), View
                     val name = if (task.name.length > 20) task.name.substring(0, 19) else task.name
                     taskSpinnerList.add(TaskSpinnerItem(name, getDrawable(if (STATUS_OFF == task.status) task.greyImageId else task.imageId), task.id, task.status))
                 }
-                taskSpinnerAdapter = TaskSpinnerAdapter(taskSpinnerList).setIsFilterKey(true).setFilterColor("#EF5362").setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
+                taskSpinnerAdapter = TaskSpinnerAdapter(taskSpinnerList).setIsFilterKey(true).setFilterColor(String.format("#%06X", com.google.android.material.color.MaterialColors.getColor(binding!!.root, com.google.android.material.R.attr.colorPrimary) and 0xFFFFFF)).setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
                 binding!!.spTask.setAdapter(taskSpinnerAdapter)
                 //taskSpinnerAdapter.notifyDataSetChanged()
 

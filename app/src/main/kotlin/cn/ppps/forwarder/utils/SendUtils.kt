@@ -57,7 +57,6 @@ object SendUtils {
     //Rematch rules and send messages
     fun rematchSendMsg(item: MsgAndLogs) {
         val msgInfo = MsgInfo(item.msg.type, item.msg.from, item.msg.content, item.msg.time, item.msg.simInfo, item.msg.simSlot, item.msg.subId)
-        Log.d(TAG, "msgInfo = $msgInfo")
 
         val request = OneTimeWorkRequestBuilder<SendWorker>().setInputData(
             workDataOf(
@@ -71,12 +70,10 @@ object SendUtils {
     fun retrySendMsg(logId: Long) {
         val item = Core.logs.getOne(logId)
         val msgInfo = MsgInfo(item.msg.type, item.msg.from, item.msg.content, item.msg.time, item.msg.simInfo, item.msg.simSlot, item.msg.subId)
-        Log.d(TAG, "msgInfo = $msgInfo")
 
         var senderIndex = 0
         for (sender in item.rule.senderList) {
             if (item.logs.senderId == sender.id) {
-                Log.d(TAG, "sender = $sender")
                 senderIndex = item.rule.senderList.indexOf(sender)
                 break
             }
@@ -93,7 +90,7 @@ object SendUtils {
         try {
             val sender = rule.senderList[senderIndex]
             if (sender.status != 1) {
-                Log.d(TAG, "sender = $sender is disabled")
+                Log.d(TAG, "sender id=${sender.id} is disabled")
                 updateLogs(logId, 0, getString(R.string.sender_disabled))
                 senderLogic(0, msgInfo, rule, senderIndex, msgId)
                 return

@@ -20,7 +20,7 @@ import com.xuexiang.xaop.annotation.SingleClick
 import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 
 @Page(name = "LockScreen")
 @Suppress("PrivatePropertyName", "SameParameterValue")
@@ -64,13 +64,12 @@ class LockScreenFragment : BaseFragment<FragmentTasksConditionLockScreenBinding?
                 R.id.rb_action_screen_locked -> binding!!.xsbTimeAfterScreenLocked.visibility = View.VISIBLE
                 else -> binding!!.xsbTimeAfterScreenOff.visibility = View.VISIBLE
             }
+            syncDelayReadouts()
             checkSetting(true)
         }
 
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             val settingVo = Gson().fromJson(eventData, LockScreenSetting::class.java)
-            Log.d(TAG, "initViews settingVo:$settingVo")
             binding!!.tvDescription.text = settingVo.description
             binding!!.xsbTimeAfterScreenOff.setDefaultValue(settingVo.timeAfterScreenOff)
             binding!!.xsbTimeAfterScreenOn.setDefaultValue(settingVo.timeAfterScreenOn)
@@ -104,6 +103,26 @@ class LockScreenFragment : BaseFragment<FragmentTasksConditionLockScreenBinding?
         }
         binding!!.sbCheckAgain.setOnCheckedChangeListener { _, _ ->
             checkSetting(true)
+        }
+        // Visible value readouts. Added after setOnSeekBarListener (which clears change listeners); display only.
+        listOf(binding!!.xsbTimeAfterScreenOff, binding!!.xsbTimeAfterScreenLocked, binding!!.xsbTimeAfterScreenOn, binding!!.xsbTimeAfterScreenUnlocked).forEach { slider ->
+            slider.addOnChangeListener { _, _, _ -> syncDelayReadouts() }
+        }
+        syncDelayReadouts()
+    }
+
+    // Each readout shows its own slider's delay and follows that slider's visibility.
+    private fun syncDelayReadouts() {
+        val b = binding ?: return
+        listOf(
+            b.conditionFormScreenOffValue to b.xsbTimeAfterScreenOff,
+            b.conditionFormScreenLockedValue to b.xsbTimeAfterScreenLocked,
+            b.conditionFormScreenOnValue to b.xsbTimeAfterScreenOn,
+            b.conditionFormScreenUnlockedValue to b.xsbTimeAfterScreenUnlocked,
+        ).forEach { (readout, slider) ->
+            val minutes = slider.selectedNumber
+            readout.text = if (minutes > 0) getString(R.string.condition_form_delay_value, minutes) else getString(R.string.condition_form_delay_none)
+            readout.visibility = slider.visibility
         }
     }
 

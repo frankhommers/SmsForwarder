@@ -8,7 +8,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView.RecycledViewPool
 import com.alibaba.android.vlayout.VirtualLayoutManager
 import cn.ppps.forwarder.R
-import cn.ppps.forwarder.activity.MainActivity
 import cn.ppps.forwarder.adapter.RulePagingAdapter
 import cn.ppps.forwarder.core.BaseFragment
 import cn.ppps.forwarder.database.entity.Rule
@@ -23,9 +22,9 @@ import com.scwang.smartrefresh.layout.api.RefreshLayout
 import com.xuexiang.xaop.annotation.SingleClick
 import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xpage.core.PageOption
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
 import com.xuexiang.xutil.resource.ResUtils.getStringArray
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -49,9 +48,9 @@ class RulesFragment : BaseFragment<FragmentRulesBinding?>(), RulePagingAdapter.O
 
     override fun initTitle(): TitleBar? {
         titleBar = super.initTitle()!!.setImmersive(false)
-        titleBar!!.setLeftImageResource(R.drawable.ic_action_menu)
+        // Root tab: the bottom bar is the only primary navigation, so no hamburger or fake Back.
+        titleBar!!.disableLeftView()
         titleBar!!.setTitle(R.string.menu_rules)
-        titleBar!!.setLeftClickListener { getContainer()?.openMenu() }
         titleBar!!.addAction(object : TitleBar.ImageAction(R.drawable.ic_add) {
             @SingleClick
             override fun performAction(view: View) {
@@ -62,10 +61,6 @@ class RulesFragment : BaseFragment<FragmentRulesBinding?>(), RulePagingAdapter.O
             }
         })
         return titleBar
-    }
-
-    private fun getContainer(): MainActivity? {
-        return activity as MainActivity?
     }
 
     /**

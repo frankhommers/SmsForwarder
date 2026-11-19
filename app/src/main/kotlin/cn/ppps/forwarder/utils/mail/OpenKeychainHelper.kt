@@ -50,7 +50,7 @@ class OpenKeychainHelper(private val context: Context) {
     @Synchronized
     private fun bindBlocking(): OpenPgpApi {
         if (!isProviderInstalled(context)) {
-            throw Exception("OpenKeychain is not installed: $PROVIDER_PACKAGE")
+            throw Exception(com.xuexiang.xutil.resource.ResUtils.getString(cn.ppps.forwarder.R.string.openkeychain_not_installed))
         }
         serviceConnection?.let { conn ->
             if (conn.isBound) return OpenPgpApi(context, conn.service)
@@ -71,9 +71,9 @@ class OpenKeychainHelper(private val context: Context) {
         connection.bindToService()
         if (!latch.await(BIND_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
             connection.unbindFromService()
-            throw Exception("Timeout binding to OpenKeychain service")
+            throw Exception(cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_openkeychain_timeout))
         }
-        bindError?.let { throw Exception("Failed to bind OpenKeychain service: ${it.message}", it) }
+        bindError?.let { throw Exception(cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_openkeychain_bind, it.message.orEmpty()), it) }
 
         serviceConnection = connection
         return OpenPgpApi(context, connection.service)
@@ -105,16 +105,16 @@ class OpenKeychainHelper(private val context: Context) {
         }
         val result = executeApi(data, input, output)
         when (result.getIntExtra(OpenPgpApi.RESULT_CODE, OpenPgpApi.RESULT_CODE_ERROR)) {
-            OpenPgpApi.RESULT_CODE_SUCCESS -> Log.d(TAG, "OpenKeychain encrypt success, recipients=${recipientEmails.joinToString()}")
+            OpenPgpApi.RESULT_CODE_SUCCESS -> Log.d(TAG, "OpenKeychain encrypt success, recipients=${recipientEmails.size}")
 
             OpenPgpApi.RESULT_CODE_USER_INTERACTION_REQUIRED -> {
                 //Backstage could not pop up the authorization interface: prompt the user to reset the channel edit page to complete the authorization
-                throw Exception("OpenKeychain requires user interaction (key selection/authorization). Please re-save the email sender settings to authorize.")
+                throw Exception(cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_openkeychain_authorize))
             }
 
             else -> {
                 val error: OpenPgpError? = result.getParcelableExtra(OpenPgpApi.RESULT_ERROR)
-                throw Exception("OpenKeychain encrypt failed: ${error?.message ?: "unknown error"}")
+                throw Exception(cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_openkeychain_encrypt, error?.message ?: cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_unknown_error)))
             }
         }
     }

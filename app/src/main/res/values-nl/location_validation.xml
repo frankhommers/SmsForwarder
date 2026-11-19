@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Arrive/Leave Location editor: coordinate validation and the unsupported address-keyword mode. -->
+<resources>
+    <string name="location_validation_longitude_help">Van -180 tot 180, bijv. 4.8952. Negatief is west.</string>
+    <string name="location_validation_latitude_help">Van -90 tot 90, bijv. 52.3702. Negatief is zuid.</string>
+    <string name="location_validation_longitude_error">Vul een lengtegraad in van -180 tot 180.</string>
+    <string name="location_validation_latitude_error">Vul een breedtegraad in van -90 tot 90.</string>
+    <string name="location_validation_radius_error">Vul een straal in die groter is dan 0 meter.</string>
+    <string name="location_validation_address_option">Adres op trefwoorden controleren (niet beschikbaar)</string>
+    <string name="location_validation_address_unavailable">Niet beschikbaar: de app zoekt geen adressen op, dus dit zou nooit activeren.</string>
+    <string name="location_validation_legacy_notice">Oude, niet-ondersteunde voorwaarde: activeert nooit. Blijft zo tenzij je GPS-coördinaten kiest.</string>
+    <string name="location_validation_address_saved">Opgeslagen trefwoord, alleen ter herkenning bewaard.</string>
+    <string name="location_validation_filled">Huidige coördinaten ingevuld.</string>
+    <string name="location_validation_legacy_row">Niet ondersteund: %s</string>
+</resources>

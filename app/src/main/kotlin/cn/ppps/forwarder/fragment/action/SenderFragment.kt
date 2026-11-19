@@ -38,7 +38,7 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 import com.xuexiang.xutil.resource.ResUtils.getDrawable
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -104,16 +104,13 @@ class SenderFragment : BaseFragment<FragmentTasksActionSenderBinding?>(), View.O
             }
         })
 
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             val settingVo = Gson().fromJson(eventData, SenderSetting::class.java)
             binding!!.rgStatus.check(if (settingVo.status == 1) R.id.rb_status_enable else R.id.rb_status_disable)
-            Log.d(TAG, settingVo.senderList.toString())
             settingVo.senderList.forEach {
                 senderId = it.id
                 senderListSelected.add(it)
             }
-            Log.d(TAG, "initViews settingVo:$settingVo")
         }
 
         //Initialize the drop-down frame of the sending channel
@@ -140,7 +137,6 @@ class SenderFragment : BaseFragment<FragmentTasksActionSenderBinding?>(), View.O
                     mCountDownHelper?.start()
                     try {
                         val settingVo = checkSetting()
-                        Log.d(TAG, settingVo.toString())
                         val taskAction = TaskSetting(TASK_ACTION_SENDER, getString(R.string.task_sender), settingVo.description, Gson().toJson(settingVo), requestCode)
                         val taskActionsJson = Gson().toJson(arrayListOf(taskAction))
                         val msgInfo = MsgInfo("task", getString(R.string.task_sender), settingVo.description, Date(), getString(R.string.task_sender))
@@ -226,7 +222,6 @@ class SenderFragment : BaseFragment<FragmentTasksActionSenderBinding?>(), View.O
             override fun onDragFinished() {
                 senderListSelected = senderRecyclerAdapter.itemList
                 //senderRecyclerAdapter.notifyDataSetChanged()
-                Log.d(TAG, "onDragFinished: $senderListSelected")
             }
         })
         val senderTouchHelper = ItemTouchHelper(senderMoveCallback)
@@ -256,11 +251,11 @@ class SenderFragment : BaseFragment<FragmentTasksActionSenderBinding?>(), View.O
 
                 senderSpinnerList.clear()
                 senderListAll = senderList as MutableList<Sender>
-                for (sender in senderList) {
+                for (sender in senderList.filter { cn.ppps.forwarder.utils.TargetCatalog.isAvailable(it.type) }) {
                     val name = if (sender.name.length > 20) sender.name.substring(0, 19) else sender.name
                     senderSpinnerList.add(SenderSpinnerItem(name, getDrawable(sender.imageId), sender.id, sender.status))
                 }
-                senderSpinnerAdapter = SenderSpinnerAdapter(senderSpinnerList).setIsFilterKey(true).setFilterColor("#EF5362").setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
+                senderSpinnerAdapter = SenderSpinnerAdapter(senderSpinnerList).setIsFilterKey(true).setFilterColor(String.format("#%06X", com.google.android.material.color.MaterialColors.getColor(binding!!.root, com.google.android.material.R.attr.colorPrimary) and 0xFFFFFF)).setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
                 binding!!.spSender.setAdapter(senderSpinnerAdapter)
                 //senderSpinnerAdapter.notifyDataSetChanged()
 

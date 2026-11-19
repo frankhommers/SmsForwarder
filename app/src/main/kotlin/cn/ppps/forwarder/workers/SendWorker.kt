@@ -73,7 +73,7 @@ class SendWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
                     val key = CipherUtils.md5(msgInfo.type + msgInfo.from + msgInfo.content)
                     val timestamp: Long = System.currentTimeMillis()
                     var timestampPrev: Long by HistoryUtils(key, timestamp)
-                    Log.d(TAG, "duplicateMessagesLimits=$duplicateMessagesLimits, timestamp=$timestamp, timestampPrev=$timestampPrev, msgInfo=$msgInfo")
+                    Log.d(TAG, "duplicateMessagesLimits=$duplicateMessagesLimits, timestamp=$timestamp, timestampPrev=$timestampPrev")
                     if (timestampPrev != timestamp && timestamp - timestampPrev <= duplicateMessagesLimits) {
                         Log.e(TAG, "Filter Duplicate Message Mechanism")
                         timestampPrev = timestamp
@@ -89,7 +89,6 @@ class SendWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
 
                 val ruleListMatched: MutableList<Rule> = mutableListOf()
                 for (rule in ruleList) {
-                    Log.d(TAG, rule.toString())
                     if (rule.checkMsg(msgInfo)) ruleListMatched.add(rule)
                 }
                 if (ruleListMatched.isEmpty()) {
@@ -150,12 +149,12 @@ class SendWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
             }
 
             if (ruleSetting.simSlot != CHECK_SIM_SLOT_ALL && simSlot != ruleSetting.simSlot) {
-                Log.d(TAG, "TASK-${task.id}：simSlot is not matched, simSlot = $simSlot, ruleSetting = $ruleSetting")
+                Log.d(TAG, "TASK-${task.id}：simSlot is not matched, simSlot = $simSlot")
                 continue
             }
 
             if (!ruleSetting.checkMsg(msgInfo)) {
-                Log.d(TAG, "TASK-${task.id}：ruleSetting is not matched, msgInfo = $msgInfo, ruleSetting = $ruleSetting")
+                Log.d(TAG, "TASK-${task.id}：ruleSetting is not matched")
                 continue
             }
 

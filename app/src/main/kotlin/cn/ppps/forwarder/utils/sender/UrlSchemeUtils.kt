@@ -42,7 +42,6 @@ class UrlSchemeUtils private constructor() {
             @SuppressLint("SimpleDateFormat") val receiveTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date()) //smsVo.getDate()
 
             var urlScheme = setting.urlScheme
-            Log.i(TAG, "urlScheme:$urlScheme")
 
             urlScheme = urlScheme.replace("[from]", URLEncoder.encode(from, "UTF-8"))
                 .replace("[content]", URLEncoder.encode(content, "UTF-8"))
@@ -55,13 +54,12 @@ class UrlSchemeUtils private constructor() {
                 .replace("[receive_time]", URLEncoder.encode(receiveTime, "UTF-8"))
                 .replace("[timestamp]", timestamp.toString())
                 .replace("\n", "%0A")
-            Log.i(TAG, "urlScheme:$urlScheme")
 
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(urlScheme))
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             try {
                 XUtil.getContext().startActivity(intent)
-                SendUtils.updateLogs(logId, 2, "Call Success")
+                SendUtils.updateLogs(logId, 2, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_url_opened))
                 SendUtils.senderLogic(2, msgInfo, rule, senderIndex, msgId)
             } catch (e: Exception) {
                 e.printStackTrace()

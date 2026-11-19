@@ -60,7 +60,7 @@
         <item name="xui_borderWidth">0dp</item>
         <item name="xui_radius">8dp</item>
         <item name="xui_shadowElevation">6dp</item>
-        <item name="android:background">@color/xui_config_color_white</item>
+        <item name="android:background">?attr/colorSurface</item>
     </style>
 
     <!-- SwitchButton -->
@@ -76,7 +76,7 @@
         <item name="android:layout_marginStart">5dp</item>
         <item name="android:layout_marginEnd">5dp</item>
         <item name="android:padding">10dp</item>
-        <item name="android:background">@drawable/rounded_background</item>
+        <item name="android:background">?attr/colorSurface</item>
         <item name="android:gravity">center_vertical</item>
         <!--<item name="android:orientation">horizontal</item>-->
     </style>
@@ -89,7 +89,7 @@
         <item name="android:paddingEnd">5dp</item>
         <item name="android:paddingTop">10dp</item>
         <item name="android:paddingBottom">10dp</item>
-        <item name="android:background">@drawable/rounded_background</item>
+        <item name="android:background">?attr/colorSurface</item>
         <item name="android:gravity">center_vertical</item>
     </style>
 
@@ -97,7 +97,7 @@
         <item name="android:layout_marginStart">5dp</item>
         <item name="android:layout_marginEnd">5dp</item>
         <item name="android:padding">10dp</item>
-        <item name="android:background">@drawable/rounded_background</item>
+        <item name="android:background">?attr/colorSurface</item>
         <item name="android:gravity">center_vertical</item>
     </style>
 
@@ -126,7 +126,7 @@
         <item name="android:layout_weight">1</item>
         <item name="android:minWidth">0dp</item>
         <item name="android:minHeight">0dp</item>
-        <item name="android:singleLine">true</item>
+        <item name="android:singleLine">false</item>
         <item name="android:textSize">@dimen/text_size_small</item>
     </style>
 
@@ -140,38 +140,46 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_gravity">center_vertical</item>
         <item name="android:layout_weight">1</item>
-        <item name="android:singleLine">true</item>
+        <item name="android:singleLine">false</item>
         <item name="android:padding">0dp</item>
         <item name="android:layout_margin">0dp</item>
         <item name="android:drawablePadding">5dp</item>
-        <item name="android:minHeight">30dp</item>
-        <item name="android:minWidth">30dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:minWidth">48dp</item>
         <item name="android:textSize">@dimen/text_size_small</item>
-        <item name="android:button">@drawable/custom_radio_button</item>
+        
     </style>
 
     <style name="rg_rb_style_wrap">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:singleLine">true</item>
+        <item name="android:singleLine">false</item>
         <item name="android:padding">0dp</item>
         <item name="android:drawablePadding">5dp</item>
-        <item name="android:minHeight">30dp</item>
-        <item name="android:minWidth">30dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:minWidth">48dp</item>
         <item name="android:textSize">@dimen/text_size_small</item>
         <item name="android:layout_marginEnd">5dp</item>
-        <item name="android:button">@drawable/custom_radio_button</item>
+        
+    </style>
+
+    <style name="rg_rb_style_row">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:singleLine">false</item>
+        <item name="android:gravity">center_vertical|start</item>
     </style>
 
     <style name="rg_rb_style_match">
         <item name="android:layout_marginTop">5dp</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:minHeight">30dp</item>
-        <item name="android:singleLine">true</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:singleLine">false</item>
         <!--<item name="android:textSize">@dimen/text_size_small</item>-->
-        <item name="android:button">@drawable/custom_radio_button</item>
+        
     </style>
 
     <style name="TabLayoutStyle" parent="Base.Widget.Design.TabLayout">

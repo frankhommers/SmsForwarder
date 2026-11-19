@@ -59,10 +59,10 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xrouter.utils.TextUtils
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
-import com.xuexiang.xui.widget.spinner.materialspinner.MaterialSpinner
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
+import cn.ppps.forwarder.widget.material.TargetDropdown as MaterialSpinner
 import com.xuexiang.xutil.XUtil
 import com.xuexiang.xutil.resource.ResUtils.getColors
 import java.util.Date
@@ -224,10 +224,8 @@ class MsgFragment : BaseFragment<FragmentTasksConditionMsgBinding?>(), View.OnCl
             }
         }
 
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             val rule = Gson().fromJson(eventData, Rule::class.java)
-            Log.d(TAG, rule.toString())
 
             binding!!.rgSimSlot.check(rule.getSimSlotCheckId())
             binding!!.rgFiled.check(rule.getFiledCheckId())
@@ -248,6 +246,7 @@ class MsgFragment : BaseFragment<FragmentTasksConditionMsgBinding?>(), View.OnCl
 
     @SingleClick
     override fun onClick(v: View) {
+        if (v.id != R.id.btn_del && !cn.ppps.forwarder.utils.ItemRows.validateAll(binding!!.root)) return
         try {
             when (v.id) {
                 R.id.btn_test -> {
@@ -309,7 +308,7 @@ class MsgFragment : BaseFragment<FragmentTasksConditionMsgBinding?>(), View.OnCl
         //The list is empty and does not show drop-down frames
         if (appListSpinnerList.isEmpty()) return
 
-        appListSpinnerAdapter = AppListSpinnerAdapter(appListSpinnerList).setIsFilterKey(true).setFilterColor("#EF5362").setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
+        appListSpinnerAdapter = AppListSpinnerAdapter(appListSpinnerList).setIsFilterKey(true).setFilterColor(String.format("#%06X", com.google.android.material.color.MaterialColors.getColor(binding!!.root, com.google.android.material.R.attr.colorPrimary) and 0xFFFFFF)).setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
         binding!!.spApp.setAdapter(appListSpinnerAdapter)
         binding!!.spApp.setOnItemClickListener { _: AdapterView<*>, _: View, position: Int, _: Long ->
             try {
@@ -429,7 +428,7 @@ class MsgFragment : BaseFragment<FragmentTasksConditionMsgBinding?>(), View.OnCl
             spCallType.selectedIndex = callTypeIndexTest
         }
 
-        MaterialDialog.Builder(requireContext()).iconRes(android.R.drawable.ic_dialog_email).title(R.string.rule_tester).customView(dialogTest, true).cancelable(false).autoDismiss(false).neutralText(R.string.action_back).neutralColor(getColors(R.color.darkGrey)).onNeutral { dialog: MaterialDialog?, _: DialogAction? ->
+        MaterialDialog.Builder(requireContext()).iconRes(android.R.drawable.ic_dialog_email).title(R.string.rule_tester).customView(dialogTest, true).cancelable(true).autoDismiss(false).neutralText(R.string.action_back).neutralColor(getColors(R.color.darkGrey)).onNeutral { dialog: MaterialDialog?, _: DialogAction? ->
             dialog?.dismiss()
         }.positiveText(R.string.action_test).onPositive { _: MaterialDialog?, _: DialogAction? ->
             try {

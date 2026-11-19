@@ -50,9 +50,9 @@ import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xrouter.utils.TextUtils
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.picker.widget.builder.OptionsPickerBuilder
-import com.xuexiang.xui.widget.picker.widget.listener.OnOptionsSelectListener
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.OptionsPickerBuilder
+import cn.ppps.forwarder.widget.material.OnOptionsSelectListener
 import com.xuexiang.xutil.resource.ResUtils.getDrawable
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -126,12 +126,9 @@ class NotificationFragment : BaseFragment<FragmentTasksActionNotificationBinding
             }
         })
 
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             val settingVo = Gson().fromJson(eventData, Rule::class.java)
-            Log.d(TAG, "initViews settingVo:$settingVo")
 
-            Log.d(TAG, settingVo.senderList.toString())
             settingVo.senderList.forEach {
                 senderId = it.id
                 senderListSelected.add(it)
@@ -158,6 +155,8 @@ class NotificationFragment : BaseFragment<FragmentTasksActionNotificationBinding
 
         //Create Tab Button
         CommonUtils.createTagButtons(requireContext(), binding!!.glSmsTemplate, binding!!.etSmsTemplate, ruleType)
+        // Task notifications carry the task's message (MsgInfo type "task"): preview with a task sample.
+        cn.ppps.forwarder.widget.material.TemplatePicker.useTaskSample(binding!!.glSmsTemplate)
     }
 
     override fun onDestroyView() {
@@ -205,9 +204,14 @@ class NotificationFragment : BaseFragment<FragmentTasksActionNotificationBinding
 
     @SingleClick
     override fun onClick(v: View) {
+        // Only Apply and Test use the rows; an unfinished row must not block the quiet-hours picker or Discard.
+        if (v.id in listOf(R.id.btn_save, R.id.btn_test) && !cn.ppps.forwarder.utils.ItemRows.validateAll(binding!!.root)) return
         try {
             when (v.id) {
                 R.id.btn_silent_period -> {
+                    binding!!.root.clearFocus()
+                    val keyboard = requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+                    keyboard.hideSoftInputFromWindow(binding!!.root.windowToken, 0)
                     OptionsPickerBuilder(context, OnOptionsSelectListener { _: View?, options1: Int, options2: Int, _: Int ->
                         silentPeriodStart = options1
                         silentPeriodEnd = options2
@@ -225,7 +229,6 @@ class NotificationFragment : BaseFragment<FragmentTasksActionNotificationBinding
                     mCountDownHelper?.start()
                     try {
                         val settingVo = checkSetting()
-                        Log.d(TAG, settingVo.toString())
                         val taskAction = TaskSetting(TASK_ACTION_NOTIFICATION, getString(R.string.task_notification), description, Gson().toJson(settingVo), requestCode)
                         val taskActionsJson = Gson().toJson(arrayListOf(taskAction))
                         val msgInfo = MsgInfo("task", getString(R.string.task_notification), description, Date(), getString(R.string.task_notification))
@@ -322,7 +325,6 @@ class NotificationFragment : BaseFragment<FragmentTasksActionNotificationBinding
             override fun onDragFinished() {
                 senderListSelected = senderRecyclerAdapter.itemList
                 //senderRecyclerAdapter.notifyDataSetChanged()
-                Log.d(TAG, "onDragFinished: $senderListSelected")
             }
         })
         val senderTouchHelper = ItemTouchHelper(senderMoveCallback)
@@ -352,11 +354,11 @@ class NotificationFragment : BaseFragment<FragmentTasksActionNotificationBinding
 
                 senderSpinnerList.clear()
                 senderListAll = senderList as MutableList<Sender>
-                for (sender in senderList) {
+                for (sender in senderList.filter { cn.ppps.forwarder.utils.TargetCatalog.isAvailable(it.type) }) {
                     val name = if (sender.name.length > 20) sender.name.substring(0, 19) else sender.name
                     senderSpinnerList.add(SenderSpinnerItem(name, getDrawable(sender.imageId), sender.id, sender.status))
                 }
-                senderSpinnerAdapter = SenderSpinnerAdapter(senderSpinnerList).setIsFilterKey(true).setFilterColor("#EF5362").setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
+                senderSpinnerAdapter = SenderSpinnerAdapter(senderSpinnerList).setIsFilterKey(true).setFilterColor(String.format("#%06X", com.google.android.material.color.MaterialColors.getColor(binding!!.root, com.google.android.material.R.attr.colorPrimary) and 0xFFFFFF)).setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
                 binding!!.spSender.setAdapter(senderSpinnerAdapter)
                 //senderSpinnerAdapter.notifyDataSetChanged()
 

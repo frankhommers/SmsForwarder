@@ -73,11 +73,20 @@ android {
         resConfigs 'en', 'nl'
         minSdkVersion build_versions.min_sdk
         targetSdkVersion build_versions.target_sdk
-        versionCode build_versions.version_code
+        // Release tooling and tests may override the build number without editing files: -PbuildNumber=59
+        versionCode(project.hasProperty('buildNumber') ? Integer.parseInt(project.property('buildNumber').toString()) : build_versions.version_code)
         versionName = "${build_versions.version_name}.${buildDate}"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "BUILD_TIME", "\"${buildTime}\""
         buildConfigField "String", "GIT_COMMIT_ID", "\"${gitCommitId}\""
+        // Updater test fixture (local emulator tests only). Empty unless -PupdaterFixtureOrigin / -PupdaterFixtureCa
+        // are passed; scripts/release.py refuses to package a build in which either is set.
+        def fixtureOrigin = project.findProperty('updaterFixtureOrigin') ?: ''
+        def fixtureCa = project.findProperty('updaterFixtureCa') ? file(project.findProperty('updaterFixtureCa')).text.readLines().findAll { !it.startsWith('-----') }.join('') : ''
+        buildConfigField "String", "UPDATER_FIXTURE_ORIGIN", "\"${fixtureOrigin}\""
+        buildConfigField "String", "UPDATER_FIXTURE_CA", "\"${fixtureCa}\""
+        // Test only: make the install session ask for confirmation, to exercise the confirmation path on API 31+.
+        buildConfigField "boolean", "UPDATER_TEST_REQUIRE_USER_ACTION", "${project.hasProperty('updaterTestRequireUserAction')}"
 
         multiDexEnabled true
         //vectorDrawables.useSupportLibrary = true
@@ -249,7 +258,7 @@ dependencies {
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
 
     testImplementation deps.junit
-    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation deps.espresso.core
 
     //noinspection GradleDependency

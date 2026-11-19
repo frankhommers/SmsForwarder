@@ -9,6 +9,6 @@ class TaskActivity : BaseActivity<ViewBinding?>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        openPage(TasksFragment::class.java)
+        if (savedInstanceState == null) openPage(TasksFragment::class.java)
     }
 }

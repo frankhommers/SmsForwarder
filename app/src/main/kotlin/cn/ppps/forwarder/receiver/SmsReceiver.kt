@@ -53,14 +53,12 @@ class SmsReceiver : BroadcastReceiver() {
                 }
 
                 from = intent.getStringExtra("address") ?: ""
-                Log.d(TAG, "from = $from, msg = $msg")
             } else {
                 for (smsMessage in Telephony.Sms.Intents.getMessagesFromIntent(intent)) {
                     from = smsMessage.displayOriginatingAddress
                     msg += smsMessage.messageBody
                 }
             }
-            Log.d(TAG, "from = $from, msg = $msg")
 
             //SMS Command
             if (SettingUtils.enableSmsCommand && msg.startsWith("smsf#")) {
@@ -87,7 +85,7 @@ class SmsReceiver : BroadcastReceiver() {
                 if (App.SimInfoList.isEmpty()) {
                     App.SimInfoList = PhoneUtils.getSimMultiInfo()
                 }
-                Log.d(TAG, "SimInfoList = " + App.SimInfoList.toString())
+                Log.d(TAG, "SIM inventory refreshed; details omitted")
 
                 if (App.SimInfoList.isNotEmpty()) {
                     for (simInfo in App.SimInfoList.values) {
@@ -107,7 +105,6 @@ class SmsReceiver : BroadcastReceiver() {
             }
 
             val msgInfo = MsgInfo("sms", from, msg, Date(), simInfo, simSlot, subscription)
-            Log.d(TAG, "msgInfo = $msgInfo")
 
             val request = OneTimeWorkRequestBuilder<SendWorker>().setInputData(
                 workDataOf(
@@ -124,7 +121,7 @@ class SmsReceiver : BroadcastReceiver() {
     //Processing SMS Commands
     private fun doSmsCommand(context: Context, from: String, message: String) {
         var safePhone = SettingUtils.smsCommandSafePhone
-        Log.d(TAG, "safePhone = $safePhone")
+        Log.d(TAG, "SMS allowlist configured; numbers omitted")
 
         if (!TextUtils.isEmpty(safePhone)) {
             var isSafePhone = false
@@ -136,7 +133,7 @@ class SmsReceiver : BroadcastReceiver() {
                 }
             }
             if (!isSafePhone) {
-                Log.d(TAG, "from = $from is not safePhone = $safePhone")
+                Log.d(TAG, "SMS sender rejected by allowlist")
                 return
             }
         }
@@ -172,7 +169,6 @@ class SmsReceiver : BroadcastReceiver() {
                         val text = part.javaClass.getMethod("getData").invoke(part) as? String
                         // Processing text information
                         if (text != null) {
-                            Log.d(TAG, "Text: $text")
                             msg += text
                         }
                     }

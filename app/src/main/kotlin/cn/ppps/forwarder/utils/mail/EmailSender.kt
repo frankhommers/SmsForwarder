@@ -3,7 +3,6 @@ package cn.ppps.forwarder.utils.mail
 import android.text.Html
 import android.text.Spanned
 import cn.ppps.forwarder.utils.Log
-import com.sun.mail.util.MailSSLSocketFactory
 import jakarta.mail.Authenticator
 import jakarta.mail.PasswordAuthentication
 import jakarta.mail.Session
@@ -50,29 +49,72 @@ class EmailSender(
     //Mail OpenKeychain Encryption and Signature (All Keys By)OpenKeychainManagement, matching public key by recipient mailbox）
     private val openKeychainHelper: OpenKeychainHelper? = null,
     private val openKeychainSignKeyId: Long = 0L, // Sign KeyID，0Means that only encryption does not sign
+    // SMTP connect/read/write timeout in milliseconds (see smtpTimeoutMillis)
+    private val smtpTimeoutMs: Int = DEFAULT_SMTP_TIMEOUT_MS,
 ) {
 
     private val TAG: String = EmailSender::class.java.simpleName
 
-    private val properties: Properties = Properties().apply {
-        // Set hostname for the mail server
-        put("mail.smtp.host", host)
-        // Set port number for the mail server
-        put("mail.smtp.port", port)
-        // Set whether authentication is required
-        put("mail.smtp.auth", "true")
-        // Settings Enabled SSL Connection
-        if (openSSL) {
-            put("mail.smtp.ssl.enable", "true")
-            // Use TLSv1.2 Agreements & Trust all hosts
-            val sf = MailSSLSocketFactory("TLSv1.2")
-            sf.setTrustedHosts("*")
-            put("mail.smtp.ssl.socketFactory", sf)
-            put("mail.smtp.ssl.protocols", "TLSv1.2")
-        }
-        // Settings Enabled TLS Connection
-        if (startTls) {
-            put("mail.smtp.starttls.enable", "true")
+    private val properties: Properties = smtpProperties(host, port, openSSL, startTls, smtpTimeoutMs)
+
+    companion object {
+        /** SMTP login for [from]; used by the encryption policy path in EmailUtils. */
+        @JvmStatic
+        fun authenticator(from: String, password: String): Authenticator = MailAuthenticator(from, password)
+
+        /** SMTP socket timeout used when no valid configured value is passed (matches the request timeout default). */
+        const val DEFAULT_SMTP_TIMEOUT_MS = 10_000
+        /** Upper bound for SMTP socket timeouts (10 minutes). */
+        const val MAX_SMTP_TIMEOUT_MS = 600_000
+
+        /**
+         * Converts the configured request timeout in seconds to an SMTP socket timeout in milliseconds:
+         * non-positive values fall back to [DEFAULT_SMTP_TIMEOUT_MS]; large values are capped without overflow.
+         */
+        @JvmStatic
+        fun smtpTimeoutMillis(seconds: Int): Int =
+            if (seconds <= 0) DEFAULT_SMTP_TIMEOUT_MS else (seconds.toLong() * 1000L).coerceAtMost(MAX_SMTP_TIMEOUT_MS.toLong()).toInt()
+
+        /**
+         * SMTP session properties. Certificate chains are validated against the platform trust store (Jakarta Mail
+         * uses the default SSLSocketFactory when no custom factory is set) and the certificate must match [host].
+         *
+         * The former `MailSSLSocketFactory` with `setTrustedHosts("*")` is not used: in Jakarta Mail 2.0.2 a
+         * non-null trusted-host list disables chain validation in its trust manager, and the literal "*" then
+         * fails `isServerTrusted`, so the fallback default socket connected without any host-name check.
+         *
+         * [timeoutMs] bounds connect, read and write; non-positive values use the default, large values are capped.
+         * Production callers pass `smtpTimeoutMillis(SettingUtils.requestTimeout)`.
+         */
+        @JvmStatic
+        fun smtpProperties(
+            host: String, port: String, openSSL: Boolean, startTls: Boolean,
+            timeoutMs: Int = DEFAULT_SMTP_TIMEOUT_MS,
+        ): Properties = Properties().apply {
+            // Set hostname for the mail server
+            put("mail.smtp.host", host)
+            // Set port number for the mail server
+            put("mail.smtp.port", port)
+            // Set whether authentication is required
+            put("mail.smtp.auth", "true")
+            // Bounded socket I/O: Jakarta Mail waits indefinitely by default (connect, greeting/replies and writes).
+            val timeout = (if (timeoutMs <= 0) DEFAULT_SMTP_TIMEOUT_MS else timeoutMs.coerceAtMost(MAX_SMTP_TIMEOUT_MS)).toString()
+            put("mail.smtp.connectiontimeout", timeout)
+            put("mail.smtp.timeout", timeout)
+            put("mail.smtp.writetimeout", timeout)
+            // Implicit TLS (SMTPS)
+            if (openSSL) {
+                put("mail.smtp.ssl.enable", "true")
+                put("mail.smtp.ssl.protocols", "TLSv1.2")
+                put("mail.smtp.ssl.checkserveridentity", "true")
+            }
+            // STARTTLS: when explicitly enabled, require the upgrade instead of silently continuing in plaintext
+            // (with credentials), and verify the server name in the certificate.
+            if (startTls) {
+                put("mail.smtp.starttls.enable", "true")
+                put("mail.smtp.starttls.required", "true")
+                put("mail.smtp.ssl.checkserveridentity", "true")
+            }
         }
     }
 
@@ -150,7 +192,7 @@ class EmailSender(
                 "OpenKeychain" -> {
                     // via OpenKeychain（OpenPGP API）Encrypted Send. Public Key Automatically Matches Recipient Mailbox
                     if (openKeychainHelper == null) {
-                        listener?.onEmailSent(false, "OpenKeychainHelper is null")
+                        listener?.onEmailSent(false, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_openkeychain_bind, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_unknown_error)))
                         return
                     }
                     val openKeychainEmail = OpenKeychainMailUtils(
@@ -190,7 +232,7 @@ class EmailSender(
                 }
             }
         } catch (e: Exception) {
-            listener?.onEmailSent(false, "Error sending email: ${e.message}")
+            listener?.onEmailSent(false, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_failed, e.message))
         }
     }
 

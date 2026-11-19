@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Labels, helper lines and question-mark dialogs for the Bark, Email, Telegram, Gotify and URL Scheme target editors (TargetForm). -->
+<resources>
+    <string name="target_form_tags_show">Sjabloontags tonen</string>
+    <string name="target_form_tags_hide">Sjabloontags verbergen</string>
+    <string name="target_form_template_default_sender">Laat leeg om de afzender van het bericht te gebruiken</string>
+    <string name="target_form_section_notification">Melding</string>
+    <string name="target_form_section_templates">Sjablonen</string>
+    <string name="target_form_section_encryption">Versleuteling</string>
+    <string name="target_form_section_message">Bericht</string>
+    <string name="target_form_section_smtp">SMTP-server</string>
+    <string name="target_form_bark_call">30 seconden laten rinkelen</string>
+    <string name="target_form_bark_auto_copy_helper">Laat leeg om een gevonden verificatiecode te kopiëren</string>
+    <string name="target_form_bark_server_dialog">Het pushadres uit de Bark-app op uw iPhone. Het eindigt op uw apparaatsleutel, bijvoorbeeld https://api.day.app/uwsleutel/. Een eigen Bark-server werkt ook. Een gebruikersnaam en wachtwoord in het adres (https://gebruiker:wachtwoord@host/…) worden als HTTP-basisauthenticatie verstuurd.</string>
+    <string name="target_form_bark_notification_dialog">Hoe de melding in Bark verschijnt. Meldingsniveau: hoe dringend iOS de melding toont. 30 seconden laten rinkelen: het geluid blijft 30 seconden spelen. Berichtgeluid: de naam van een Bark-geluid, bijvoorbeeld minuet. Groepnaam: meldingen met dezelfde groep worden gebundeld. Berichtbadge: het getal op het pictogram van de Bark-app. Berichtpictogram: een link naar een kleine afbeelding. Berichtkoppeling: wordt geopend als u op de melding tikt; codes voor berichtgegevens zoals {{FROM}} werken hier. Lege velden gebruiken de standaard van Bark.</string>
+    <string name="target_form_bark_templates_dialog">Meldingstitel: de titel in Bark. Laat leeg om de afzender van het bericht te gebruiken. Tekst om te kopiëren: de tekst die Bark kopieert, bijvoorbeeld een code. Laat leeg om de app een verificatiecode uit het bericht te laten kopiëren. Gebruik Gegevens invoegen om berichtgegevens toe te voegen en Voorbeeld bekijken om het resultaat met voorbeeldgegevens te controleren.</string>
+    <string name="target_form_bark_encryption_dialog">Versleutelt de melding zodat alleen uw Bark-app hem kan lezen. Gebruik hetzelfde algoritme, dezelfde sleutel en dezelfde IV als in de versleutelingsinstellingen van de Bark-app. De sleutel moet 16 tekens zijn voor AES128, 24 voor AES192 en 32 voor AES256. De IV moet 16 tekens zijn voor CBC en 12 voor GCM; ECB gebruikt er geen. Laat u de IV leeg, dan maakt de app een willekeurige IV en stuurt die mee. NONE verstuurt de melding onversleuteld.</string>
+    <string name="target_form_gotify_server_dialog">Het berichtadres van uw Gotify-server met een applicatietoken, bijvoorbeeld https://push.example.org/message?token=apptoken. Maak de applicatie aan en kopieer het token in de webinterface van Gotify. Een gebruikersnaam en wachtwoord in het adres (https://gebruiker:wachtwoord@host/…) worden als HTTP-basisauthenticatie verstuurd.</string>
+    <string name="target_form_url_scheme_helper">Bijvoorbeeld myapp://api/add?type=0&amp;msg=[msg]</string>
+    <string name="target_form_url_scheme_dialog">Opent een andere app op deze telefoon met een link die die app ondersteunt (het URL-schema). De app moet geïnstalleerd zijn: Opslaan en Test controleren of er een passende app is, en Test opent die met een voorbeeldbericht. Deze variabelen worden vervangen (tekst wordt URL-gecodeerd): [msg] of [content] voor het bericht, [org_content] voor de oorspronkelijke tekst, [from] voor de afzender, [card_slot] of [title] voor de simkaartgegevens, [receive_time], [device_mark], [app_version] en [timestamp].</string>
+    <string name="target_form_telegram_token">Bottoken</string>
+    <string name="target_form_telegram_token_helper">Of een volledige API-URL die met http begint</string>
+    <string name="target_form_telegram_token_dialog">Het token dat BotFather aan uw bot gaf, bijvoorbeeld 123456789:AAE…. De app verstuurt dan naar https://api.telegram.org/bot&lt;token&gt;/sendMessage. Is Telegram op uw netwerk geblokkeerd, dan kunt u in plaats daarvan een volledig adres invullen dat met http begint, bijvoorbeeld een doorstuurserver eindigend op /bot&lt;token&gt;/sendMessage; de app stuurt hetzelfde verzoek dan naar precies dat adres.</string>
+    <string name="target_form_telegram_chat_dialog">Waar de berichten heen gaan: de ID van een gebruiker, groep of kanaal, of @kanaalnaam voor een openbaar kanaal. Stuur uw bot eerst een bericht, open dan https://api.telegram.org/bot&lt;token&gt;/getUpdates in een browser en zoek de chat-ID op. ID\'s van groepen en kanalen zijn negatieve getallen.</string>
+    <string name="target_form_telegram_topic_helper">Optioneel. Alleen voor groepen met topics</string>
+    <string name="target_form_telegram_parse_mode_dialog">Hoe Telegram het bericht opmaakt. Tekst: geen opmaak. HTML: opmaaktags zoals &lt;b&gt; in uw sjabloon worden toegepast. MarkdownV2: Telegram-Markdown. De app maskeert hooguit het teken -, dus andere speciale tekens in een bericht, zoals _ of *, kunnen ervoor zorgen dat Telegram het weigert.</string>
+    <string name="target_form_email_provider">E-mailprovider</string>
+    <string name="target_form_email_provider_helper">Kies Overige voor een eigen SMTP-server.</string>
+    <string name="target_form_email_address">Gebruikersnaam of e-mailadres</string>
+    <string name="target_form_email_address_helper">Gmail/iCloud: gebruikersnaam. Overige: volledig e-mailadres.</string>
+    <string name="target_form_smtp_port_helper">Meestal 465 met SSL of 587 met StartTLS</string>
+    <string name="target_form_smtp_dialog">Alleen nodig bij Overige; bij providers uit de lijst vult de app de server zelf in. Vul de SMTP-host en -poort van uw e-mailprovider in, bijvoorbeeld smtp.example.org. SSL: de verbinding is vanaf het begin versleuteld, meestal poort 465. StartTLS: versleuteling is verplicht vóór verzending, meestal poort 587 met SSL uit. Kan de server dit niet bieden, dan stopt de verzending.</string>
+    <string name="target_form_email_encryption_dialog">Onversleuteld: een gewone e-mail. S/MIME of OpenPGP: elke ontvanger heeft een certificaat of openbare sleutel nodig en krijgt een versleutelde e-mail. Voeg uw eigen sleutel en het wachtwoord daarvan toe om de e-mails ook te ondertekenen; is die sleutel niet bruikbaar, dan wordt niets verzonden. OpenKeychain: de app OpenKeychain versleutelt met de sleutels die hij voor de adressen van de ontvangers heeft; die moet geïnstalleerd zijn. Ontvangers bij wie versleutelen mislukt: zie “Onversleuteld verzenden als versleutelen mislukt”.</string>
+    <string name="target_form_openkeychain_sign_key">Ondertekeningssleutel (optioneel)</string>
+    <string name="target_form_sign_key_dialog">Optioneel: een sleutel in OpenKeychain die elke e-mail ondertekent. Zonder sleutel worden e-mails alleen versleuteld. Heeft de sleutel een wachtwoordzin, laat OpenKeychain die dan onthouden; anders mislukt ondertekenen op de achtergrond.</string>
+    <string name="target_form_sender_key_supporting">Ondertekent de e-mail, samen met het sleutelwachtwoord.</string>
+    <string name="target_form_email_to_tips">Tik op + om een ontvanger toe te voegen.</string>
+    <string name="target_form_remove_recipient">Ontvanger verwijderen</string>
+    <string name="target_form_key_file_helper">Plak als Base64, of gebruik Bestand selecteren (map Download)</string>
+    <string name="target_form_sender_key_password_helper">Nodig om met deze sleutel te ondertekenen</string>
+    <string name="target_form_recipient_key_password_helper">Alleen als het bestand een privésleutel bevat</string>
+    <string name="target_form_bark_iv_helper">Hetzelfde als in Bark, of leeg voor een willekeurige IV</string>
+    <string name="target_form_bark_url_helper">Opent bij tikken, bijv. https://example.org</string>
+</resources>

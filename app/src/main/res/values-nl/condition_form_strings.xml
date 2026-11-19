@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Task-condition editor labels (ConditionForm). Display only; stored condition values are unchanged. -->
+<resources>
+    <string name="condition_form_unknown">Onbekend</string>
+    <string name="condition_form_any_power_source">Elke voedingsbron</string>
+    <string name="condition_form_any_health">Elke conditie</string>
+    <string name="condition_form_no_voltage_limit">Geen spanningsgrens</string>
+    <string name="condition_form_no_temperature_limit">Geen temperatuurgrens</string>
+    <string name="condition_form_detection_method">Detectiemethode</string>
+    <string name="condition_form_use_current_location">Huidige coördinaten invullen</string>
+    <string name="condition_form_radius">Straal (meter)</string>
+    <string name="condition_form_radius_help_to">Activeert wanneer je binnen deze afstand van het punt komt.</string>
+    <string name="condition_form_radius_help_leave">Activeert wanneer je verder dan deze afstand van het punt gaat.</string>
+    <string name="condition_form_address_help_to">Activeert wanneer het GPS-adres dit trefwoord gaat bevatten.</string>
+    <string name="condition_form_address_help_leave">Activeert wanneer het GPS-adres dit trefwoord niet meer bevat.</string>
+    <string name="condition_form_level_value">Batterijniveau: %1$d%%</string>
+    <string name="condition_form_delay_value">Wachttijd: %1$d min</string>
+    <string name="condition_form_delay_none">Wachttijd: geen</string>
+</resources>

@@ -1,53 +1,30 @@
 package cn.ppps.forwarder.utils.interceptor
 
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.workDataOf
-import com.google.gson.Gson
-import cn.ppps.forwarder.entity.result.SendResponse
 import cn.ppps.forwarder.utils.Log
-import cn.ppps.forwarder.utils.Worker
-import cn.ppps.forwarder.workers.UpdateLogsWorker
-import com.xuexiang.xutil.XUtil
 import okhttp3.Interceptor
 import okhttp3.Response
-import java.util.concurrent.TimeUnit
 
+/**
+ * Signals an HTTP 204/205 response to [onNoContent]. Retrofit passes these responses on with a null body, which
+ * XHttp delivers to `onError` instead of `onSuccess`; the caller evaluates them there as an empty response body.
+ *
+ * This interceptor writes no log/forwarding status itself: the request callback is the single source of truth,
+ * so a configured response check ("response must contain") can never be overridden afterwards.
+ */
 @Suppress("PrivatePropertyName")
-class NoContentInterceptor(private val logId: Long) : Interceptor {
+class NoContentInterceptor(private val onNoContent: () -> Unit) : Interceptor {
 
     private val TAG: String = NoContentInterceptor::class.java.simpleName
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalResponse = chain.proceed(chain.request())
 
-        //HTTP Status 201-299 It's a success.
-        if (originalResponse.code() in 201..299) {
+        if (originalResponse.code() == 204 || originalResponse.code() == 205) {
             val response = "HTTP Status " + originalResponse.code() + " " + originalResponse.message()
             Log.d(TAG, response)
-            /*
-            // Create an empty response
-            val message = "{\"Code\":0, \"Msg\":\"\", \"Data\":{}}"
-            val emptyJsonBody = ResponseBody.create(MediaType.parse("application/json"), message)
-            // Replace the response in the original response with a new one
-            return originalResponse.newBuilder()
-                .body(emptyJsonBody)
-                .header("Content-Length", message.length.toString())
-                .build()
-            */
-            //TODO: temporary special processing, update log status is successful
-            val sendResponse = SendResponse(logId, 2, response)
-            val request = OneTimeWorkRequestBuilder<UpdateLogsWorker>()
-                .setInitialDelay(200, TimeUnit.MILLISECONDS)
-                .setInputData(
-                    workDataOf(
-                        Worker.UPDATE_LOGS to Gson().toJson(sendResponse)
-                    )
-                ).build()
-            WorkManager.getInstance(XUtil.getContext()).enqueue(request)
+            onNoContent()
         }
 
         return originalResponse
     }
 }
-

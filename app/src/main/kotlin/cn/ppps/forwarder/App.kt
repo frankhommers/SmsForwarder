@@ -150,6 +150,7 @@ class App : Application(), CactusCallback, Configuration.Provider by Core {
 
     override fun onCreate() {
         super.onCreate()
+        com.google.android.material.color.DynamicColors.applyToActivitiesIfAvailable(this)
 
         // Configure global exception handling
         val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
@@ -181,6 +182,10 @@ class App : Application(), CactusCallback, Configuration.Provider by Core {
 
             //InitializeWorkManager
             WorkManager.initialize(this, Configuration.Builder().build())
+
+            // In-app updater: one-time default-on migration, then (re)schedule or cancel the daily check.
+            cn.ppps.forwarder.utils.update.UpdateScheduler.migrateDefaults()
+            cn.ppps.forwarder.utils.update.UpdateScheduler.apply(this)
 
             // FRPC is unavailable: no downloaded native code is loaded.
 

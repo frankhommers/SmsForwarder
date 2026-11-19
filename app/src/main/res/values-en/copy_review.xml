@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="copy_unknown_device">Unknown Device</string>
+    <string name="copy_unknown_error">Unknown error</string>
+    <string name="copy_security_key_required">Enter the signing key, RSA public key or SM4 key for the selected security mode.</string>
+    <string name="copy_wechat_sm4">The WeChat mini program requires SM4 encryption. Change the security mode in Server settings.</string>
+    <string name="copy_rule_spaces">Line %1$d: consecutive spaces between tokens are not allowed.</string>
+    <string name="copy_rule_tokens">Line %1$d: use four syntax tokens followed by a value, e.g. AND IS PHONE_NUM EQUALS 10086.</string>
+    <string name="copy_rule_token_invalid">Line %1$d: expected one of %2$s; received %3$s.</string>
+    <string name="copy_rule_conjunction">Invalid conjunction. Use AND or OR.</string>
+    <string name="copy_markdown_disabled">Remote Markdown is disabled in this privacy fork.</string>
+    <string name="copy_sms_empty">Enter at least one recipient and a message.</string>
+    <string name="copy_email_sent">Email sent.</string>
+    <string name="copy_email_failed">Email could not be sent: %1$s</string>
+    <string name="copy_pgp_user_missing">No user ID found in the OpenPGP private keyring.</string>
+    <string name="copy_pgp_private_missing">The sender’s OpenPGP private keyring is required.</string>
+    <string name="copy_pgp_password_missing">The OpenPGP private-key password is required.</string>
+    <string name="copy_pgp_public_missing">The recipient’s OpenPGP public keyring is required.</string>
+    <string name="copy_recipient_required">A recipient email address is required.</string>
+    <string name="copy_openkeychain_timeout">Timed out connecting to OpenKeychain.</string>
+    <string name="copy_openkeychain_bind">Could not connect to OpenKeychain: %1$s</string>
+    <string name="copy_openkeychain_authorize">OpenKeychain needs permission or a key selection. Open the email target and save it again to authorize.</string>
+    <string name="copy_openkeychain_encrypt">OpenKeychain encryption failed: %1$s</string>
+    <string name="copy_udp_timeout">No UDP acknowledgment received before the timeout.</string>
+    <string name="copy_mqtt_sent">MQTT message sent.</string>
+    <string name="copy_mqtt_lost">MQTT connection lost.</string>
+    <string name="copy_url_opened">URL opened.</string>
+    <string name="copy_server_private_key">No RSA private key is configured on the server.</string>
+    <string name="copy_server_sm4_key">No SM4 key is configured on the server.</string>
+    <string name="copy_foreground_channel">SmsForwarder Background Service</string>
+    <string name="copy_add_recipient">Add Recipient</string>
+    <string name="copy_pick_contact">Choose from Contacts</string>
+    <string name="copy_reply_sender">Use Original Sender ({{FROM}})</string>
+    <string name="copy_phone_template">Edit as Template</string>
+    <string name="copy_phone_invalid">Enter one phone number (3–20 digits, optional +) or a template tag.</string>
+    <string name="copy_phone_required">Enter a recipient phone number.</string>
+    <string name="copy_contact_unavailable">Could not read the selected contact’s phone number.</string>
+</resources>

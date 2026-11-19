@@ -24,7 +24,8 @@ class SenderPagingAdapter(private val itemClickListener: OnItemClickListener) : 
         if (item != null) {
             holder.binding.ivImage.setImageResource(item.imageId)
             holder.binding.ivStatus.setImageResource(item.statusImageId)
-            holder.binding.tvName.text = item.name
+            holder.binding.tvName.text = if (cn.ppps.forwarder.utils.TargetCatalog.isAvailable(item.type)) item.name
+                else item.name + " · " + holder.itemView.context.getString(cn.ppps.forwarder.R.string.target_legacy)
 
             holder.binding.ivCopy.setOnClickListener { view: View? ->
                 itemClickListener.onItemClicked(view, item)

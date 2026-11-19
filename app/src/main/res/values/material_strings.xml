@@ -1,0 +1,13 @@
+<resources>
+    <string name="m3_target_name">Target name</string>
+    <string name="m3_logout">Sign out</string>
+    <string name="m3_notifications">Notification settings</string>
+    <string name="m3_restore">Restore</string>
+    <string name="m3_filter">Filter</string>
+    <string name="m3_period_start">Start</string>
+    <string name="m3_period_end">End</string>
+    <string name="m3_edit">Edit</string>
+    <string name="m3_close">Close</string>
+    <string name="m3_apply">Apply</string>
+    <string name="m3_reorder">Drag to reorder</string>
+</resources>

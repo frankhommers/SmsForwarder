@@ -35,7 +35,7 @@ class SmsCommandUtils {
         //Execute SMS Command
         fun execute(context: Context, smsCommand: String): Boolean {
             val cmdList = smsCommand.split("#", limit = 3)
-            Log.d(TAG, "smsCommand = $smsCommand, cmdList = $cmdList")
+            Log.d(TAG, "SMS command received; content omitted")
             if (cmdList.count() < 2) return false
 
             val function = cmdList[0]
@@ -99,7 +99,7 @@ class SmsCommandUtils {
                         val key = CipherUtils.md5(smsCommand)
                         val timestamp: Long = System.currentTimeMillis()
                         var timestampPrev: Long by HistoryUtils(key, timestamp)
-                        Log.d(TAG, "duplicateMessagesLimits=$duplicateMessagesLimits, timestamp=$timestamp, timestampPrev=$timestampPrev, msgInfo=$smsCommand")
+                        Log.d(TAG, "duplicateMessagesLimits=$duplicateMessagesLimits, timestamp=$timestamp, timestampPrev=$timestampPrev")
                         if (timestampPrev != timestamp && timestamp - timestampPrev <= duplicateMessagesLimits) {
                             Log.e(TAG, "Filter Duplicate Message Mechanism")
                             timestampPrev = timestamp
@@ -131,13 +131,12 @@ class SmsCommandUtils {
                         try {
                             val gson = Gson()
                             val smsSendData = gson.fromJson(param, SmsSendData::class.java)
-                            Log.d(TAG, smsSendData.toString())
 
                             //Get SIM slot information
                             if (App.SimInfoList.isEmpty()) {
                                 App.SimInfoList = PhoneUtils.getSimMultiInfo()
                             }
-                            Log.d(TAG, App.SimInfoList.toString())
+                            Log.d(TAG, "SIM inventory refreshed; details omitted")
 
                             //Send card slots: 1=SIM1, 2=SIM2
                             val simSlotIndex = smsSendData.simSlot - 1

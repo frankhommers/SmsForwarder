@@ -41,7 +41,6 @@ class PushplusUtils private constructor() {
             }
 
             val requestUrl = "https://" + setting.website + "/send"
-            Log.i(TAG, "requestUrl:$requestUrl")
 
             val msgMap: MutableMap<String, Any> = mutableMapOf()
             msgMap["token"] = setting.token
@@ -64,7 +63,6 @@ class PushplusUtils private constructor() {
             }
 
             val requestMsg: String = Gson().toJson(msgMap)
-            Log.i(TAG, "requestMsg:$requestMsg")
 
             XHttp.post(requestUrl)
                 .upJson(requestMsg)
@@ -84,7 +82,6 @@ class PushplusUtils private constructor() {
                     }
 
                     override fun onSuccess(response: String) {
-                        Log.i(TAG, response)
 
                         val resp = Gson().fromJson(response, PushplusResult::class.java)
                         val status = if (resp?.code == 200L) 2 else 0

@@ -1,0 +1,4 @@
+<resources>
+    <!-- View tag on a template grid: which synthetic sample its Preview uses (TemplatePicker.useTaskSample). -->
+    <item name="template_sample_context" type="id" />
+</resources>

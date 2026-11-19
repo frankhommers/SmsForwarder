@@ -2,7 +2,7 @@ SmsForwarder Private — local privacy notice
 
 This is an independent privacy-focused fork of SmsForwarder by pppscn and contributors.
 
-SMS, call details, contacts and notifications are processed on your device and forwarded only according to the destinations and rules you configure. Forwarding providers receive the content you choose to send; their own policies apply. Optional Chinese providers are retained, not automatically enabled.
+SMS, call details, contacts and notifications are processed on your device and forwarded only according to the destinations and rules you configure. Forwarding providers receive the content you choose to send; their own policies apply. Saved configurations for providers no longer offered in the editor are retained.
 
 There is no Umeng analytics integration, upstream update check, remote tips feed, phone-number lookup or downloaded FRPC executable loader. FRPC is unavailable. Updates must be installed manually from reviewed builds. Phone-area values are reported as unknown. Online reverse geocoding is disabled; coordinates remain available if you enable location.
 

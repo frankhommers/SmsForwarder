@@ -1,21 +1,25 @@
 package cn.ppps.forwarder.fragment
 
 import android.annotation.SuppressLint
-import android.text.InputType
+import android.content.res.Configuration
+import android.graphics.Rect
 import android.text.TextUtils
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.RadioGroup
+import androidx.appcompat.app.AlertDialog
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView.RecycledViewPool
 import com.alibaba.android.vlayout.VirtualLayoutManager
 import cn.ppps.forwarder.App.Companion.FORWARD_STATUS_MAP
 import cn.ppps.forwarder.R
-import cn.ppps.forwarder.activity.MainActivity
 import cn.ppps.forwarder.adapter.MsgPagingAdapter
 import cn.ppps.forwarder.core.BaseFragment
 import cn.ppps.forwarder.database.entity.LogsDetail
@@ -30,16 +34,19 @@ import cn.ppps.forwarder.utils.XToastUtils
 import com.scwang.smartrefresh.layout.api.RefreshLayout
 import com.xuexiang.xaop.annotation.SingleClick
 import com.xuexiang.xpage.annotation.Page
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.button.SmoothCheckBox
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
-import com.xuexiang.xui.widget.picker.widget.TimePickerView
-import com.xuexiang.xui.widget.picker.widget.builder.TimePickerBuilder
-import com.xuexiang.xui.widget.picker.widget.configure.TimePickerType
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.TargetCheckBox as SmoothCheckBox
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
+import androidx.fragment.app.DialogFragment
 import com.xuexiang.xutil.data.DateUtils
 import com.xuexiang.xutil.resource.ResUtils.getColors
 import com.xuexiang.xutil.resource.ResUtils.getStringArray
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputLayout
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 import com.xuexiang.xutil.tip.ToastUtils
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -47,6 +54,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 
 @Suppress("PrivatePropertyName")
@@ -61,8 +69,8 @@ class LogsFragment : BaseFragment<FragmentLogsBinding?>(), MsgPagingAdapter.OnIt
 
     //Log Filter
     private var currentFilter: MutableMap<String, Any> = mutableMapOf()
-    private var logsFilterPopup: MaterialDialog? = null
-    private var timePicker: TimePickerView? = null
+    private var logsFilterPopup: AlertDialog? = null
+    private var timePicker: DialogFragment? = null
 
     override fun viewBindingInflate(
         inflater: LayoutInflater,
@@ -73,9 +81,9 @@ class LogsFragment : BaseFragment<FragmentLogsBinding?>(), MsgPagingAdapter.OnIt
 
     override fun initTitle(): TitleBar? {
         titleBar = super.initTitle()!!.setImmersive(false)
-        titleBar!!.setLeftImageResource(R.drawable.ic_action_menu)
+        // Root tab: the bottom bar is the only primary navigation, so no hamburger or fake Back.
+        titleBar!!.disableLeftView()
         titleBar!!.setTitle(R.string.menu_logs)
-        titleBar!!.setLeftClickListener { getContainer()?.openMenu() }
         titleBar!!.addAction(object : TitleBar.ImageAction(R.drawable.ic_delete) {
             @SingleClick
             override fun performAction(view: View) {
@@ -99,15 +107,10 @@ class LogsFragment : BaseFragment<FragmentLogsBinding?>(), MsgPagingAdapter.OnIt
         titleBar!!.addAction(object : TitleBar.ImageAction(R.drawable.ic_filter) {
             @SingleClick
             override fun performAction(view: View) {
-                initLogsFilterDialog()
-                logsFilterPopup?.show()
+                showLogsFilterDialog()
             }
         })
         return titleBar
-    }
-
-    private fun getContainer(): MainActivity? {
-        return activity as MainActivity?
     }
 
     /**
@@ -129,7 +132,9 @@ class LogsFragment : BaseFragment<FragmentLogsBinding?>(), MsgPagingAdapter.OnIt
                 2 -> "app"
                 else -> "sms"
             }
-            initLogsFilterDialog(true)
+            // Switching tabs clears the filter, as before: its fields differ per log type.
+            currentFilter = mutableMapOf()
+            dismissLogsFilterDialog()
             reloadData()
         }
     }
@@ -150,7 +155,6 @@ class LogsFragment : BaseFragment<FragmentLogsBinding?>(), MsgPagingAdapter.OnIt
     }
 
     override fun onItemClicked(view: View?, item: MsgAndLogs) {
-        Log.d(TAG, "item: $item")
 
         val detailStr = StringBuilder()
         detailStr.append(getString(R.string.from)).append(item.msg.from).append("\n\n")
@@ -186,7 +190,6 @@ class LogsFragment : BaseFragment<FragmentLogsBinding?>(), MsgPagingAdapter.OnIt
     }
 
     override fun onLogsClicked(view: View?, item: LogsDetail) {
-        Log.d(TAG, "item: $item")
         val ruleStr = StringBuilder()
         ruleStr.append(Rule.getRuleMatch(item.type, item.ruleFiled, item.ruleCheck, item.ruleValue, item.ruleSimSlot)).append(item.senderName)
         val detailStr = StringBuilder()
@@ -215,133 +218,197 @@ class LogsFragment : BaseFragment<FragmentLogsBinding?>(), MsgPagingAdapter.OnIt
         binding!!.recyclerView.scrollToPosition(0)
     }
 
-    @Suppress("SameParameterValue")
-    private fun initLogsFilterDialog(needInit: Boolean = false) {
-        if (logsFilterPopup == null || needInit) {
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // MainActivity handles rotation itself, so an open dialog would keep the background insets resolved for
+        // the old orientation (80dp top/bottom in portrait, 24dp in landscape). Rebuild it with the unapplied
+        // draft. Not while a date/time picker is on top: the new dialog window would cover the picker.
+        val dialog = logsFilterPopup ?: return
+        if (!dialog.isShowing || timePicker?.isAdded == true) return
+        val draft = readLogsFilter(dialog)
+        dismissLogsFilterDialog()
+        showLogsFilterDialog(draft)
+    }
+
+    override fun onDestroyView() {
+        dismissLogsFilterDialog()
+        super.onDestroyView()
+    }
+
+    private fun dismissLogsFilterDialog() {
+        val dialog = logsFilterPopup ?: return
+        logsFilterPopup = null
+        dialog.dismiss()
+    }
+
+    /**
+     * Filter dialog: a Material 3 alert dialog with a title and dialog_logs_filter (scrolling form plus its own
+     * Reset / Cancel / Apply row). Built directly with MaterialAlertDialogBuilder and no message: the shared
+     * MaterialDialog wrapper always sets one, which broke AlertDialogLayout's measuring and hid the buttons.
+     * The form is filled from the applied filter on every open (or from [draft] after a rotation), so Cancel,
+     * Back and tapping outside discard edits and never change the applied filter.
+     */
+    private fun showLogsFilterDialog(draft: LogsFilterSelection = LogsFilterSelection.fromFilter(currentFilter)) {
+        if (logsFilterPopup?.isShowing == true) return
+        val builder = MaterialAlertDialogBuilder(requireContext())
+        // Inflate with the dialog's themed context so fields and buttons get the dialog surface colours.
+        val content = View.inflate(builder.context, R.layout.dialog_logs_filter, null)
+        configureLogsFilterFields(content)
+        writeLogsFilter(content, draft)
+
+        val dialog = builder
+            .setTitle(R.string.logs_filter_title)
+            .setView(content)
+            .setCancelable(true)
+            .create()
+        dialog.setCanceledOnTouchOutside(true)
+        // The keyboard shrinks the scrolling form, never the title or the action row.
+        dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE or WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
+
+        content.findViewById<View>(R.id.btn_logs_filter_reset).setOnClickListener {
             currentFilter = mutableMapOf()
+            reloadData()
+            dismissLogsFilterDialog()
+        }
+        content.findViewById<View>(R.id.btn_logs_filter_cancel).setOnClickListener { dialog.cancel() }
+        content.findViewById<View>(R.id.btn_logs_filter_apply).setOnClickListener {
+            val selection = readLogsFilter(content)
+            if (selection.endBeforeStart()) {
+                // Such a period can never match; keep the dialog open and point at the field.
+                val endLayout = content.findViewById<TextInputLayout>(R.id.til_logs_filter_end)
+                endLayout.error = getString(R.string.logs_filter_end_before_start)
+                endLayout.post { endLayout.requestRectangleOnScreen(Rect(0, 0, endLayout.width, endLayout.height), false) }
+                return@setOnClickListener
+            }
+            currentFilter = selection.toFilter(currentType)
+            reloadData()
+            dismissLogsFilterDialog()
+        }
+        dialog.setOnDismissListener { if (logsFilterPopup === dialog) logsFilterPopup = null }
+        logsFilterPopup = dialog
+        dialog.show()
+    }
 
-            val logsFilterDialog = View.inflate(requireContext(), R.layout.dialog_logs_filter, null)
-            val layoutTitle = logsFilterDialog.findViewById<LinearLayout>(R.id.layout_title)
-            val layoutSimSlot = logsFilterDialog.findViewById<LinearLayout>(R.id.layout_sim_slot)
-            val layoutCallType = logsFilterDialog.findViewById<LinearLayout>(R.id.layout_call_type)
+    /** Shows the rows that apply to the current log type, with type-specific field labels. */
+    private fun configureLogsFilterFields(content: View) {
+        content.findViewById<LinearLayout>(R.id.layout_title).visibility = if (currentType == "app") View.VISIBLE else View.GONE
+        content.findViewById<LinearLayout>(R.id.layout_sim_slot).visibility = if (currentType == "app") View.GONE else View.VISIBLE
+        content.findViewById<LinearLayout>(R.id.layout_call_type).visibility = if (currentType == "call") View.VISIBLE else View.GONE
+        content.findViewById<TextInputLayout>(R.id.til_logs_filter_from).hint = getString(
             when (currentType) {
-                "app" -> {
-                    layoutTitle.visibility = View.VISIBLE
-                    layoutSimSlot.visibility = View.GONE
-                    layoutCallType.visibility = View.GONE
-                }
-
-                "call" -> {
-                    layoutTitle.visibility = View.GONE
-                    layoutSimSlot.visibility = View.VISIBLE
-                    layoutCallType.visibility = View.VISIBLE
-                }
-
-                else -> {
-                    layoutTitle.visibility = View.GONE
-                    layoutSimSlot.visibility = View.VISIBLE
-                    layoutCallType.visibility = View.GONE
-                }
+                "app" -> R.string.logs_filter_from_app
+                "call" -> R.string.logs_filter_from_number
+                else -> R.string.logs_filter_from_sms
             }
+        )
+        content.findViewById<TextInputLayout>(R.id.til_logs_filter_message).hint =
+            getString(if (currentType == "app") R.string.logs_filter_message_app else R.string.logs_filter_message)
 
-            val scbCallType1 = logsFilterDialog.findViewById<SmoothCheckBox>(R.id.scb_call_type1)
-            val scbCallType2 = logsFilterDialog.findViewById<SmoothCheckBox>(R.id.scb_call_type2)
-            val scbCallType3 = logsFilterDialog.findViewById<SmoothCheckBox>(R.id.scb_call_type3)
-            val scbCallType4 = logsFilterDialog.findViewById<SmoothCheckBox>(R.id.scb_call_type4)
-            val scbCallType5 = logsFilterDialog.findViewById<SmoothCheckBox>(R.id.scb_call_type5)
-            val scbCallType6 = logsFilterDialog.findViewById<SmoothCheckBox>(R.id.scb_call_type6)
-            val etFrom = logsFilterDialog.findViewById<EditText>(R.id.et_from)
-            val etContent = logsFilterDialog.findViewById<EditText>(R.id.et_content)
-            val etTitle = logsFilterDialog.findViewById<EditText>(R.id.et_title)
-            val rgSimSlot = logsFilterDialog.findViewById<RadioGroup>(R.id.rg_sim_slot)
-            val etStartTime = logsFilterDialog.findViewById<EditText>(R.id.et_start_time)
-            val scbForwardStatus0 = logsFilterDialog.findViewById<SmoothCheckBox>(R.id.scb_forward_status_0)
-            val scbForwardStatus1 = logsFilterDialog.findViewById<SmoothCheckBox>(R.id.scb_forward_status_1)
-            val scbForwardStatus2 = logsFilterDialog.findViewById<SmoothCheckBox>(R.id.scb_forward_status_2)
-            etStartTime.setOnFocusChangeListener { _, hasFocus ->
-                if (hasFocus) {
-                    showTimePicker(etStartTime.text.toString().trim(), getString(R.string.start_time), etStartTime)
-                } else {
-                    timePicker?.dismiss()
-                }
+        for ((layoutId, fieldId) in listOf(R.id.til_logs_filter_start to R.id.et_start_time, R.id.til_logs_filter_end to R.id.et_end_time)) {
+            val layout = content.findViewById<TextInputLayout>(layoutId)
+            val field = content.findViewById<EditText>(fieldId)
+            // Read-only (no key listener, so no hardware-keyboard typing either); a tap or Enter opens the date
+            // picker and then the time picker, and the end icon clears the field.
+            field.keyListener = null
+            field.setOnClickListener { showTimePicker(field.text.toString().trim(), layout.hint.toString(), fieldId) }
+            field.isLongClickable = false
+            layout.setEndIconOnClickListener { field.setText("") }
+            fun syncClearIcon() { layout.isEndIconVisible = field.text?.isNotEmpty() == true }
+            field.doAfterTextChanged {
+                syncClearIcon()
+                content.findViewById<TextInputLayout>(R.id.til_logs_filter_end).error = null
             }
-            val etEndTime = logsFilterDialog.findViewById<EditText>(R.id.et_end_time)
-            etEndTime.setOnFocusChangeListener { _, hasFocus ->
-                if (hasFocus) {
-                    showTimePicker(etEndTime.text.toString().trim(), getString(R.string.end_time), etEndTime)
-                } else {
-                    timePicker?.dismiss()
-                }
-            }
-
-            logsFilterPopup = MaterialDialog.Builder(requireContext())
-                .iconRes(android.R.drawable.ic_menu_search)
-                .title(R.string.menu_logs)
-                .customView(logsFilterDialog, true)
-                .cancelable(false)
-                .autoDismiss(false)
-                .neutralText(R.string.reset)
-                .neutralColor(getColors(R.color.darkGrey))
-                .onNeutral { dialog: MaterialDialog?, _: DialogAction? ->
-                    dialog?.dismiss()
-                    currentFilter = mutableMapOf()
-                    logsFilterPopup = null
-                    reloadData()
-                }.positiveText(R.string.search).onPositive { dialog: MaterialDialog?, _: DialogAction? ->
-                    currentFilter = mutableMapOf()
-                    currentFilter["from"] = etFrom.text.toString().trim()
-                    currentFilter["content"] = etContent.text.toString().trim()
-                    currentFilter["title"] = etTitle.text.toString().trim()
-                    currentFilter["start_time"] = etStartTime.text.toString().trim()
-                    currentFilter["end_time"] = etEndTime.text.toString().trim()
-                    currentFilter["sim_slot"] = if (currentType == "app") -1 else when (rgSimSlot.checkedRadioButtonId) {
-                        R.id.rb_sim_slot_1 -> 0
-                        R.id.rb_sim_slot_2 -> 1
-                        else -> -1
-                    }
-                    if (currentType == "call") {
-                        currentFilter["call_type"] = mutableListOf<Int>().apply {
-                            if (scbCallType1.isChecked) add(1)
-                            if (scbCallType2.isChecked) add(2)
-                            if (scbCallType3.isChecked) add(3)
-                            if (scbCallType4.isChecked) add(4)
-                            if (scbCallType5.isChecked) add(5)
-                            if (scbCallType6.isChecked) add(6)
-                        }
-                    }
-                    currentFilter["forward_status"] = mutableListOf<Int>().apply {
-                        if (scbForwardStatus0.isChecked) add(0)
-                        if (scbForwardStatus1.isChecked) add(1)
-                        if (scbForwardStatus2.isChecked) add(2)
-                    }
-                    reloadData()
-                    dialog?.dismiss()
-                }.build()
+            syncClearIcon()
         }
     }
 
-    private fun showTimePicker(time: String, title: String, et: EditText) {
-        et.inputType = InputType.TYPE_NULL
-        val calendar: Calendar = Calendar.getInstance()
-        calendar.time = try {
-            if (time.isEmpty()) Date() else DateUtils.string2Date(time, DateUtils.yyyyMMddHHmmss.get())
-        } catch (e: Exception) {
-            Date()
-        }
-        timePicker = TimePickerBuilder(context) { date, _ ->
-            ToastUtils.toast(DateUtils.date2String(date, DateUtils.yyyyMMddHHmmss.get()))
-            et.setText(DateUtils.date2String(date, DateUtils.yyyyMMddHHmmss.get()))
-        }
-            .setTimeSelectChangeListener { date ->
-                Log.i("pvTime", "onTimeSelectChanged")
-                et.setText(DateUtils.date2String(date, DateUtils.yyyyMMddHHmmss.get()))
+    private fun writeLogsFilter(content: View, selection: LogsFilterSelection) {
+        content.findViewById<EditText>(R.id.et_from).setText(selection.from)
+        content.findViewById<EditText>(R.id.et_content).setText(selection.content)
+        content.findViewById<EditText>(R.id.et_title).setText(selection.title)
+        content.findViewById<EditText>(R.id.et_start_time).setText(selection.startTime)
+        content.findViewById<EditText>(R.id.et_end_time).setText(selection.endTime)
+        content.findViewById<RadioGroup>(R.id.rg_sim_slot).check(
+            when (selection.simSlot) {
+                0 -> R.id.rb_sim_slot_1
+                1 -> R.id.rb_sim_slot_2
+                else -> R.id.rb_sim_slot_0
             }
-            .setType(TimePickerType.ALL)
-            .setTitleText(title)
-            .isDialog(true)
-            .setOutSideCancelable(false)
-            .setDate(calendar)
-            .build()
-        timePicker?.show(false)
+        )
+        for ((type, id) in CALL_TYPE_BOXES) content.findViewById<SmoothCheckBox>(id).isChecked = type in selection.callTypes
+        for ((status, id) in FORWARD_STATUS_BOXES) content.findViewById<SmoothCheckBox>(id).isChecked = status in selection.forwardStatuses
+        content.findViewById<TextInputLayout>(R.id.til_logs_filter_end).error = null
+    }
+
+    private fun readLogsFilter(dialog: AlertDialog): LogsFilterSelection {
+        val content = dialog.findViewById<View>(R.id.logs_filter_root) ?: return LogsFilterSelection.fromFilter(currentFilter)
+        return readLogsFilter(content)
+    }
+
+    private fun readLogsFilter(content: View): LogsFilterSelection {
+        fun text(id: Int) = content.findViewById<EditText>(id)?.text?.toString()?.trim().orEmpty()
+        fun checked(id: Int) = content.findViewById<SmoothCheckBox>(id)?.isChecked == true
+        return LogsFilterSelection(
+            from = text(R.id.et_from),
+            content = text(R.id.et_content),
+            title = text(R.id.et_title),
+            startTime = text(R.id.et_start_time),
+            endTime = text(R.id.et_end_time),
+            simSlot = when (content.findViewById<RadioGroup>(R.id.rg_sim_slot)?.checkedRadioButtonId) {
+                R.id.rb_sim_slot_1 -> 0
+                R.id.rb_sim_slot_2 -> 1
+                else -> -1
+            },
+            callTypes = CALL_TYPE_BOXES.filter { checked(it.second) }.map { it.first }.toSet(),
+            forwardStatuses = FORWARD_STATUS_BOXES.filter { checked(it.second) }.map { it.first }.toSet(),
+        )
+    }
+
+    /**
+     * Date, then time picker. A start time gets :00 seconds and an end time :59, so "until 14:30" includes
+     * that whole minute. The result goes to the field of the dialog that is open when the user confirms.
+     */
+    private fun showTimePicker(time: String, title: String, fieldId: Int) {
+        if (timePicker?.isAdded == true) return
+        val calendar: Calendar = Calendar.getInstance()
+        calendar.time = LogsFilterSelection.parseTime(time)?.let { Date(it) } ?: Date()
+        val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+            clear()
+            set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
+        }
+        val picker = MaterialDatePicker.Builder.datePicker()
+            .setTitleText(title).setSelection(utc.timeInMillis).build()
+        picker.addOnPositiveButtonClickListener { day ->
+            if (!isAdded) return@addOnPositiveButtonClickListener
+            val selectedDay = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { timeInMillis = day }
+            calendar.set(selectedDay.get(Calendar.YEAR), selectedDay.get(Calendar.MONTH), selectedDay.get(Calendar.DAY_OF_MONTH))
+            val clock = MaterialTimePicker.Builder()
+                .setTitleText(title)
+                .setTimeFormat(if (DateFormat.is24HourFormat(requireContext())) TimeFormat.CLOCK_24H else TimeFormat.CLOCK_12H)
+                .setHour(calendar.get(Calendar.HOUR_OF_DAY)).setMinute(calendar.get(Calendar.MINUTE)).build()
+            clock.addOnPositiveButtonClickListener {
+                calendar.set(Calendar.HOUR_OF_DAY, clock.hour)
+                calendar.set(Calendar.MINUTE, clock.minute)
+                calendar.set(Calendar.SECOND, if (fieldId == R.id.et_end_time) 59 else 0)
+                calendar.set(Calendar.MILLISECOND, 0)
+                logsFilterPopup?.findViewById<EditText>(fieldId)
+                    ?.setText(DateUtils.date2String(calendar.time, DateUtils.yyyyMMddHHmmss.get()))
+            }
+            timePicker = clock
+            clock.show(parentFragmentManager, "log-time")
+        }
+        timePicker = picker
+        picker.show(parentFragmentManager, "log-date")
+    }
+
+    private companion object {
+        /** Call type value (Msg.call_type) -> checkbox. */
+        val CALL_TYPE_BOXES = listOf(
+            1 to R.id.scb_call_type1, 2 to R.id.scb_call_type2, 3 to R.id.scb_call_type3,
+            4 to R.id.scb_call_type4, 5 to R.id.scb_call_type5, 6 to R.id.scb_call_type6,
+        )
+
+        /** Forward status value (Logs.forward_status) -> checkbox. */
+        val FORWARD_STATUS_BOXES = listOf(0 to R.id.scb_forward_status_0, 1 to R.id.scb_forward_status_1, 2 to R.id.scb_forward_status_2)
     }
 }

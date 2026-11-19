@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView.RecycledViewPool
 import com.alibaba.android.vlayout.VirtualLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import cn.ppps.forwarder.R
-import cn.ppps.forwarder.activity.MainActivity
 import cn.ppps.forwarder.adapter.SenderPagingAdapter
 import cn.ppps.forwarder.adapter.WidgetItemAdapter
 import cn.ppps.forwarder.core.BaseFragment
@@ -66,16 +65,16 @@ import com.xuexiang.xpage.model.PageInfo
 import com.xuexiang.xui.adapter.recyclerview.RecyclerViewHolder
 import com.xuexiang.xui.utils.DensityUtils
 import com.xuexiang.xui.utils.WidgetUtils
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.alpha.XUIAlphaTextView
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import cn.ppps.forwarder.widget.material.TitleBar
+import com.google.android.material.textview.MaterialTextView as XUIAlphaTextView
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
 import com.xuexiang.xutil.resource.ResUtils.getStringArray
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Suppress("PrivatePropertyName", "DEPRECATION")
-@Page(name = "Forwarding channels")
+@Page(name = "Targets")
 class SendersFragment : BaseFragment<FragmentSendersBinding?>(),
     SenderPagingAdapter.OnItemClickListener,
     RecyclerViewHolder.OnItemClickListener<PageInfo> {
@@ -211,36 +210,27 @@ class SendersFragment : BaseFragment<FragmentSendersBinding?>(),
 
     override fun initTitle(): TitleBar? {
         titleBar = super.initTitle()!!.setImmersive(false)
-        titleBar!!.setLeftImageResource(R.drawable.ic_action_menu)
+        // Root tab: the bottom bar is the only primary navigation, so no hamburger or fake Back.
+        titleBar!!.disableLeftView()
         titleBar!!.setTitle(R.string.menu_senders)
-        titleBar!!.setLeftClickListener { getContainer()?.openMenu() }
         titleBar!!.addAction(object : TitleBar.ImageAction(R.drawable.ic_add) {
             @SuppressLint("InflateParams")
             @SingleClick
             override fun performAction(view: View) {
-                val bottomSheet: View = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_sender_bottom_sheet, null)
-                val recyclerView: RecyclerView = bottomSheet.findViewById(R.id.recyclerView)
-
-                WidgetUtils.initGridRecyclerView(recyclerView, 4, DensityUtils.dp2px(1f))
-                val widgetItemAdapter = WidgetItemAdapter(SENDER_FRAGMENT_LIST)
-                widgetItemAdapter.setOnItemClickListener(that)
-                recyclerView.adapter = widgetItemAdapter
-
-                val bottomSheetCloseButton: XUIAlphaTextView = bottomSheet.findViewById(R.id.bottom_sheet_close_button)
-                bottomSheetCloseButton.setOnClickListener { dialog.dismiss() }
-
-                dialog.setContentView(bottomSheet)
-                dialog.setCancelable(true)
-                dialog.setCanceledOnTouchOutside(true)
-                dialog.show()
-                WidgetUtils.transparentBottomSheetDialogBackground(dialog)
+                val types = cn.ppps.forwarder.utils.TargetCatalog.availableTypes
+                com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.select_sender_type)
+                    .setItems(types.map { SENDER_FRAGMENT_LIST[it].name }.toTypedArray()) { _, position ->
+                        PageOption.to(getFragment(types[position]))
+                            .setNewActivity(true)
+                            .putInt(KEY_SENDER_TYPE, types[position])
+                            .open(this@SendersFragment)
+                    }
+                    .setNegativeButton(R.string.cancel, null)
+                    .show()
             }
         })
         return titleBar
-    }
-
-    private fun getContainer(): MainActivity? {
-        return activity as MainActivity?
     }
 
     /**
@@ -282,7 +272,11 @@ class SendersFragment : BaseFragment<FragmentSendersBinding?>(),
     }
 
     override fun onItemClicked(view: View?, item: Sender) {
-        Log.e(TAG, item.toString())
+        if (!cn.ppps.forwarder.utils.TargetCatalog.isAvailable(item.type) && view?.id != R.id.iv_delete) {
+            MaterialDialog.Builder(requireContext()).title(R.string.target_legacy)
+                .content(R.string.target_legacy_help).positiveText(R.string.lab_yes).show()
+            return
+        }
         when (view?.id) {
             R.id.iv_copy -> {
                 PageOption.to(getFragment(item.type))
@@ -326,7 +320,7 @@ class SendersFragment : BaseFragment<FragmentSendersBinding?>(),
             @Suppress("UNCHECKED_CAST")
             PageOption.to(Class.forName(widgetInfo.classPath) as Class<XPageFragment>) //Targetfragment
                 .setNewActivity(true)
-                .putInt(KEY_SENDER_TYPE, pos) //Attention: That's just the order.
+                .putInt(KEY_SENDER_TYPE, cn.ppps.forwarder.utils.TargetCatalog.availableTypes[pos])
                 .open(this)
             dialog.dismiss()
         } catch (e: Exception) {

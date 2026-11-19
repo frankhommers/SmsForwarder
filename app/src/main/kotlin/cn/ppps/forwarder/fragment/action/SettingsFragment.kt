@@ -46,7 +46,7 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
+import cn.ppps.forwarder.widget.material.TitleBar
 import com.xuexiang.xutil.XUtil
 import java.util.Date
 
@@ -102,11 +102,9 @@ class SettingsFragment : BaseFragment<FragmentTasksActionSettingsBinding?>(), Vi
             }
         })
 
-        Log.d(TAG, "initViews eventData:$eventData")
         var settingVo = SettingsSetting(getString(R.string.task_settings_tips))
         if (eventData != null) {
             settingVo = Gson().fromJson(eventData, SettingsSetting::class.java)
-            Log.d(TAG, "initViews settingVo:$settingVo")
         }
         binding!!.sbEnableSms.isChecked = settingVo.enableSms
         binding!!.sbEnablePhone.isChecked = settingVo.enablePhone
@@ -284,7 +282,7 @@ class SettingsFragment : BaseFragment<FragmentTasksActionSettingsBinding?>(), Vi
                 val inputText = binding!!.etMinInterval.text.toString()
                 if (inputText.isEmpty() || inputText == "0") {
                     binding!!.etMinInterval.setText("1")
-                    binding!!.etMinInterval.setSelection(binding!!.etMinInterval.text.length) // Move cursor to end of text
+                    binding!!.etMinInterval.setSelection(binding!!.etMinInterval.text.toString().length) // Move cursor to end of text
                 }
             }
         }
@@ -294,7 +292,7 @@ class SettingsFragment : BaseFragment<FragmentTasksActionSettingsBinding?>(), Vi
                 val inputText = binding!!.etMinDistance.text.toString()
                 if (inputText.isEmpty()) {
                     binding!!.etMinDistance.setText("0")
-                    binding!!.etMinDistance.setSelection(binding!!.etMinDistance.text.length) // Move cursor to end of text
+                    binding!!.etMinDistance.setSelection(binding!!.etMinDistance.text.toString().length) // Move cursor to end of text
                 }
             }
         }
@@ -333,17 +331,27 @@ class SettingsFragment : BaseFragment<FragmentTasksActionSettingsBinding?>(), Vi
             }
         }
 
+        // Visible value readout (no setOnSeekBarListener on this slider); display only. 0 = filter off.
+        binding!!.xsbDuplicateMessagesLimits.addOnChangeListener { _, _, _ -> syncDuplicateReadout() }
+        syncDuplicateReadout()
+    }
+
+    private fun syncDuplicateReadout() {
+        val b = binding ?: return
+        val seconds = b.xsbDuplicateMessagesLimits.selectedNumber
+        b.actionFormDuplicateValue.text = if (seconds == 0) getString(R.string.action_form_duplicate_off) else getString(R.string.action_form_duplicate_value, seconds)
+        b.actionFormDuplicateValue.visibility = b.xsbDuplicateMessagesLimits.visibility
     }
 
     @SingleClick
     override fun onClick(v: View) {
+        if (v.id != R.id.btn_del && !cn.ppps.forwarder.utils.ItemRows.validateAll(binding!!.root)) return
         try {
             when (v.id) {
                 R.id.btn_test -> {
                     mCountDownHelper?.start()
                     try {
                         val settingVo = checkSetting()
-                        Log.d(TAG, settingVo.toString())
                         val taskAction = TaskSetting(TASK_ACTION_SETTINGS, getString(R.string.task_settings), settingVo.description, Gson().toJson(settingVo), requestCode)
                         val taskActionsJson = Gson().toJson(arrayListOf(taskAction))
                         val msgInfo = MsgInfo("task", getString(R.string.task_settings), settingVo.description, Date(), getString(R.string.task_settings))
@@ -411,7 +419,7 @@ class SettingsFragment : BaseFragment<FragmentTasksActionSettingsBinding?>(), Vi
         //The list is empty and does not show drop-down frames
         if (appListSpinnerList.isEmpty()) return
 
-        appListSpinnerAdapter = AppListSpinnerAdapter(appListSpinnerList).setIsFilterKey(true).setFilterColor("#EF5362").setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
+        appListSpinnerAdapter = AppListSpinnerAdapter(appListSpinnerList).setIsFilterKey(true).setFilterColor(String.format("#%06X", com.google.android.material.color.MaterialColors.getColor(binding!!.root, com.google.android.material.R.attr.colorPrimary) and 0xFFFFFF)).setBackgroundSelector(R.drawable.selector_custom_spinner_bg)
         binding!!.spApp.setAdapter(appListSpinnerAdapter)
         binding!!.spApp.setOnItemClickListener { _: AdapterView<*>, _: View, position: Int, _: Long ->
             try {

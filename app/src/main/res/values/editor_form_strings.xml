@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Final small editors (SMS, Socket, Notify, Reverse-proxy tunnel, Network, Cron). Display only; stored values are unchanged. -->
+<resources>
+    <string name="editor_form_sms_only_no_network_help">On: sends only while the phone has no working internet connection.</string>
+    <string name="editor_form_server_address">Server address</string>
+    <string name="editor_form_server_address_helper">IP address or host name</string>
+    <string name="editor_form_socket_payload">Message content</string>
+    <string name="editor_form_socket_template_helper">Empty sends {\"msg\": \"[msg]\"}. [msg] is the message.</string>
+    <string name="editor_form_socket_secret_helper">Optional. Fills [sign] with an HMAC-SHA256 signature.</string>
+    <string name="editor_form_frpc_purpose">Starts or stops saved reverse-proxy tunnel configurations.</string>
+    <string name="editor_form_frpc_unavailable">Not available: this version has no tunnel client. A saved action is kept but does nothing.</string>
+    <string name="editor_form_frpc_action">Action</string>
+    <string name="editor_form_frpc_configs">Tunnel configurations</string>
+    <string name="editor_form_frpc_configs_helper">Empty: all configurations that start automatically</string>
+    <string name="editor_form_cron_fields_help">Tap a field to pick values. Test shows the next run times.</string>
+    <string name="editor_form_cron_check_title">Schedule check</string>
+    <string name="editor_form_cron_field_invalid">Not a valid value for this field</string>
+    <string name="editor_form_cron_day_week_conflict">Set Day of month or Day of week to ?</string>
+    <string name="editor_form_cron_invalid_summary">Not a valid schedule</string>
+    <string name="editor_form_cron_no_next">This schedule has no future run time.</string>
+    <string name="editor_form_cron_range">Range</string>
+    <string name="editor_form_cron_start_at">Start at</string>
+    <string name="editor_form_cron_every">Repeat every</string>
+    <string name="editor_form_cron_specific">Specific values</string>
+    <string name="editor_form_cron_no_specific">No specific value (?)</string>
+    <string name="editor_form_cron_day_number">Day of the month (1–31)</string>
+    <string name="editor_form_cron_nth_weekday">Nth weekday of the month</string>
+    <string name="editor_form_cron_day_of_month">Day of month</string>
+    <string name="editor_form_cron_day_of_week">Day of week</string>
+    <string name="editor_form_cron_weekday_numbers">1 = Sunday, 2 = Monday … 7 = Saturday</string>
+</resources>

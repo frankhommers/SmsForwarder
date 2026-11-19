@@ -20,12 +20,10 @@ class CloneController {
     @PostMapping("/pull")
     fun pull(@RequestBody bean: BaseRequest<CloneInfo>): CloneInfo {
         val cloneBean = bean.data
-        Log.d(TAG, cloneBean.toString())
 
         HttpServerUtils.compareVersion(cloneBean)
 
         val cloneInfo = HttpServerUtils.exportSettings()
-        Log.d(TAG, cloneInfo.toString())
         return cloneInfo
     }
 
@@ -34,7 +32,6 @@ class CloneController {
     @PostMapping("/push")
     fun push(@RequestBody bean: BaseRequest<CloneInfo>): String {
         val cloneInfo = bean.data
-        Log.d(TAG, cloneInfo.toString())
 
         HttpServerUtils.compareVersion(cloneInfo)
 

@@ -11,8 +11,8 @@ import com.xuexiang.xpage.core.PageOption
 import com.xuexiang.xpage.enums.CoreAnim
 import com.xuexiang.xrouter.facade.service.SerializationService
 import com.xuexiang.xrouter.launcher.XRouter
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.actionbar.TitleUtils
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.TitleUtils
 import java.io.Serializable
 
 /**

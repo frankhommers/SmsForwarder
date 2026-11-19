@@ -1,0 +1,15 @@
+SmsForwarder Private — lokale privacyverklaring
+
+Dit is een onafhankelijke, op privacy gerichte fork van SmsForwarder van pppscn en andere bijdragers.
+
+SMS-berichten, oproepgegevens, contacten en meldingen worden op uw apparaat verwerkt en doorgestuurd volgens de bestemmingen en regels die u instelt. Doorstuurdiensten ontvangen de inhoud die u verzendt; hun eigen privacybeleid is van toepassing. Opgeslagen configuraties van niet meer aangeboden diensten blijven behouden.
+
+Umeng-analyses, automatische upstream-updatecontroles, externe tips, telefoonnummers opzoeken en het downloaden van uitvoerbare FRPC-code zijn verwijderd. De reverse-proxytunnelclient FRPC is niet beschikbaar. Installeer gecontroleerde updates handmatig. Telefoonregio’s worden als onbekend weergegeven. Online adresbepaling is uitgeschakeld; coördinaten blijven beschikbaar als u locatie inschakelt.
+
+Op uitdrukkelijk verzoek van de eigenaar vraagt de verwerking van netwerkwijzigingen via HTTPS GET https://ip.hommers.it/ het openbare IP-adres op. Deze dienst kan uw IP-adres en het tijdstip van het verzoek zien. Dit verzoek bevat geen SMS-inhoud, telefoonnummers of apparaat-ID’s. Het antwoord bevat één adres; niet beide adresfamilies tegelijk. DNS en Android-netwerkdiensten blijven in gebruik.
+
+Hulp- en projectkoppelingen openen alleen wanneer u erop tikt. Externe websites kunnen hun eigen diensten benaderen. Tips en deze verklaring zijn lokaal gebundeld. Dit betekent niet dat al het netwerkverkeer is uitgeschakeld.
+
+Configuratie, inloggegevens en berichtgeschiedenis worden lokaal opgeslagen. Bescherm uw apparaat en geëxporteerde back-ups. Debuglogboeken kunnen gevoelige gegevens bevatten; schakel ze alleen in wanneer dat nodig is. Doorsturen, e-mail, MQTT, HTTP-client/server, locatie en automatisering kunnen gegevens verzenden of acties uitvoeren. Schakel alleen functies in die u begrijpt. Locatiediensten van het besturingssysteem kunnen eigen netwerkdiensten gebruiken.
+
+De broncodecontrole en regressietests vormen geen volledige controle van alle afhankelijkheden of netwerkopname op een apparaat. Zie README_PRIVACY.md voor de reikwijdte en beperkingen van de verificatie.

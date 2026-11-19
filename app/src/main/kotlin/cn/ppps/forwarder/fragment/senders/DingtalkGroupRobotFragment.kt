@@ -33,9 +33,9 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -125,7 +125,6 @@ class DingtalkGroupRobotFragment : BaseFragment<FragmentSendersDingtalkGroupRobo
                 binding!!.etName.setText(sender.name)
                 binding!!.sbEnable.isChecked = sender.status == 1
                 val settingVo = Gson().fromJson(sender.jsonSetting, DingtalkGroupRobotSetting::class.java)
-                Log.d(TAG, settingVo.toString())
                 if (settingVo != null) {
                     binding!!.etToken.setText(settingVo.token)
                     binding!!.etSecret.setText(settingVo.secret)
@@ -173,7 +172,6 @@ class DingtalkGroupRobotFragment : BaseFragment<FragmentSendersDingtalkGroupRobo
                     Thread {
                         try {
                             val settingVo = checkSetting()
-                            Log.d(TAG, settingVo.toString())
                             val name = binding!!.etName.text.toString().trim().takeIf { it.isNotEmpty() } ?: getString(R.string.test_sender_name)
                             val msgInfo = MsgInfo("sms", getString(R.string.test_phone_num), String.format(getString(R.string.test_sender_sms), name), Date(), getString(R.string.test_sim_info))
                             DingtalkGroupRobotUtils.sendMsg(settingVo, msgInfo)
@@ -211,7 +209,6 @@ class DingtalkGroupRobotFragment : BaseFragment<FragmentSendersDingtalkGroupRobo
                     val settingVo = checkSetting()
                     if (isClone) senderId = 0
                     val senderNew = Sender(senderId, senderType, name, Gson().toJson(settingVo), status)
-                    Log.d(TAG, senderNew.toString())
 
                     viewModel.insertOrUpdate(senderNew)
                     XToastUtils.success(R.string.tipSaveSuccess)

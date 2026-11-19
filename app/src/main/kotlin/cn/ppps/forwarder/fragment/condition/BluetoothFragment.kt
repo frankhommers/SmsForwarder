@@ -37,9 +37,9 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
 
 
 @Page(name = "Bluetooth")
@@ -138,10 +138,8 @@ class BluetoothFragment : BaseFragment<FragmentTasksConditionBluetoothBinding?>(
             checkSetting(true)
         }
 
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             val settingVo = Gson().fromJson(eventData, BluetoothSetting::class.java)
-            Log.d(TAG, "initViews settingVo:$settingVo")
             binding!!.tvDescription.text = settingVo.description
             binding!!.rgBluetoothAction.check(settingVo.getActionCheckId())
             binding!!.rgBluetoothState.check(settingVo.getStateCheckId())

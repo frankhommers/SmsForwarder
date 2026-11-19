@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="copy_unknown_device">Onbekend apparaat</string>
+    <string name="copy_unknown_error">Onbekende fout</string>
+    <string name="copy_security_key_required">Vul de ondertekeningssleutel, openbare RSA-sleutel of SM4-sleutel in voor de gekozen beveiligingsmodus.</string>
+    <string name="copy_wechat_sm4">Het WeChat-miniprogramma vereist SM4-versleuteling. Wijzig de beveiligingsmodus in de serverinstellingen.</string>
+    <string name="copy_rule_spaces">Regel %1$d: opeenvolgende spaties tussen tokens zijn niet toegestaan.</string>
+    <string name="copy_rule_tokens">Regel %1$d: gebruik vier syntaxistokens gevolgd door een waarde, bijvoorbeeld AND IS PHONE_NUM EQUALS 10086.</string>
+    <string name="copy_rule_token_invalid">Regel %1$d: verwacht een van %2$s; ontvangen: %3$s.</string>
+    <string name="copy_rule_conjunction">Ongeldig verbindingswoord. Gebruik AND of OR.</string>
+    <string name="copy_markdown_disabled">Externe Markdown is uitgeschakeld in deze privacyfork.</string>
+    <string name="copy_sms_empty">Vul minstens één ontvanger en een bericht in.</string>
+    <string name="copy_email_sent">E-mail verzonden.</string>
+    <string name="copy_email_failed">E-mail kon niet worden verzonden: %1$s</string>
+    <string name="copy_pgp_user_missing">Geen gebruikers-ID gevonden in de OpenPGP-privésleutelring.</string>
+    <string name="copy_pgp_private_missing">De OpenPGP-privésleutelring van de afzender is vereist.</string>
+    <string name="copy_pgp_password_missing">Het wachtwoord voor de OpenPGP-privésleutel is vereist.</string>
+    <string name="copy_pgp_public_missing">De OpenPGP-openbaresleutelring van de ontvanger is vereist.</string>
+    <string name="copy_recipient_required">Een e-mailadres van de ontvanger is vereist.</string>
+    <string name="copy_openkeychain_timeout">Time-out bij verbinden met OpenKeychain.</string>
+    <string name="copy_openkeychain_bind">Verbinding met OpenKeychain mislukt: %1$s</string>
+    <string name="copy_openkeychain_authorize">OpenKeychain heeft toestemming of een sleutelkeuze nodig. Open de e-mailbestemming en sla deze opnieuw op om toestemming te geven.</string>
+    <string name="copy_openkeychain_encrypt">OpenKeychain-versleuteling mislukt: %1$s</string>
+    <string name="copy_udp_timeout">Geen UDP-bevestiging ontvangen vóór de time-out.</string>
+    <string name="copy_mqtt_sent">MQTT-bericht verzonden.</string>
+    <string name="copy_mqtt_lost">MQTT-verbinding verbroken.</string>
+    <string name="copy_url_opened">URL geopend.</string>
+    <string name="copy_server_private_key">Er is geen RSA-privésleutel ingesteld op de server.</string>
+    <string name="copy_server_sm4_key">Er is geen SM4-sleutel ingesteld op de server.</string>
+    <string name="copy_foreground_channel">SmsForwarder-achtergrondservice</string>
+    <string name="copy_add_recipient">Ontvanger toevoegen</string>
+    <string name="copy_pick_contact">Kiezen uit contacten</string>
+    <string name="copy_reply_sender">Oorspronkelijke afzender gebruiken ({{FROM}})</string>
+    <string name="copy_phone_template">Als sjabloon bewerken</string>
+    <string name="copy_phone_invalid">Vul één telefoonnummer in (3–20 cijfers, eventueel +) of een sjabloontag.</string>
+    <string name="copy_phone_required">Vul een telefoonnummer van de ontvanger in.</string>
+    <string name="copy_contact_unavailable">Het telefoonnummer van het geselecteerde contact kon niet worden gelezen.</string>
+</resources>

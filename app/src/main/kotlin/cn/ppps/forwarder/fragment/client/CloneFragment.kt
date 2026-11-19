@@ -1,6 +1,5 @@
 package cn.ppps.forwarder.fragment.client
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Environment
 import android.view.LayoutInflater
@@ -24,6 +23,7 @@ import cn.ppps.forwarder.utils.RSACrypt
 import cn.ppps.forwarder.utils.SM4Crypt
 import cn.ppps.forwarder.utils.SettingUtils
 import cn.ppps.forwarder.utils.XToastUtils
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializer
@@ -42,9 +42,9 @@ import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xrouter.utils.TextUtils
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
 import com.xuexiang.xutil.data.ConvertTools
 import com.xuexiang.xutil.file.FileIOUtils
 import com.xuexiang.xutil.file.FileUtils
@@ -89,31 +89,14 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
      * Initialize controls
      */
     override fun initViews() {
-        // Request for storage privileges
-        XXPermissions.with(this)
-            .permission(PermissionLists.getManageExternalStoragePermission())
-            .request(object : OnPermissionCallback {
-                @SuppressLint("SetTextI18n")
-                override fun onResult(grantedList: MutableList<IPermission>, deniedList: MutableList<IPermission>) {
-                    val allGranted = deniedList.isEmpty()
-                    if (!allGranted) {
-                        // Check whether the user selected Never ask again for denied permissions
-                        val doNotAskAgain = XXPermissions.isDoNotAskAgainPermissions(requireActivity(), deniedList)
-                        if (doNotAskAgain) {
-                            XToastUtils.error(R.string.toast_denied_never)
-                            // Jump to Apply Permission System Settings page if refused permanently
-                            XXPermissions.startPermissionActivity(requireContext(), deniedList)
-                        }
-                        // Logic of failure in processing requests for permission
-                        binding!!.tvBackupPath.text = getString(R.string.storage_permission_tips)
-                        return
-                    }
-                    // Logic of successful processing of requests for authority
-                    backupPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
-                    binding!!.tvBackupPath.text = backupPath + File.separator + backupFile
-
-                }
-            })
+        // File backup needs Android "All files access". Explain it in the app first; the Android settings page only opens
+        // after the user chooses Continue (on this screen or from Export/Import).
+        if (XXPermissions.isGrantedPermission(requireContext(), PermissionLists.getManageExternalStoragePermission())) {
+            useDownloadFolder()
+        } else {
+            binding!!.btnStoragePermission.visibility = View.VISIBLE
+            if (defaultSelection == 1) explainStoragePermission()
+        }
 
         binding!!.tabBar.setTabTitles(getStringArray(R.array.clone_type_option))
         binding!!.tabBar.setOnTabClickListener { _, position ->
@@ -176,7 +159,39 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
         })
     }
 
+    private fun useDownloadFolder() {
+        backupPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+        binding!!.tvBackupPath.text = backupPath + File.separator + backupFile
+        binding!!.btnStoragePermission.visibility = View.GONE
+    }
+
+    private fun explainStoragePermission() {
+        cn.ppps.forwarder.widget.material.StoragePermissionDialog.show(requireContext(), R.string.infra_form_storage_clone_message) { requestStoragePermission() }
+    }
+
+    private fun requestStoragePermission() {
+        XXPermissions.with(this)
+            .permission(PermissionLists.getManageExternalStoragePermission())
+            .request(object : OnPermissionCallback {
+                override fun onResult(grantedList: MutableList<IPermission>, deniedList: MutableList<IPermission>) {
+                    if (binding == null) return
+                    if (deniedList.isNotEmpty()) {
+                        // Check whether the user selected Never ask again for denied permissions
+                        if (XXPermissions.isDoNotAskAgainPermissions(requireActivity(), deniedList)) {
+                            XToastUtils.error(R.string.toast_denied_never)
+                            XXPermissions.startPermissionActivity(requireContext(), deniedList)
+                        }
+                        binding!!.tvBackupPath.text = getString(R.string.storage_permission_tips)
+                        binding!!.btnStoragePermission.visibility = View.VISIBLE
+                        return
+                    }
+                    useDownloadFolder()
+                }
+            })
+    }
+
     override fun initListeners() {
+        binding!!.btnStoragePermission.setOnClickListener { explainStoragePermission() }
         binding!!.btnPush.setOnClickListener(this)
         binding!!.btnPull.setOnClickListener(this)
         binding!!.btnExport.setOnClickListener(this)
@@ -192,6 +207,7 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
             R.id.btn_pull -> pullData()
             //Export Configuration
             R.id.btn_export -> {
+                if (backupPath == null) { explainStoragePermission(); return }
                 try {
                     exportCountDownHelper?.start()
                     val file = File(backupPath + File.separator + backupFile)
@@ -199,7 +215,6 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
                     FileUtils.createFileByDeleteOldFile(file)
                     val cloneInfo = HttpServerUtils.exportSettings()
                     val jsonStr = Gson().toJson(cloneInfo)
-                    Log.d(TAG, "jsonStr = $jsonStr")
                     if (FileIOUtils.writeFileFromString(file, jsonStr)) {
                         XToastUtils.success(getString(R.string.export_succeeded))
                     } else {
@@ -212,6 +227,7 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
             }
             //Import Configuration
             R.id.btn_import -> {
+                if (backupPath == null) { explainStoragePermission(); return }
                 try {
                     importCountDownHelper?.start()
                     val file = File(backupPath + File.separator + backupFile)
@@ -222,7 +238,6 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
                     }
 
                     val jsonStr = FileIOUtils.readFile2String(file)
-                    Log.d(TAG, "jsonStr = $jsonStr")
                     if (TextUtils.isEmpty(jsonStr)) {
                         XToastUtils.error(getString(R.string.import_failed))
                         return
@@ -233,7 +248,6 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
                     builder.registerTypeAdapter(Date::class.java, JsonDeserializer<Any?> { _, _, _ -> Date() })
                     val gson = builder.create()
                     val cloneInfo = gson.fromJson(jsonStr, CloneInfo::class.java)
-                    Log.d(TAG, "cloneInfo = $cloneInfo")
 
                     //Judge whether the version is consistent
                     HttpServerUtils.compareVersion(cloneInfo)
@@ -282,7 +296,6 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
         msgMap["data"] = HttpServerUtils.exportSettings()
 
         var requestMsg: String = Gson().toJson(msgMap)
-        Log.i(TAG, "requestMsg:$requestMsg")
 
         val postRequest = XHttp.post(requestUrl).keepJson(true).timeOut((SettingUtils.requestTimeout * 1000).toLong()) //Timeout10s
             .cacheMode(CacheMode.NO_CACHE).timeStamp(true)
@@ -293,7 +306,6 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
                 try {
                     requestMsg = Base64.encode(requestMsg.toByteArray())
                     requestMsg = RSACrypt.encryptByPublicKey(requestMsg, publicKey)
-                    Log.i(TAG, "requestMsg: $requestMsg")
                 } catch (e: Exception) {
                     XToastUtils.error(getString(R.string.request_failed) + e.message)
                     e.printStackTrace()
@@ -309,7 +321,6 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
                     //requestMsg = Base64.encode(requestMsg.toByteArray())
                     val encryptCBC = SM4Crypt.encrypt(requestMsg.toByteArray(), sm4Key)
                     requestMsg = ConvertTools.bytes2HexString(encryptCBC)
-                    Log.i(TAG, "requestMsg: $requestMsg")
                 } catch (e: Exception) {
                     XToastUtils.error(getString(R.string.request_failed) + e.message)
                     e.printStackTrace()
@@ -331,7 +342,6 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
             }
 
             override fun onSuccess(response: String) {
-                Log.i(TAG, response)
                 try {
                     var json = response
                     if (HttpServerUtils.clientSafetyMeasures == 2) {
@@ -394,7 +404,6 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
         msgMap["data"] = mutableMapOf<String, Any>()
 
         var requestMsg: String = Gson().toJson(msgMap)
-        Log.i(TAG, "requestMsg:$requestMsg")
 
         val postRequest = XHttp.post(requestUrl).keepJson(true).timeStamp(true)
 
@@ -438,7 +447,6 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
             }
 
             override fun onSuccess(response: String) {
-                Log.i(TAG, response)
                 try {
                     var json = response
                     if (HttpServerUtils.clientSafetyMeasures == 2) {
@@ -499,7 +507,6 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
         msgMap["data"] = dataMap
 
         var requestMsg: String = Gson().toJson(msgMap)
-        Log.i(TAG, "requestMsg:$requestMsg")
 
         val postRequest = XHttp.post(requestUrl).keepJson(true).timeStamp(true)
 
@@ -509,7 +516,6 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
                 try {
                     requestMsg = Base64.encode(requestMsg.toByteArray())
                     requestMsg = RSACrypt.encryptByPublicKey(requestMsg, publicKey)
-                    Log.i(TAG, "requestMsg: $requestMsg")
                 } catch (e: Exception) {
                     XToastUtils.error(getString(R.string.request_failed) + e.message)
                     e.printStackTrace()
@@ -525,7 +531,6 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
                     //requestMsg = Base64.encode(requestMsg.toByteArray())
                     val encryptCBC = SM4Crypt.encrypt(requestMsg.toByteArray(), sm4Key)
                     requestMsg = ConvertTools.bytes2HexString(encryptCBC)
-                    Log.i(TAG, "requestMsg: $requestMsg")
                 } catch (e: Exception) {
                     XToastUtils.error(getString(R.string.request_failed) + e.message)
                     e.printStackTrace()
@@ -547,7 +552,6 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
             }
 
             override fun onSuccess(response: String) {
-                Log.i(TAG, response)
                 try {
                     var json = response
                     if (HttpServerUtils.clientSafetyMeasures == 2) {
@@ -568,7 +572,6 @@ class CloneFragment : BaseFragment<FragmentClientCloneBinding?>(), View.OnClickL
                     val resp: BaseResponse<CloneInfo> = gson.fromJson(json, object : TypeToken<BaseResponse<CloneInfo>>() {}.type)
                     if (resp.code == 200) {
                         val cloneInfo = resp.data
-                        Log.d(TAG, "cloneInfo = $cloneInfo")
 
                         if (cloneInfo == null) {
                             XToastUtils.error(getString(R.string.request_failed))

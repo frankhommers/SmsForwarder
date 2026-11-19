@@ -33,7 +33,6 @@ class WeworkRobotUtils private constructor() {
             }
 
             val requestUrl = setting.webHook
-            Log.i(TAG, "requestUrl:$requestUrl")
 
             val msgMap: MutableMap<String, Any> = mutableMapOf()
             msgMap["msgtype"] = if (setting.msgType == "markdown") "markdown" else "text"
@@ -58,7 +57,6 @@ class WeworkRobotUtils private constructor() {
             }
 
             val requestMsg: String = Gson().toJson(msgMap)
-            Log.i(TAG, "requestMsg:$requestMsg")
 
             XHttp.post(requestUrl)
                 .upJson(requestMsg)
@@ -77,7 +75,6 @@ class WeworkRobotUtils private constructor() {
                     }
 
                     override fun onSuccess(response: String) {
-                        Log.i(TAG, response)
 
                         val resp = Gson().fromJson(response, WeworkRobotResult::class.java)
                         val status = if (resp?.errcode == 0L) 2 else 0

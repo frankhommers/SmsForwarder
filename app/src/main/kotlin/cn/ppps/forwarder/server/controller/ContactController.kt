@@ -24,7 +24,6 @@ class ContactController {
     @PostMapping("/query")
     fun query(@RequestBody bean: BaseRequest<ContactQueryData>): MutableList<ContactInfo> {
         val contactQueryData = bean.data
-        Log.d(TAG, contactQueryData.toString())
 
         val limit = contactQueryData.pageSize
         val offset = (contactQueryData.pageNum - 1) * limit
@@ -36,7 +35,6 @@ class ContactController {
     @PostMapping("/add")
     fun add(@RequestBody bean: BaseRequest<ContactInfo>): String {
         val contactData = bean.data
-        Log.d(TAG, contactData.toString())
 
         //Create an empty oneContentValues
         val values = ContentValues()

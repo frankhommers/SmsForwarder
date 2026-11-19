@@ -237,7 +237,7 @@ data class Rule(
                 else -> {}
             }
         }
-        Log.i(TAG, "rule:$this checkMsg:$msg checked:$mixChecked")
+        Log.i(TAG, "rule id=$id checked:$mixChecked")
         return mixChecked
     }
 
@@ -284,7 +284,7 @@ data class Rule(
             evaluateCondition(value)
         }
 
-        Log.i(TAG, "checkValue $msgValue $check $value checked:$checked")
+        Log.i(TAG, "checkValue $check checked:$checked")
         return checked
     }
 

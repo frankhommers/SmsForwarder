@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Final small editors (SMS, Socket, Notify, Reverse-proxy tunnel, Network, Cron). Display only; stored values are unchanged. -->
+<resources>
+    <string name="editor_form_sms_only_no_network_help">Aan: verstuurt alleen als de telefoon geen werkende internetverbinding heeft.</string>
+    <string name="editor_form_server_address">Serveradres</string>
+    <string name="editor_form_server_address_helper">IP-adres of hostnaam</string>
+    <string name="editor_form_socket_payload">Berichtinhoud</string>
+    <string name="editor_form_socket_template_helper">Leeg verstuurt {\"msg\": \"[msg]\"}. [msg] is het bericht.</string>
+    <string name="editor_form_socket_secret_helper">Optioneel. Vult [sign] met een HMAC-SHA256-handtekening.</string>
+    <string name="editor_form_frpc_purpose">Start of stopt opgeslagen reverse-proxytunnelconfiguraties.</string>
+    <string name="editor_form_frpc_unavailable">Niet beschikbaar: deze versie heeft geen tunnelclient. Een bewaarde actie doet niets.</string>
+    <string name="editor_form_frpc_action">Actie</string>
+    <string name="editor_form_frpc_configs">Tunnelconfiguraties</string>
+    <string name="editor_form_frpc_configs_helper">Leeg: alle configuraties die automatisch starten</string>
+    <string name="editor_form_cron_fields_help">Tik op een veld om waarden te kiezen. Test toont de volgende uitvoertijden.</string>
+    <string name="editor_form_cron_check_title">Controle van het schema</string>
+    <string name="editor_form_cron_field_invalid">Geen geldige waarde voor dit veld</string>
+    <string name="editor_form_cron_day_week_conflict">Zet Dag van de maand of Dag van de week op ?</string>
+    <string name="editor_form_cron_invalid_summary">Geen geldig schema</string>
+    <string name="editor_form_cron_no_next">Dit schema heeft geen toekomstige uitvoertijd.</string>
+    <string name="editor_form_cron_range">Bereik</string>
+    <string name="editor_form_cron_start_at">Beginnen bij</string>
+    <string name="editor_form_cron_every">Herhalen elke</string>
+    <string name="editor_form_cron_specific">Specifieke waarden</string>
+    <string name="editor_form_cron_no_specific">Geen specifieke waarde (?)</string>
+    <string name="editor_form_cron_day_number">Dag van de maand (1–31)</string>
+    <string name="editor_form_cron_nth_weekday">N-de weekdag van de maand</string>
+    <string name="editor_form_cron_day_of_month">Dag van de maand</string>
+    <string name="editor_form_cron_day_of_week">Dag van de week</string>
+    <string name="editor_form_cron_weekday_numbers">1 = zondag, 2 = maandag … 7 = zaterdag</string>
+</resources>

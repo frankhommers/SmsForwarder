@@ -37,7 +37,12 @@ import cn.ppps.forwarder.utils.KEY_SENDER_TYPE
 import cn.ppps.forwarder.utils.Log
 import cn.ppps.forwarder.utils.SettingUtils
 import cn.ppps.forwarder.utils.XToastUtils
+import cn.ppps.forwarder.utils.mail.EmailCrypto
+import cn.ppps.forwarder.utils.mail.EmailDeliveryReport
+import cn.ppps.forwarder.utils.mail.EmailKeys
 import cn.ppps.forwarder.utils.mail.OpenKeychainHelper
+import cn.ppps.forwarder.utils.mail.SigningKey
+import com.google.android.material.color.MaterialColors
 import cn.ppps.forwarder.utils.sender.EmailUtils
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.xuexiang.xaop.annotation.SingleClick
@@ -45,10 +50,12 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
-import com.xuexiang.xui.widget.spinner.materialspinner.MaterialSpinner
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.FormHelp
+import cn.ppps.forwarder.widget.material.TargetForm
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
+import cn.ppps.forwarder.widget.material.TargetDropdown as MaterialSpinner
 import com.xuexiang.xutil.resource.ResUtils.getStringArray
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -74,7 +81,8 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
     private var titleBar: TitleBar? = null
     private val viewModel by viewModels<SenderViewModel> { BaseViewModelFactory(context) }
     private var mCountDownHelper: CountDownButtonHelper? = null
-    private var mailType: String = getString(R.string.other_mail_type) //Mailbox Type
+    private var mailType: String = cn.ppps.forwarder.utils.EmailProviderChoices.CUSTOM
+    private var providerTokens = cn.ppps.forwarder.utils.EmailProviderChoices.tokens()
     private var recipientItemMap: MutableMap<Int, LinearLayout> = mutableMapOf()
     private val downloadPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
 
@@ -85,6 +93,9 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
     private var openKeychainSignKeyId: Long = 0L
     private var openKeychainSignKeyDesc: String = ""
     private var openKeychainHelper: OpenKeychainHelper? = null
+
+    //Stored JSON of the target being edited: unknown properties are kept when saving (EmailSetting.mergeJson)
+    private var loadedJsonSetting: String? = null
 
     @JvmField
     @AutoWired(name = KEY_SENDER_ID)
@@ -130,18 +141,24 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
             }
         })
 
-        val mailTypeArray = getStringArray(R.array.MailType)
-        binding!!.spMailType.setOnItemSelectedListener { _: MaterialSpinner?, position: Int, _: Long, item: Any ->
-            mailType = item.toString()
-            //XToastUtils.warning(mailType)
-            binding!!.layoutServiceSetting.visibility = if (position == mailTypeArray.size - 1) View.VISIBLE else View.GONE
+        fun showProviders(stored: String) {
+            providerTokens = cn.ppps.forwarder.utils.EmailProviderChoices.tokens(stored)
+            binding!!.spMailType.setItems(cn.ppps.forwarder.utils.EmailProviderChoices.labels(
+                providerTokens, getString(R.string.email_provider_custom)
+            ) { getString(R.string.email_provider_legacy, it) })
+            binding!!.spMailType.selectedIndex = providerTokens.indexOf(stored).coerceAtLeast(0)
+            TargetForm.wrapDropdown(binding!!.spMailType)
+        }
+        showProviders(mailType)
+        binding!!.spMailType.setOnItemSelectedListener { _: MaterialSpinner?, position: Int, _: Long, _: Any ->
+            mailType = providerTokens[position]
+            binding!!.layoutServiceSetting.visibility = if (mailType == "other") View.VISIBLE else View.GONE
         }
         binding!!.spMailType.setOnNothingSelectedListener {
-            mailType = mailTypeArray[mailTypeArray.size - 1]
-            binding!!.spMailType.selectedIndex = mailTypeArray.size - 1
+            mailType = "other"
+            binding!!.spMailType.selectedIndex = providerTokens.indexOf(mailType)
             binding!!.layoutServiceSetting.visibility = View.VISIBLE
         }
-        binding!!.spMailType.selectedIndex = mailTypeArray.size - 1
         binding!!.layoutServiceSetting.visibility = View.VISIBLE
 
         binding!!.rgEncryptionProtocol.setOnCheckedChangeListener { _, checkedId ->
@@ -180,9 +197,12 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
                     binding!!.layoutSenderKeystore.visibility = View.GONE
                     binding!!.layoutOpenkeychainSignKey.visibility = View.GONE
                     binding!!.tvEmailTo.text = getString(R.string.email_to)
-                    binding!!.tvEmailToTips.text = getString(R.string.email_to_tips)
+                    //Same text as the layout default: the add action is now the + icon beside the heading
+                    binding!!.tvEmailToTips.text = getString(R.string.target_form_email_to_tips)
                 }
             }
+
+            updateFallbackState()
 
             //Iterate layout_recipients Sub-elements, Settings layout_recipient_keystore Visibility
             //Plain Certificate not required；OpenKeychain The public key is automatically matched by pressing the mailbox and does not require a certificate
@@ -195,6 +215,17 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
         //Create Tab Button
         CommonUtils.createTagButtons(requireContext(), binding!!.glTitleTemplate, binding!!.etTitleTemplate)
         CommonUtils.createTagButtons(requireContext(), binding!!.glNickname, binding!!.etNickname)
+
+        //Display only (TargetForm): help dialogs, tag grids behind a toggle, dropdown popup rows that wrap
+        FormHelp.install(binding!!.btnHelpSmtp, R.string.target_form_section_smtp, R.string.target_form_smtp_dialog)
+        FormHelp.install(binding!!.btnHelpEncryption, R.string.encryption_protocol, R.string.target_form_email_encryption_dialog)
+        FormHelp.install(binding!!.btnHelpSignKey, R.string.target_form_openkeychain_sign_key, R.string.target_form_sign_key_dialog)
+        FormHelp.install(binding!!.btnHelpUnencryptedFallback, R.string.target_form_email_fallback, R.string.target_form_email_fallback_dialog)
+        binding!!.sbUnencryptedFallback.setOnCheckedChangeListener { _, _ -> updateFallbackState() }
+        updateFallbackState()
+        TargetForm.installTagToggle(binding!!.btnTagsNickname, binding!!.glNickname)
+        TargetForm.installTagToggle(binding!!.btnTagsTitleTemplate, binding!!.glTitleTemplate)
+        TargetForm.wrapDropdown(binding!!.spMailType)
 
         //Add
         if (senderId <= 0) {
@@ -222,19 +253,15 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
                 }
                 binding!!.etName.setText(sender.name)
                 binding!!.sbEnable.isChecked = sender.status == 1
+                loadedJsonSetting = sender.jsonSetting
                 val settingVo = Gson().fromJson(sender.jsonSetting, EmailSetting::class.java)
-                Log.d(TAG, settingVo.toString())
                 if (settingVo != null) {
+                    //Absent in settings saved before this option existed: Gson leaves the primitive false (safe default)
+                    binding!!.sbUnencryptedFallback.isChecked = settingVo.allowUnencryptedFallback
                     if (!TextUtils.isEmpty(settingVo.mailType)) {
                         mailType = settingVo.mailType
-                        //TODO: ReplacemailTypeUse the current language so language changes do not invalidate old settings？
-                        if (mailType == "other") {
-                            mailType = getString(R.string.other_mail_type)
-                        }
-                        binding!!.spMailType.setSelectedItem(mailType)
-                        if (mailType != getString(R.string.other_mail_type)) {
-                            binding!!.layoutServiceSetting.visibility = View.GONE
-                        }
+                        showProviders(mailType)
+                        binding!!.layoutServiceSetting.visibility = if (mailType == "other") View.VISIBLE else View.GONE
                     }
                     binding!!.etFromEmail.setText(settingVo.fromEmail)
                     binding!!.etPwd.setText(settingVo.pwd)
@@ -301,7 +328,6 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
                     Thread {
                         try {
                             val settingVo = checkSetting()
-                            Log.d(TAG, settingVo.toString())
                             val name = binding!!.etName.text.toString().trim().takeIf { it.isNotEmpty() } ?: getString(R.string.test_sender_name)
                             val msgInfo = MsgInfo("sms", getString(R.string.test_phone_num), String.format(getString(R.string.test_sender_sms), name), Date(), getString(R.string.test_sim_info))
                             EmailUtils.sendMsg(settingVo, msgInfo)
@@ -332,14 +358,14 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
                 R.id.btn_save -> {
                     val name = binding!!.etName.text.toString().trim()
                     if (TextUtils.isEmpty(name)) {
-                        throw Exception(getString(R.string.invalid_name))
+                        cn.ppps.forwarder.widget.material.FormValidation.show(binding!!.etName, getString(R.string.invalid_name))
+                        return
                     }
 
                     val status = if (binding!!.sbEnable.isChecked) 1 else 0
                     val settingVo = checkSetting()
                     if (isClone) senderId = 0
-                    val senderNew = Sender(senderId, senderType, name, Gson().toJson(settingVo), status)
-                    Log.d(TAG, senderNew.toString())
+                    val senderNew = Sender(senderId, senderType, name, EmailSetting.mergeJson(loadedJsonSetting, settingVo), status)
 
                     viewModel.insertOrUpdate(senderNew)
                     XToastUtils.success(R.string.tipSaveSuccess)
@@ -365,7 +391,6 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
             if (!CommonUtils.checkEmail(email)) {
                 throw Exception(String.format(getString(R.string.invalid_recipient_email), email))
             }
-            Log.d(TAG, "email: $email, cert: $cert")
             when (encryptionProtocol) {
                 "OpenKeychain" -> {
                     if (!OpenKeychainHelper.isProviderInstalled(requireContext())) {
@@ -388,7 +413,6 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
                                 keyStore.load(fileInputStream, cert.second.toCharArray())
                                 val alias = keyStore.aliases().nextElement()
                                 val recipientPublicKey = keyStore.getCertificate(alias) as X509Certificate
-                                Log.d(TAG, "PKCS12 Certificate: $recipientPublicKey")
                             } catch (e: Exception) {
                                 e.printStackTrace()
                                 throw Exception(String.format(getString(R.string.invalid_pkcs12_certificate), email))
@@ -406,7 +430,6 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
                                 }
                                 val certFactory = CertificateFactory.getInstance("X.509")
                                 val recipientPublicKey = certFactory.generateCertificate(fileInputStream) as X509Certificate
-                                Log.d(TAG, "X.509 Certificate: $recipientPublicKey")
                             } catch (e: Exception) {
                                 e.printStackTrace()
                                 throw Exception(String.format(getString(R.string.invalid_x509_certificate), email))
@@ -429,7 +452,6 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
                                 val recipientPGPSecretKeyRing = PGPainless.readKeyRing().secretKeyRing(recipientPrivateKeyStream)
                                 val recipientPGPPublicKeyRing = PGPainless.extractCertificate(recipientPGPSecretKeyRing!!)
                                 val keyInfo = KeyRingInfo(recipientPGPPublicKeyRing)
-                                Log.d(TAG, "recipientPGPPublicKeyRing: $keyInfo")
                             } catch (e: Exception) {
                                 e.printStackTrace()
                                 throw Exception(String.format(getString(R.string.invalid_x509_certificate), email))
@@ -447,7 +469,6 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
                                 }
                                 val recipientPGPPublicKeyRing = PGPainless.readKeyRing().publicKeyRing(recipientPublicKeyStream)
                                 val keyInfo = KeyRingInfo(recipientPGPPublicKeyRing!!)
-                                Log.d(TAG, "recipientPGPPublicKeyRing: $keyInfo")
                             } catch (e: Exception) {
                                 e.printStackTrace()
                                 throw Exception(String.format(getString(R.string.invalid_x509_certificate), email))
@@ -459,7 +480,7 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
         }
         val host = binding!!.etHost.text.toString().trim()
         val port = binding!!.etPort.text.toString().trim()
-        if (mailType == getString(R.string.other_mail_type) && (TextUtils.isEmpty(host) || TextUtils.isEmpty(port))) {
+        if (mailType == "other" && (TextUtils.isEmpty(host) || TextUtils.isEmpty(port))) {
             throw Exception(getString(R.string.invalid_email_server))
         }
 
@@ -470,46 +491,20 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
         val title = binding!!.etTitleTemplate.text.toString().trim()
         val keystore = binding!!.etSenderKeystore.text.toString().trim()
         val password = binding!!.etSenderPassword.text.toString().trim()
-        if (keystore.isNotEmpty()) {
-            val senderPrivateKeyStream = if (keystore.startsWith("/")) {
-                FileInputStream(keystore)
-            } else {
-                val decodedBytes = Base64.decode(keystore)
-                ByteArrayInputStream(decodedBytes)
-            }
-            if (senderPrivateKeyStream.available() <= 0) {
-                throw Exception(getString(R.string.invalid_sender_keystore))
-            }
-            when (encryptionProtocol) {
-                "S/MIME" -> {
-                    try {
-                        // It's a good judgment.PKCS12Private Key Certificate
-                        val keyStore = KeyStore.getInstance("PKCS12")
-                        keyStore.load(senderPrivateKeyStream, password.toCharArray())
-                        val alias = keyStore.aliases().nextElement()
-                        val certificate = keyStore.getCertificate(alias) as X509Certificate
-                        Log.d(TAG, "PKCS12 Certificate: $certificate")
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        throw Exception(getString(R.string.invalid_sender_keystore))
-                    }
-                }
+        if (keystore.isNotEmpty() && (encryptionProtocol == "S/MIME" || encryptionProtocol == "OpenPGP")) {
+            //Same loader as sending: a configured signing key must be usable (key, password), never silently skipped
+            when (val signing = EmailKeys.loadSigningKey(encryptionProtocol, keystore, password)) {
+                is SigningKey.Failed -> throw Exception(
+                    getString(R.string.invalid_sender_keystore) + ": " + EmailDeliveryReport.reasonText(signing.failure, signing.detail) { id, args -> getString(id, *args) }
+                )
 
-                "OpenPGP" -> {
-                    try {
-                        val senderPGPSecretKeyRing = PGPainless.readKeyRing().secretKeyRing(senderPrivateKeyStream)
-                        val keyInfo = KeyRingInfo(senderPGPSecretKeyRing!!)
-                        Log.d(TAG, "senderPGPSecretKeyRing: $keyInfo")
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        throw Exception(getString(R.string.invalid_sender_keystore))
-                    }
-                }
+                else -> {}
             }
-
         }
 
-        return EmailSetting(mailType, fromEmail, pwd, nickname, host, port, ssl, startTls, title, recipients, "", keystore, password, encryptionProtocol, fromEmailAlias, openKeychainSignKeyId, openKeychainSignKeyDesc)
+        //Kept as stored while Unencrypted is selected (switch disabled, value retained)
+        val allowUnencryptedFallback = binding!!.sbUnencryptedFallback.isChecked
+        return EmailSetting(mailType, fromEmail, pwd, nickname, host, port, ssl, startTls, title, recipients, "", keystore, password, encryptionProtocol, fromEmailAlias, openKeychainSignKeyId, openKeychainSignKeyDesc, allowUnencryptedFallback)
     }
 
     //recipientSerial number
@@ -527,12 +522,9 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
         val etRecipientKeystore = itemAddRecipient.findViewById<EditText>(R.id.et_recipient_keystore)
         val etRecipientPassword = itemAddRecipient.findViewById<EditText>(R.id.et_recipient_password)
         etRecipientEmail.setText(email)
-        Log.d(TAG, "cert: $cert")
         when (cert) {
             is String -> etRecipientKeystore.setText(cert)
             is Pair<*, *> -> {
-                Log.d(TAG, "cert.first: ${cert.first}")
-                Log.d(TAG, "cert.second: ${cert.second}")
                 etRecipientKeystore.setText(cert.first.toString())
                 etRecipientPassword.setText(cert.second.toString())
             }
@@ -578,7 +570,6 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
             val password = etRecipientPassword.text.toString().trim()
             recipients[email] = Pair(keystore, password)
         }
-        Log.d(TAG, "recipients: $recipients")
         return recipients
     }
 
@@ -652,6 +643,29 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
         return Base64.encode(pfxBytes)
     }
 
+    /**
+     * The fallback switch only applies to S/MIME, OpenPGP and OpenKeychain: disabled (value kept) for Unencrypted.
+     * The line below states what happens; when the fallback is on it is a warning in the error colour.
+     */
+    private fun updateFallbackState() {
+        val b = binding ?: return
+        val applies = EmailCrypto.isEncryptionMode(encryptionProtocol)
+        b.sbUnencryptedFallback.isEnabled = applies
+        //The Material switch draws its own disabled state (an extra alpha made the retained On state unreadable).
+        //The question-mark help stays usable.
+        val on = b.sbUnencryptedFallback.isChecked
+        b.tvUnencryptedFallbackState.setText(
+            when {
+                !applies -> R.string.target_form_email_fallback_na
+                on -> R.string.target_form_email_fallback_on
+                else -> R.string.target_form_email_fallback_off
+            }
+        )
+        b.tvUnencryptedFallbackState.setTextColor(
+            MaterialColors.getColor(b.tvUnencryptedFallbackState, if (applies && on) com.google.android.material.R.attr.colorError else com.google.android.material.R.attr.colorOnSurfaceVariant)
+        )
+    }
+
     //RefreshOpenKeychainSign Key Display
     private fun updateOpenKeychainSignKeyText() {
         binding?.tvOpenkeychainSignKey?.text = if (openKeychainSignKeyId == 0L) {
@@ -704,7 +718,7 @@ class EmailFragment : BaseFragment<FragmentSendersEmailBinding?>(), View.OnClick
                     else -> {
                         val error: OpenPgpError? = result.getParcelableExtra(OpenPgpApi.RESULT_ERROR)
                         requireActivity().runOnUiThread {
-                            XToastUtils.error(String.format(getString(R.string.openkeychain_check_failed), error?.message ?: "unknown error"))
+                            XToastUtils.error(String.format(getString(R.string.openkeychain_check_failed), error?.message ?: getString(R.string.copy_unknown_error)))
                         }
                     }
                 }

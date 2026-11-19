@@ -19,7 +19,6 @@ class UpdateLogsWorker(context: Context, params: WorkerParameters) : CoroutineWo
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
             val sendResponseJson = inputData.getString(Worker.UPDATE_LOGS)
-            Log.d("UpdateLogsWorker", "UpdateLogsWorker sendResponseJson: $sendResponseJson")
             val sendResponse = Gson().fromJson(sendResponseJson, SendResponse::class.java)
             if (sendResponse.logId == 0L) {
                 Log.e("UpdateLogsWorker", "UpdateLogsWorker error: logId is 0")

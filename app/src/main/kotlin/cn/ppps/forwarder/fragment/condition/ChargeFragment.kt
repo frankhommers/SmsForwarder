@@ -20,9 +20,9 @@ import com.xuexiang.xaop.annotation.SingleClick
 import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.button.SmoothCheckBox
-import com.xuexiang.xui.widget.picker.XRangeSlider
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.TargetCheckBox as SmoothCheckBox
+import cn.ppps.forwarder.widget.material.TargetRangeSlider as XRangeSlider
 
 @Page(name = "Charge")
 @Suppress("PrivatePropertyName", "SameParameterValue")
@@ -52,10 +52,8 @@ class ChargeFragment : BaseFragment<FragmentTasksConditionChargeBinding?>(), Vie
     }
 
     override fun initViews() {
-        Log.d(TAG, "initViews eventData:$eventData")
         if (eventData != null) {
             val settingVo = Gson().fromJson(eventData, ChargeSetting::class.java)
-            Log.d(TAG, "initViews settingVo:$settingVo")
             binding!!.tvDescription.text = settingVo.description
             val statusIds = settingVo.getStatusCheckIds()
             binding!!.cbBatteryCharging.isChecked = R.id.cb_battery_charging in statusIds
@@ -115,7 +113,7 @@ class ChargeFragment : BaseFragment<FragmentTasksConditionChargeBinding?>(), Vie
     override fun initListeners() {
         binding!!.btnDel.setOnClickListener(this)
         binding!!.btnSave.setOnClickListener(this)
-        val listener = SmoothCheckBox.OnCheckedChangeListener { _, _ -> checkSetting(true) }
+        val listener = android.widget.CompoundButton.OnCheckedChangeListener { _, _ -> checkSetting(true) }
         listOf(
             binding!!.cbBatteryCharging, binding!!.cbBatteryDischarging,
             binding!!.cbBatteryNotCharging, binding!!.cbBatteryFull, binding!!.cbBatteryUnknown,

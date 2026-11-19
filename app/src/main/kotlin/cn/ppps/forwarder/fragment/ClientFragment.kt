@@ -37,9 +37,9 @@ import com.xuexiang.xui.adapter.recyclerview.RecyclerViewHolder
 import com.xuexiang.xui.utils.CountDownButtonHelper
 import com.xuexiang.xui.utils.DensityUtils
 import com.xuexiang.xui.utils.WidgetUtils
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
 import com.xuexiang.xutil.XUtil
 import com.xuexiang.xutil.data.ConvertTools
 import com.xuexiang.xutil.resource.ResUtils.getColors
@@ -226,7 +226,7 @@ class ClientFragment : BaseFragment<FragmentClientBinding?>(), View.OnClickListe
         when (v.id) {
             R.id.btn_wechat_miniprogram -> {
                 if (HttpServerUtils.safetyMeasures != 3) {
-                    XToastUtils.error("The WeChat mini-program only supportsSM4encrypted transport. Change the security mode under Remote control - Server！")
+                    XToastUtils.error(getString(R.string.copy_wechat_sm4))
                     return
                 }
                 XToastUtils.info(R.string.privacy_updates_disabled)
@@ -237,17 +237,14 @@ class ClientFragment : BaseFragment<FragmentClientBinding?>(), View.OnClickListe
                     XToastUtils.warning(getString(R.string.no_server_history))
                     return
                 }
-                Log.d(TAG, "serverHistory = $serverHistory")
+                Log.d(TAG, "Sensitive event details omitted")
 
                 MaterialDialog.Builder(requireContext()).title(R.string.server_history).items(serverHistory.keys).itemsCallbackSingleChoice(0) { _: MaterialDialog?, _: View?, _: Int, text: CharSequence ->
                     //XToastUtils.info("$which: $text")
-                    val matches = Regex("[(.*)](.*)", RegexOption.IGNORE_CASE).findAll(text).toList().flatMap(MatchResult::groupValues)
-                    Log.i(TAG, "matches = $matches")
-                    if (matches.isNotEmpty()) {
-                        binding!!.etServerAddress.setText(matches[2])
-                    } else {
-                        binding!!.etServerAddress.setText(text)
-                    }
+                    // History supports both legacy bare URLs and [device label]URL entries.
+                    val entry = text.toString()
+                    val address = if (entry.startsWith("[") && entry.contains("]")) entry.substringAfter("]") else entry
+                    binding!!.etServerAddress.setText(address)
                     val signKey = serverHistory[text].toString()
                     if (!TextUtils.isEmpty(signKey)) {
                         val keyMatches = Regex("(.*)##(.*)", RegexOption.IGNORE_CASE).findAll(signKey).toList().flatMap(MatchResult::groupValues)
@@ -333,7 +330,7 @@ class ClientFragment : BaseFragment<FragmentClientBinding?>(), View.OnClickListe
 
         val clientSignKey = HttpServerUtils.clientSignKey
         if (HttpServerUtils.clientSafetyMeasures != 0 && TextUtils.isEmpty(clientSignKey)) {
-            if (needToast) XToastUtils.error("Please enter the signature key/RSAPublic Keys/SM4Key")
+            if (needToast) XToastUtils.error(getString(R.string.copy_security_key_required))
             return
         }
 
@@ -344,7 +341,6 @@ class ClientFragment : BaseFragment<FragmentClientBinding?>(), View.OnClickListe
         msgMap["data"] = dataMap
 
         var requestMsg: String = Gson().toJson(msgMap)
-        Log.i(TAG, "requestMsg:$requestMsg")
 
         val postRequest = XHttp.post(requestUrl).keepJson(true).timeStamp(true)
 
@@ -354,7 +350,6 @@ class ClientFragment : BaseFragment<FragmentClientBinding?>(), View.OnClickListe
                     val publicKey = RSACrypt.getPublicKey(HttpServerUtils.clientSignKey)
                     requestMsg = Base64.encode(requestMsg.toByteArray())
                     requestMsg = RSACrypt.encryptByPublicKey(requestMsg, publicKey)
-                    Log.i(TAG, "requestMsg: $requestMsg")
                 } catch (e: Exception) {
                     if (needToast) XToastUtils.error(getString(R.string.request_failed) + e.message)
                     e.printStackTrace()
@@ -370,7 +365,6 @@ class ClientFragment : BaseFragment<FragmentClientBinding?>(), View.OnClickListe
                     //requestMsg = Base64.encode(requestMsg.toByteArray())
                     val encryptCBC = SM4Crypt.encrypt(requestMsg.toByteArray(), sm4Key)
                     requestMsg = ConvertTools.bytes2HexString(encryptCBC)
-                    Log.i(TAG, "requestMsg: $requestMsg")
                 } catch (e: Exception) {
                     if (needToast) XToastUtils.error(getString(R.string.request_failed) + e.message)
                     e.printStackTrace()
@@ -388,12 +382,14 @@ class ClientFragment : BaseFragment<FragmentClientBinding?>(), View.OnClickListe
         if (needToast) mCountDownHelper?.start()
         postRequest.execute(object : SimpleCallBack<String>() {
             override fun onError(e: ApiException) {
-                XToastUtils.error(e.displayMessage)
+                // Automatic refresh is silent; never show a late popup over another screen.
+                if (needToast && isAdded && isResumed && isVisible && binding != null) {
+                    XToastUtils.error(e.displayMessage)
+                }
                 if (needToast) mCountDownHelper?.finish()
             }
 
             override fun onSuccess(response: String) {
-                Log.i(TAG, response)
                 try {
                     var json = response
                     if (HttpServerUtils.clientSafetyMeasures == 2) {

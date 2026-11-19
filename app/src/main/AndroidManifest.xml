@@ -53,6 +53,9 @@
         android:name="android.permission.BATTERY_STATS"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- In-app updater (GitHub Releases of the fork): hand verified APKs to the system package installer. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION" />
     <uses-permission android:name="android.permission.CANCEL_NOTIFICATIONS " />
     <uses-permission
         android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
@@ -105,7 +108,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
-        android:windowSoftInputMode="adjustPan|stateHidden"
+        android:windowSoftInputMode="adjustResize|stateHidden"
         tools:ignore="DataExtractionRules,LockedOrientationActivity,UnusedAttribute">
 
         <meta-data
@@ -117,10 +120,10 @@
             android:configChanges="screenSize|keyboardHidden|orientation|keyboard"
             android:excludeFromRecents="true"
             android:exported="true"
-            android:screenOrientation="portrait"
+            android:screenOrientation="unspecified"
             android:taskAffinity=":splash"
             android:theme="@style/AppTheme.Launch.App"
-            android:windowSoftInputMode="adjustPan|stateHidden"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             tools:ignore="DiscouragedApi,TranslucentOrientation">
 
             <intent-filter>
@@ -132,24 +135,24 @@
             android:name=".activity.MainActivity"
             android:configChanges="screenSize|keyboardHidden|orientation|keyboard"
             android:exported="true"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|stateHidden"
+            android:screenOrientation="unspecified"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
         <activity
             android:name=".activity.ClientActivity"
             android:configChanges="screenSize|keyboardHidden|orientation|keyboard"
             android:exported="true"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|stateHidden"
+            android:screenOrientation="unspecified"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
         <activity
             android:name=".activity.TaskActivity"
             android:configChanges="screenSize|keyboardHidden|orientation|keyboard"
             android:exported="true"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|stateHidden"
+            android:screenOrientation="unspecified"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
         <!--Universal Browser-->
         <activity
@@ -203,15 +206,15 @@
             android:name=".core.BaseActivity"
             android:configChanges="screenSize|keyboardHidden|orientation|keyboard"
             android:exported="true"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|stateHidden"
+            android:screenOrientation="unspecified"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
         <!-- Version Update Hint-->
         <!-- WebviewInterception warning dialog-->
         <activity
             android:name=".core.webview.WebViewInterceptDialog"
             android:exported="true"
-            android:screenOrientation="portrait"
+            android:screenOrientation="unspecified"
             android:theme="@style/DialogTheme"
             tools:ignore="DiscouragedApi" />
         <!-- applinkTransit Pages -->
@@ -219,8 +222,8 @@
             android:name=".core.XPageTransferActivity"
             android:configChanges="screenSize|keyboardHidden|orientation|keyboard"
             android:exported="true"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|stateHidden"
+            android:screenOrientation="unspecified"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
 
         <!--Screen Adaptive Design-->
@@ -365,6 +368,19 @@
                 <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
 
                 <data android:mimeType="application/vnd.wap.mms-message" />
+            </intent-filter>
+        </receiver>
+
+        <!-- In-app updater: install session status (only reachable through the app's own PendingIntent). -->
+        <receiver
+            android:name=".utils.update.UpdateInstaller$StatusReceiver"
+            android:exported="false" />
+        <!-- After an in-app update: restart forwarding without the user opening the app (system-only broadcast). -->
+        <receiver
+            android:name=".utils.update.PackageReplacedReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
 

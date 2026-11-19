@@ -12,69 +12,15 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:overScrollMode="never">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:layout_margin="10dp"
-                android:contentDescription="@string/task_cleaner"
-                app:srcCompat="@drawable/auto_task_icon_cleaner"
-                tools:ignore="ImageContrastCheck" />
-
-            <LinearLayout
-                style="@style/BarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/task_cleaner"
-                    android:textSize="@dimen/text_size_big"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tv_description"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/task_cleaner_tips"
-                    android:textSize="@dimen/text_size_mini"
-                    tools:ignore="SmallSp" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginBottom="5dp"
-                    android:background="?attr/xui_config_color_separator_light" />
-
-                <com.xuexiang.xui.widget.picker.XSeekBar
-                    android:id="@+id/xsb_days"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:xsb_insideRangeLineColor="#0bd97f"
-                    app:xsb_insideRangeLineStrokeWidth="10dp"
-                    app:xsb_isShowBubble="true"
-                    app:xsb_isShowRuler="true"
-                    app:xsb_max="60"
-                    app:xsb_min="0"
-                    app:xsb_numberTextColor="#ffffff"
-                    app:xsb_numberTextSize="@dimen/text_size_small"
-                    app:xsb_outsideRangeLineColor="#f0f0f0"
-                    app:xsb_outsideRangeLineStrokeWidth="10dp"
-                    app:xsb_rulerColor="@color/xui_config_color_gray_4"
-                    app:xsb_rulerInterval="ten" />
-
+        <!-- Task-action form (ActionForm.* on top of the Form.* recipe, privacy-verification/form-pattern/PATTERN.md). Ids, view classes, defaults and show/hide logic unchanged. -->
+        <LinearLayout style="@style/Form.Content">
+            <androidx.appcompat.widget.AppCompatImageView style="@style/ActionForm.Hero" android:contentDescription="@string/task_cleaner" app:srcCompat="@drawable/auto_task_icon_cleaner" tools:ignore="ImageContrastCheck" />
+            <LinearLayout style="@style/Form.Section.First">
+                <TextView style="@style/Form.SectionTitle" android:text="@string/task_cleaner" />
+                <TextView android:id="@+id/tv_description" style="@style/Form.Supporting" android:text="@string/task_cleaner_tips" />
+                <TextView android:id="@+id/action_form_days_value" style="@style/ActionForm.SliderValue" />
+                <cn.ppps.forwarder.widget.material.TargetSlider android:id="@+id/xsb_days" style="@style/ActionForm.Slider" android:contentDescription="@string/action_form_days" app:xsb_max="60" app:xsb_min="0" />
             </LinearLayout>
-
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
@@ -86,23 +32,23 @@
         android:orientation="horizontal"
         android:padding="10dp">
 
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_del"
-            style="@style/SuperButton.Gray.Icon.Spacing"
+            style="@style/MaterialActionButton.Secondary"
             android:drawableStart="@drawable/ic_delete"
             android:text="@string/discard"
             tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
 
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_save"
-            style="@style/SuperButton.Blue.Icon.Spacing"
+            style="@style/MaterialActionButton"
             android:drawableStart="@drawable/ic_save"
-            android:text="@string/submit"
+            android:text="@string/m3_apply"
             tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />
 
-        <com.xuexiang.xui.widget.textview.supertextview.SuperButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_test"
-            style="@style/SuperButton.Green.Icon.Spacing"
+            style="@style/MaterialActionButton.Secondary"
             android:drawableStart="@drawable/ic_test"
             android:text="@string/test"
             tools:ignore="RtlSymmetry,TextContrastCheck,TouchTargetSizeCheck" />

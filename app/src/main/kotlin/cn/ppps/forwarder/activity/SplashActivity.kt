@@ -7,34 +7,25 @@ import cn.ppps.forwarder.utils.CommonUtils.Companion.showPrivacyDialog
 import cn.ppps.forwarder.utils.SettingUtils
 import cn.ppps.forwarder.utils.SettingUtils.Companion.isAgreePrivacy
 import com.xuexiang.xui.utils.KeyboardUtils
-import com.xuexiang.xui.widget.activity.BaseSplashActivity
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
 import com.xuexiang.xutil.app.ActivityUtils
 import me.jessyan.autosize.internal.CancelAdapt
 
 @Suppress("PropertyName")
 @SuppressLint("CustomSplashScreen")
-class SplashActivity : BaseSplashActivity(), CancelAdapt {
+class SplashActivity : AppCompatActivity(), CancelAdapt {
 
     val TAG: String = SplashActivity::class.java.simpleName
 
-    override fun getSplashDurationMillis(): Long {
-        return 500
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(com.hjq.language.MultiLanguages.attach(newBase))
     }
 
-    /**
-     * activityInitialization after startup
-     */
-    override fun onCreateActivity() {
-        initSplashView(R.drawable.xui_config_bg_splash)
-        startSplash(false)
-    }
-
-    /**
-     * Actions after the start page
-     */
-    override fun onSplashFinished() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         if (isAgreePrivacy) {
             whereToJump()
         } else {

@@ -1,0 +1,4 @@
+<resources>
+    <string name="email_provider_custom">Overige (eigen SMTP-server)</string>
+    <string name="email_provider_legacy">%1$s (opgeslagen oude provider)</string>
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="review_add_allowed_sender">Add allowed sender</string>
+    <string name="review_text_keyboard">Use full keyboard</string>
+    <string name="review_alarm_sound">Sound at %1$d%% volume</string>
+    <string name="review_alarm_continuous">continuous</string>
+    <string name="review_alarm_count">Repetitions: %1$d</string>
+    <string name="review_alarm_custom_audio">custom audio file</string>
+    <string name="review_alarm_vibration">Vibration</string>
+    <string name="review_alarm_flash">Flashlight</string>
+    <string name="review_web_folder">Web client folder</string>
+    <string name="review_reload_device_name">Reload device name</string>
+</resources>

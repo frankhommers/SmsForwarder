@@ -100,7 +100,7 @@ class NotificationService : NotificationListenerService() {
 
             //One blocked keyword per line; regex supported; skip matching titles or content
             if (isInBlacklist(title, text)) {
-                Log.d(TAG, "MatchedAPPNotify key word blacklist, skip forward.title=$title, text=$text")
+                Log.d(TAG, "Matched app notification keyword blacklist, skip forwarding")
                 return
             }
 

@@ -5,12 +5,10 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.google.gson.Gson
 import cn.ppps.forwarder.App
 import cn.ppps.forwarder.R
 import cn.ppps.forwarder.core.BaseFragment
 import cn.ppps.forwarder.databinding.FragmentTasksConditionToAddressBinding
-import cn.ppps.forwarder.entity.condition.LocationSetting
 import cn.ppps.forwarder.service.LocationService
 import cn.ppps.forwarder.utils.ACTION_START
 import cn.ppps.forwarder.utils.HttpServerUtils
@@ -25,9 +23,9 @@ import com.xuexiang.xaop.annotation.SingleClick
 import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
 
 @Page(name = "ToAddress")
 @Suppress("PrivatePropertyName", "SameParameterValue")
@@ -40,7 +38,8 @@ class ToAddressFragment : BaseFragment<FragmentTasksConditionToAddressBinding?>(
     @AutoWired(name = KEY_EVENT_DATA_CONDITION)
     var eventData: String? = null
 
-    private var description = ""
+    /** View-owned form logic; validation runs only on Apply. */
+    var editor: LocationConditionEditor? = null
 
     override fun initArgs() {
         XRouter.getInstance().inject(this)
@@ -62,34 +61,17 @@ class ToAddressFragment : BaseFragment<FragmentTasksConditionToAddressBinding?>(
      * Initialize controls
      */
     override fun initViews() {
-        binding!!.rgCalcType.setOnCheckedChangeListener { _, checkedId ->
-            if (checkedId == R.id.rb_calc_type_distance) {
-                binding!!.layoutCalcTypeDistance.visibility = View.VISIBLE
-                binding!!.layoutCalcTypeAddress.visibility = View.GONE
-            } else {
-                binding!!.layoutCalcTypeDistance.visibility = View.GONE
-                binding!!.layoutCalcTypeAddress.visibility = View.VISIBLE
-            }
-            try {
-                checkSetting(true)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Log.e(TAG, "initViews error:$e")
-            }
-        }
+        val b = binding!!
+        editor = LocationConditionEditor(
+            "to", eventData, getString(R.string.task_to_address_tips), getString(R.string.to_address_distance_description),
+            b.rgCalcType, b.rbCalcTypeDistance, b.rbCalcTypeAddress, b.layoutCalcTypeDistance, b.layoutCalcTypeAddress,
+            b.conditionFormLocationLegacyNotice, b.etLongitude, b.etLatitude, b.etDistance, b.etAddress, b.tvDescription,
+        ).also { it.bind() }
+    }
 
-        var settingVo = LocationSetting(getString(R.string.task_leave_address_tips), "to")
-        if (eventData != null) {
-            Log.d(TAG, "initViews eventData:$eventData")
-            settingVo = Gson().fromJson(eventData, LocationSetting::class.java)
-        }
-        Log.d(TAG, "initViews settingVo:$settingVo")
-        binding!!.tvDescription.text = settingVo.description
-        binding!!.etLongitude.setText(settingVo.longitude.toString())
-        binding!!.etLatitude.setText(settingVo.latitude.toString())
-        binding!!.etDistance.setText(settingVo.distance.toString())
-        binding!!.etAddress.setText(settingVo.address)
-        binding!!.rgCalcType.check(settingVo.getCalcTypeCheckId())
+    override fun onDestroyView() {
+        editor = null
+        super.onDestroyView()
     }
 
     @SuppressLint("SetTextI18n")
@@ -97,64 +79,6 @@ class ToAddressFragment : BaseFragment<FragmentTasksConditionToAddressBinding?>(
         binding!!.btnDel.setOnClickListener(this)
         binding!!.btnSave.setOnClickListener(this)
         binding!!.btnCurrentCoordinates.setOnClickListener(this)
-        binding!!.etLongitude.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                try {
-                    val inputText = binding!!.etLongitude.text.toString()
-                    if (inputText.isEmpty()) {
-                        binding!!.etLongitude.setText("0")
-                        binding!!.etLongitude.setSelection(binding!!.etLongitude.text.length) // Move cursor to end of text
-                    } else {
-                        checkSetting(true)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    Log.e(TAG, "etLongitude error:$e")
-                }
-            }
-        }
-        binding!!.etLatitude.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                try {
-                    val inputText = binding!!.etLatitude.text.toString()
-                    if (inputText.isEmpty()) {
-                        binding!!.etLatitude.setText("0")
-                        binding!!.etLatitude.setSelection(binding!!.etLatitude.text.length) // Move cursor to end of text
-                    } else {
-                        checkSetting(true)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    Log.e(TAG, "etLatitude error:$e")
-                }
-            }
-        }
-        binding!!.etDistance.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                try {
-                    val inputText = binding!!.etDistance.text.toString()
-                    if (inputText.isEmpty()) {
-                        binding!!.etDistance.setText("1")
-                        binding!!.etDistance.setSelection(binding!!.etDistance.text.length) // Move cursor to end of text
-                    } else {
-                        checkSetting(true)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    Log.e(TAG, "etDistance error:$e")
-                }
-            }
-        }
-        binding!!.etAddress.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                try {
-                    checkSetting(true)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    Log.e(TAG, "etAddress error:$e")
-                }
-            }
-        }
     }
 
     @SingleClick
@@ -163,24 +87,28 @@ class ToAddressFragment : BaseFragment<FragmentTasksConditionToAddressBinding?>(
             when (v.id) {
                 R.id.btn_current_coordinates -> {
                     if (!App.LocationClient.isStarted()) {
-                        MaterialDialog.Builder(requireContext()).iconRes(R.drawable.auto_task_icon_location).title(R.string.enable_location).content(R.string.enable_location_dialog).cancelable(false).positiveText(R.string.lab_yes).negativeText(R.string.lab_no).onPositive { _: MaterialDialog?, _: DialogAction? ->
-                            SettingUtils.enableLocation = true
-                            val serviceIntent = Intent(requireContext(), LocationService::class.java)
-                            serviceIntent.action = ACTION_START
-                            requireContext().startService(serviceIntent)
-                        }.show()
+                        MaterialDialog.Builder(requireContext())
+                            .iconRes(R.drawable.auto_task_icon_location)
+                            .title(R.string.enable_location)
+                            .content(R.string.enable_location_dialog)
+                            .cancelable(false)
+                            .positiveText(R.string.lab_yes)
+                            .negativeText(R.string.lab_no)
+                            .onPositive { _: MaterialDialog?, _: DialogAction? ->
+                                SettingUtils.enableLocation = true
+                                val serviceIntent = Intent(requireContext(), LocationService::class.java)
+                                serviceIntent.action = ACTION_START
+                                requireContext().startService(serviceIntent)
+                            }.show()
                         return
                     }
 
-                    val location = HttpServerUtils.apiLocationCache
-                    if (location.latitude == 0.0 || location.longitude == 0.0) {
+                    // 0/0 is a valid point; only the absence of an actual cached fix is a failure.
+                    if (editor?.fillFrom(HttpServerUtils.apiLocationCache) != true) {
                         XToastUtils.error(getString(R.string.location_failed), 30000)
                         return
                     }
-
-                    binding!!.etLatitude.setText(location.latitude.toString())
-                    binding!!.etLongitude.setText(location.longitude.toString())
-                    XToastUtils.success(String.format(getString(R.string.current_address), location.address), 30000)
+                    XToastUtils.success(getString(R.string.location_validation_filled))
                 }
 
                 R.id.btn_del -> {
@@ -189,10 +117,10 @@ class ToAddressFragment : BaseFragment<FragmentTasksConditionToAddressBinding?>(
                 }
 
                 R.id.btn_save -> {
-                    val settingVo = checkSetting()
+                    val applied = editor?.apply() ?: return
                     val intent = Intent()
-                    intent.putExtra(KEY_BACK_DESCRIPTION_CONDITION, description)
-                    intent.putExtra(KEY_BACK_DATA_CONDITION, Gson().toJson(settingVo))
+                    intent.putExtra(KEY_BACK_DESCRIPTION_CONDITION, applied.description)
+                    intent.putExtra(KEY_BACK_DATA_CONDITION, applied.json)
                     setFragmentResult(TASK_CONDITION_TO_ADDRESS, intent)
                     popToBack()
                     return
@@ -203,40 +131,5 @@ class ToAddressFragment : BaseFragment<FragmentTasksConditionToAddressBinding?>(
             e.printStackTrace()
             Log.e(TAG, "onClick error:$e")
         }
-    }
-
-    //Check Settings
-    @SuppressLint("SetTextI18n")
-    private fun checkSetting(updateView: Boolean = false): LocationSetting {
-        val longitude = binding!!.etLongitude.text.toString().toDouble()
-        val latitude = binding!!.etLatitude.text.toString().toDouble()
-        val distance = binding!!.etDistance.text.toString().toDouble()
-        val address = binding!!.etAddress.text.toString()
-        val calcType = when (binding!!.rgCalcType.checkedRadioButtonId) {
-            R.id.rb_calc_type_distance -> {
-                Log.d(TAG, "longitude:$longitude latitude:$latitude distance:$distance")
-                if (latitude.isNaN() || longitude.isNaN() || distance.isNaN()) {
-                    throw Exception(getString(R.string.calc_type_distance_error))
-                }
-                description = String.format(getString(R.string.to_address_distance_description), longitude, latitude, distance)
-                "distance"
-            }
-
-            else -> {
-                if (address.isEmpty()) {
-                    throw Exception(getString(R.string.calc_type_address_error))
-                }
-                description = String.format(getString(R.string.to_address_keyword_description), address)
-                "address"
-            }
-        }
-
-        val settingVo = LocationSetting(description, "to", calcType, longitude, latitude, distance, address)
-
-        if (updateView) {
-            binding!!.tvDescription.text = description
-        }
-
-        return settingVo
     }
 }

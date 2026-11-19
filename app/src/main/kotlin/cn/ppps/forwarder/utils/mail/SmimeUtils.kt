@@ -70,10 +70,10 @@ class SmimeUtils(
         try {
             val originalMessage = getOriginalMessage()
             Transport.send(originalMessage)
-            Pair(true, "Email sent successfully")
+            Pair(true, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_sent))
         } catch (e: Exception) {
             e.printStackTrace()
-            Pair(false, "Failed to send email: ${e.message}")
+            Pair(false, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_failed, e.message))
         }
     }
 
@@ -84,10 +84,10 @@ class SmimeUtils(
             val originalMessage = getOriginalMessage()
             val signedMessage = getSignedMessage(originalMessage)
             Transport.send(signedMessage)
-            Pair(true, "Email signed and sent successfully")
+            Pair(true, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_sent))
         } catch (e: Exception) {
             e.printStackTrace()
-            Pair(false, "Failed to sign and send email: ${e.message}")
+            Pair(false, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_failed, e.message))
         }
     }
 
@@ -98,10 +98,10 @@ class SmimeUtils(
             val originalMessage = getOriginalMessage()
             val encryptedMessage = getEncryptedMessage(originalMessage)
             Transport.send(encryptedMessage)
-            Pair(true, "Encrypted email sent successfully")
+            Pair(true, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_sent))
         } catch (e: Exception) {
             e.printStackTrace()
-            Pair(false, "Failed to send encrypted email: ${e.message}")
+            Pair(false, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_failed, e.message))
         }
     }
 
@@ -113,17 +113,29 @@ class SmimeUtils(
             val signedMessage = getSignedMessage(originalMessage)
             val encryptedMessage = getEncryptedMessage(signedMessage)
             Transport.send(encryptedMessage)
-            Pair(true, "Signed and encrypted email sent successfully")
+            Pair(true, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_sent))
         } catch (e: Exception) {
             e.printStackTrace()
-            Pair(false, "Failed to send signed and encrypted email: ${e.message}")
+            Pair(false, cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_email_failed, e.message))
         }
+    }
+
+    /**
+     * Build (without sending) the message: signed when [sign], encrypted to [recipientX509Cert] when [encrypt].
+     * Throws when signing or encryption fails, so callers can tell a crypto failure from an SMTP failure.
+     */
+    fun prepareMessage(encrypt: Boolean, sign: Boolean): MimeMessage {
+        var message = getOriginalMessage()
+        if (sign) message = getSignedMessage(message)
+        if (encrypt) message = getEncryptedMessage(message)
+        return message
     }
 
     // Get Original Mail
     private fun getOriginalMessage(): MimeMessage {
         val session = Session.getInstance(properties, authenticator)
-        session.debug = true
+        // Never enable Jakarta Mail protocol debugging: it prints message text (and SMTP dialogue) to logcat
+        session.debug = false
         val message = MimeMessage(session)
         // Set direct receiver inbox
         val toAddress = toAddress.map { InternetAddress(it) }.toTypedArray()

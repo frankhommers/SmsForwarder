@@ -285,7 +285,7 @@ class ForegroundService : Service() {
             }
 
             //Asynchronously load all installed App Information
-            if (SettingUtils.enableLoadAppList) {
+            if (SettingUtils.enableLoadAppList && (SettingUtils.enableLoadUserAppList || SettingUtils.enableLoadSystemAppList)) {
                 val request = OneTimeWorkRequestBuilder<LoadAppListWorker>().build()
                 WorkManager.getInstance(XUtil.getContext()).enqueue(request)
             }

@@ -32,9 +32,9 @@ import com.xuexiang.xpage.annotation.Page
 import com.xuexiang.xrouter.annotation.AutoWired
 import com.xuexiang.xrouter.launcher.XRouter
 import com.xuexiang.xui.utils.CountDownButtonHelper
-import com.xuexiang.xui.widget.actionbar.TitleBar
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import cn.ppps.forwarder.widget.material.TitleBar
+import cn.ppps.forwarder.widget.material.DialogAction
+import cn.ppps.forwarder.widget.material.MaterialDialog
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -121,7 +121,6 @@ class SocketFragment : BaseFragment<FragmentSendersSocketBinding?>(), View.OnCli
                 binding!!.etName.setText(sender.name)
                 binding!!.sbEnable.isChecked = sender.status == 1
                 val settingVo = Gson().fromJson(sender.jsonSetting, SocketSetting::class.java)
-                Log.d(TAG, settingVo.toString())
                 if (settingVo != null) {
                     val checkedId = settingVo.getMethodCheckId()
                     binding!!.rgMethod.check(checkedId)
@@ -162,11 +161,11 @@ class SocketFragment : BaseFragment<FragmentSendersSocketBinding?>(), View.OnCli
         try {
             when (v.id) {
                 R.id.btn_test -> {
+                    // Read and validate view state on the UI thread before starting transport work.
+                    val settingVo = checkSetting()
                     mCountDownHelper?.start()
                     Thread {
                         try {
-                            val settingVo = checkSetting()
-                            Log.d(TAG, settingVo.toString())
                             val name = binding!!.etName.text.toString().trim().takeIf { it.isNotEmpty() } ?: getString(R.string.test_sender_name)
                             val msgInfo = MsgInfo("sms", getString(R.string.test_phone_num), String.format(getString(R.string.test_sender_sms), name), Date(), getString(R.string.test_sim_info))
                             SocketUtils.sendMsg(settingVo, msgInfo)
@@ -197,14 +196,13 @@ class SocketFragment : BaseFragment<FragmentSendersSocketBinding?>(), View.OnCli
                 R.id.btn_save -> {
                     val name = binding!!.etName.text.toString().trim()
                     if (TextUtils.isEmpty(name)) {
-                        throw Exception(getString(R.string.invalid_name))
+                        fieldError(binding!!.etName, R.string.invalid_name)
                     }
 
                     val status = if (binding!!.sbEnable.isChecked) 1 else 0
                     val settingVo = checkSetting()
                     if (isClone) senderId = 0
                     val senderNew = Sender(senderId, senderType, name, Gson().toJson(settingVo), status)
-                    Log.d(TAG, senderNew.toString())
 
                     viewModel.insertOrUpdate(senderNew)
                     XToastUtils.success(R.string.tipSaveSuccess)
@@ -219,15 +217,26 @@ class SocketFragment : BaseFragment<FragmentSendersSocketBinding?>(), View.OnCli
         }
     }
 
+    private fun fieldError(field: android.widget.EditText, message: Int): Nothing {
+        generateSequence(field.parent as? View) { it.parent as? View }
+            .filterIsInstance<com.google.android.material.textfield.TextInputLayout>().firstOrNull()?.error = getString(message)
+        field.requestRectangleOnScreen(android.graphics.Rect(0, 0, field.width, field.height), true)
+        throw IllegalArgumentException(getString(message))
+    }
+
     private fun checkSetting(): SocketSetting {
+        for (field in listOf(binding!!.etName, binding!!.etAddress, binding!!.etPort)) {
+            generateSequence(field.parent as? View) { it.parent as? View }
+                .filterIsInstance<com.google.android.material.textfield.TextInputLayout>().firstOrNull()?.error = null
+        }
         val address = binding!!.etAddress.text.toString().trim()
         if (CommonUtils.checkIP(address) == "Neither" && !CommonUtils.checkDomain(address)) {
-            throw Exception(getString(R.string.invalid_ip))
+            fieldError(binding!!.etAddress, R.string.invalid_ip)
         }
 
         val port = binding!!.etPort.text.toString().trim()
         if (!CommonUtils.checkPort(port)) {
-            throw Exception(getString(R.string.invalid_port))
+            fieldError(binding!!.etPort, R.string.invalid_port)
         }
 
         val method = when (binding!!.rgMethod.checkedRadioButtonId) {

@@ -7,8 +7,8 @@ import com.xuexiang.xutil.resource.ResUtils.getString
 class SettingUtils private constructor() {
     companion object {
 
-        //Check for updates on startup
-        var autoCheckUpdate: Boolean by SharedPreference(AUTO_CHECK_UPDATE, false)
+        //Automatic daily update check (GitHub Releases of the fork). Default on; see UpdateScheduler.migrateDefaults.
+        var autoCheckUpdate: Boolean by SharedPreference(AUTO_CHECK_UPDATE, true)
 
         //Join or notSmsFPreview Experience
         var joinPreviewProgram: Boolean by SharedPreference(JOIN_PREVIEW_PROGRAM, false)
@@ -107,8 +107,12 @@ class SettingUtils private constructor() {
         //Request failed interface timeout (sec)）
         var requestTimeout: Int by SharedPreference(SP_REQUEST_TIMEOUT, 10)
 
-        //Content of notice
-        var notifyContent: String by SharedPreference(SP_NOTIFY_CONTENT, getString(R.string.notification_content))
+        // Resolve an unset default on each read so it follows the current app language.
+        // Stored text is user data, even when it happens to match a translated default.
+        var notifyContent: String
+            get() = SharedPreference.preference.getString(SP_NOTIFY_CONTENT, null)
+                ?: getString(R.string.notification_content)
+            set(value) { SharedPreference.preference.edit().putString(SP_NOTIFY_CONTENT, value).apply() }
 
         //Device Name
         var extraDeviceMark: String by SharedPreference(SP_EXTRA_DEVICE_MARK, "")

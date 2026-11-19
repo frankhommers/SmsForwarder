@@ -78,7 +78,7 @@ and is mobile equals 100861"""
             currentAll = when (currentRuleLine.getChildRuleLine()!!.conjunction) {
                 RuleLine.CONJUNCTION_AND -> currentAll && checkRuleTree(msg, currentRuleLine.getChildRuleLine())
                 RuleLine.CONJUNCTION_OR -> currentAll || checkRuleTree(msg, currentRuleLine.getChildRuleLine())
-                else -> throw Exception("child wrong conjunction")
+                else -> throw Exception(cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_rule_conjunction))
             }
         }
 
@@ -88,7 +88,7 @@ and is mobile equals 100861"""
             currentAll = when (currentRuleLine.getNextRuleLine()!!.conjunction) {
                 RuleLine.CONJUNCTION_AND -> currentAll && checkRuleTree(msg, currentRuleLine.getNextRuleLine())
                 RuleLine.CONJUNCTION_OR -> currentAll || checkRuleTree(msg, currentRuleLine.getNextRuleLine())
-                else -> throw Exception("next wrong conjunction")
+                else -> throw Exception(cn.ppps.forwarder.App.context.getString(cn.ppps.forwarder.R.string.copy_rule_conjunction))
             }
         }
         return currentAll

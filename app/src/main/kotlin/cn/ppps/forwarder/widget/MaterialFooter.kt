@@ -20,8 +20,9 @@ import com.scwang.smartrefresh.layout.util.DensityUtil
  * @since 2019-08-03 11:14
  */
 class MaterialFooter @JvmOverloads constructor(context: Context?, attrs: AttributeSet? = null) :
-    ProgressBar(context, attrs), RefreshFooter {
+    FrameLayout(requireNotNull(context), attrs), RefreshFooter {
     private fun initView() {
+        addView(com.google.android.material.progressindicator.CircularProgressIndicator(context).apply { isIndeterminate = true }, FrameLayout.LayoutParams(-2, -2, android.view.Gravity.CENTER))
         visibility = GONE
         val params = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,

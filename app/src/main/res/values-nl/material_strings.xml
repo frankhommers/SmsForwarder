@@ -1,0 +1,13 @@
+<resources>
+    <string name="m3_target_name">Naam bestemming</string>
+    <string name="m3_logout">Afmelden</string>
+    <string name="m3_notifications">Meldingsinstellingen</string>
+    <string name="m3_restore">Herstellen</string>
+    <string name="m3_filter">Filteren</string>
+    <string name="m3_period_start">Begin</string>
+    <string name="m3_period_end">Einde</string>
+    <string name="m3_edit">Bewerken</string>
+    <string name="m3_close">Sluiten</string>
+    <string name="m3_apply">Toepassen</string>
+    <string name="m3_reorder">Sleep om te verplaatsen</string>
+</resources>
